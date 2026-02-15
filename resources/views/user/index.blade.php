@@ -19,11 +19,15 @@
                      <span class="text-sm text-slate-300 group-hover:text-white">Upgrade Plan</span>
                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-500 group-hover:text-white" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" /></svg>
                  </a>
-                 <a href="{{ route('user.support') }}" class="w-full p-3 rounded-xl bg-white/5 hover:bg-white/10 text-left flex items-center justify-between group transition-all">
-                     <span class="text-sm text-slate-300 group-hover:text-white">Open Support Ticket</span>
-                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-500 group-hover:text-white" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" /></svg>
-                 </a>
-             </div>
+                    <a href="{{ route('user.support') }}" class="w-full p-3 rounded-xl bg-white/5 hover:bg-white/10 text-left flex items-center justify-between group transition-all">
+                        <span class="text-sm text-slate-300 group-hover:text-white">Open Support Ticket</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-500 group-hover:text-white" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" /></svg>
+                    </a>
+                    <a href="{{ route('user.connect-bank') }}" class="w-full p-3 rounded-xl bg-indigo-600/20 hover:bg-indigo-600/30 text-left flex items-center justify-between group transition-all border border-indigo-500/30">
+                        <span class="text-sm text-indigo-400 group-hover:text-indigo-300 font-bold">Connect Bank Account</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-indigo-500 group-hover:text-indigo-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+                    </a>
+                </div>
          </div>
          <div class="glass p-6 rounded-3xl border-white/5">
              <h3 class="text-lg font-bold text-white mb-4">Recent Activity</h3>

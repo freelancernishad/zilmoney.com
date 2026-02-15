@@ -5,9 +5,12 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Artisan;
 use App\Http\Middleware\AuthenticateAdmin;
 use App\Http\Middleware\AttachJwtFromCookie;
+use App\Http\Middleware\AuthenticateUser;
 use App\Http\Controllers\Admin\Auth\AdminAuthController as AdminViewAuthController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 
+
+use App\Http\Controllers\Zilmoney\PlaidController;
 
 Route::get('/', function () {
     $dbConnected = false;
@@ -153,7 +156,7 @@ Route::prefix('admin')->group(function () {
 });
 
 // User Side Routes
-Route::prefix('user')->group(function () {
+Route::prefix('user')->middleware([AttachJwtFromCookie::class, AuthenticateUser::class])->group(function () {
     Route::get('/dashboard', function() {
         return view('user.index');
     })->name('user.dashboard');
@@ -185,4 +188,7 @@ Route::prefix('user')->group(function () {
     Route::get('/docs', function() {
         return view('user.docs');
     })->name('user.docs');
+
+    // Hosted UI
+    Route::get('/connect-bank', [PlaidController::class, 'showLinkPage'])->name('user.connect-bank');
 });

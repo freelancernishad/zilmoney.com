@@ -62,6 +62,13 @@
                         </svg>
                         Support
                     </button>
+
+                    <button onclick="switchTab('banking')" id="tab-btn-banking" class="tab-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left text-slate-400 hover:text-white hover:bg-white/5 transition-all mb-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
+                        </svg>
+                        Banking (Plaid)
+                    </button>
                 </nav>
             </div>
 
@@ -363,6 +370,49 @@
                                 <label class="block text-sm font-medium text-slate-400 mb-2">Support Email</label>
                                 <input type="email" name="support_email" 
                                     class="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 focus:border-indigo-500 outline-none text-white">
+                            </div>
+                        </div>
+                    </div>
+
+                     <!-- Banking Tab -->
+                    <div id="tab-banking" class="tab-content hidden">
+                        <h2 class="text-2xl font-bold font-outfit text-white mb-6">Banking Configuration (Plaid)</h2>
+                        <div class="space-y-6">
+                            <div>
+                                <label class="block text-sm font-medium text-slate-400 mb-2">Plaid Client ID</label>
+                                <input type="text" name="plaid_client_id" 
+                                    class="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 focus:border-indigo-500 outline-none text-white">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-slate-400 mb-2">Plaid Secret</label>
+                                <div class="relative">
+                                    <input type="password" name="plaid_secret" 
+                                        class="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 focus:border-indigo-500 outline-none text-white pr-10">
+                                    <button type="button" onclick="togglePassword(this)" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 eye-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                        </svg>
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 eye-off-icon hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-slate-400 mb-2">Environment</label>
+                                <select name="plaid_environment" class="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 focus:border-indigo-500 outline-none text-white">
+                                    <option value="sandbox">Sandbox</option>
+                                    <option value="development">Development</option>
+                                    <option value="production">Production</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-slate-400 mb-2">Plaid Webhook URL</label>
+                                <input type="text" name="plaid_webhook_url" 
+                                    class="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 focus:border-indigo-500 outline-none text-white"
+                                    placeholder="https://your-domain.com/api/zilmoney/plaid/webhook">
+                                <p class="text-xs text-slate-500 mt-1">Required for Hosted Link. Use ngrok for local dev.</p>
                             </div>
                         </div>
                     </div>

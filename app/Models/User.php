@@ -14,6 +14,8 @@ class User extends Authenticatable implements JWTSubject, MustVerifyEmail
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
 
+    protected $with = ['personalInfo', 'businessDetails', 'deviceLogs'];
+
     /**
      * The attributes that are mass assignable.
      *
@@ -32,6 +34,18 @@ class User extends Authenticatable implements JWTSubject, MustVerifyEmail
         'role',
         'notes',
         'last_login_at',
+        'two_factor_verification',
+        'first_name',
+        'last_name',
+        'display_name',
+        'ssn',
+        'date_of_birth',
+        'address_line1',
+        'address_line2',
+        'city',
+        'state',
+        'postal_code',
+        'country',
     ];
 
     /**
@@ -59,6 +73,8 @@ class User extends Authenticatable implements JWTSubject, MustVerifyEmail
             'is_active' => 'boolean',
             'is_blocked' => 'boolean',
             'last_login_at' => 'datetime',
+            'two_factor_verification' => 'boolean',
+            'date_of_birth' => 'date',
         ];
     }
 
@@ -110,8 +126,31 @@ class User extends Authenticatable implements JWTSubject, MustVerifyEmail
         return $this->hasOne(UserPhoto::class)->where('is_primary', true);
     }
 
+    public function personalInfo()
+    {
+        return $this->hasOne(\App\Models\Zilmoney\PersonalInfo::class);
+    }
+
+    public function businessDetails()
+    {
+        return $this->hasOne(\App\Models\Zilmoney\BusinessDetail::class); // Assuming single business for the TS interface
+    }
+
+    public function deviceLogs()
+    {
+        return $this->hasMany(\App\Models\Zilmoney\DeviceLog::class)->orderBy('created_at', 'desc')->take(10);
+    }
+
+    public function planSubscriptions()
+    {
+        return $this->hasMany(\App\Models\Plan\PlanSubscription::class);
+    }
+
     protected $appends = [
-        'profile_picture'
+        'profile_picture',
+        'documents',
+        'accounts',
+        'payees',
     ];
 
     // Accessor for profile picture
@@ -120,18 +159,36 @@ class User extends Authenticatable implements JWTSubject, MustVerifyEmail
         return $this->primaryPhoto?->path;
     }
 
-    public function planSubscriptions()
+    // Accessor for documents (Aggregating from BusinessDetail)
+    public function getDocumentsAttribute()
     {
-        return $this->hasMany(PlanSubscription::class);
+        $business = $this->businessDetails;
+        if (!$business) return null;
+        
+        $docs = $business->documents;
+        
+        return [
+            'formation_document' => $docs->where('type', 'formation_document')->first()?->file_path,
+            'ownership_document' => $docs->where('type', 'ownership_document')->first()?->file_path,
+            'principal_officer_id' => $docs->where('type', 'principal_officer_id')->first()?->file_path,
+            'supporting_documents' => $docs->whereNotIn('type', ['formation_document', 'ownership_document', 'principal_officer_id'])->map(function($doc) {
+                return [
+                    'type' => $doc->type,
+                    'file' => $doc->file_path
+                ];
+            })->values(),
+        ];
     }
 
-    public function payments()
+    public function getAccountsAttribute()
     {
-        return $this->hasMany(Payment::class)->where('status', 'paid');
+        return $this->businessDetails?->accounts ?? [];
     }
 
-
-
+    public function getPayeesAttribute()
+    {
+        return $this->businessDetails?->payees ?? [];
+    }
 
 
 }

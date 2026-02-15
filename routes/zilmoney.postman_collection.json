@@ -1,0 +1,309 @@
+{
+    "info": {
+        "_postman_id": "zilmoney-api-collection",
+        "name": "Zilmoney API",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "Dashboard",
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "{{base_url}}/dashboard",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "dashboard"
+                    ]
+                }
+            },
+            "response": []
+        },
+        {
+            "name": "Business",
+            "item": [
+                {
+                    "name": "Get All Businesses",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/business",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "business"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create Business",
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"legal_business_name\": \"My Business\",\n    \"email\": \"business@example.com\",\n    \"business_type\": \"LLC\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/business",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "business"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Business Detail",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/business/1",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "business",
+                                "1"
+                            ]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Banking",
+            "item": [
+                {
+                    "name": "Get Accounts",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/accounts",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "accounts"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create Account (Manual)",
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"account_holder_name\": \"John Doe\",\n    \"account_number\": \"1234567890\",\n    \"routing_number\": \"098765432\",\n    \"type\": \"checking\",\n    \"balance\": 1000.00\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/accounts",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "accounts"
+                            ]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Payees",
+            "item": [
+                {
+                    "name": "Get Payees",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/payees",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "payees"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create Payee",
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"payee_name\": \"Vendor Inc\",\n    \"type\": \"vendor\",\n    \"email\": \"vendor@example.com\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/payees",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "payees"
+                            ]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Payments",
+            "item": [
+                {
+                    "name": "Get Payments",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/payments",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "payments"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create Payment (Check)",
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"account_id\": 1,\n    \"payee_id\": 1,\n    \"amount\": 150.00,\n    \"issue_date\": \"2023-10-27\",\n    \"memo\": \"Service Payment\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/payments",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "payments"
+                            ]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Plaid",
+            "item": [
+                {
+                    "name": "Create Link Token",
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/plaid/create-link-token",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "plaid",
+                                "create-link-token"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Exchange Public Token",
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"public_token\": \"public-sandbox-12345678\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/plaid/exchange-public-token",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "plaid",
+                                "exchange-public-token"
+                            ]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        }
+    ],
+    "auth": {
+        "type": "bearer",
+        "bearer": [
+            {
+                "key": "token",
+                "value": "{{token}}",
+                "type": "string"
+            }
+        ]
+    },
+    "event": [],
+    "variable": [
+        {
+            "key": "base_url",
+            "value": "http://localhost:8000/api/zilmoney",
+            "type": "string"
+        },
+        {
+            "key": "token",
+            "value": "YOUR_ACCESS_TOKEN_HERE",
+            "type": "string"
+        }
+    ]
+}
