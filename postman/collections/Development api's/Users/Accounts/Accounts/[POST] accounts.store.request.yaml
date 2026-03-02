@@ -1,26 +1,22 @@
 $kind: http-request
 description: |-
-  Action: App\Http\Controllers\Zilmoney\AccountController@update
+  Action: App\Http\Controllers\Zilmoney\AccountController@store
   Middleware: api
-url: "{{baseUrl}}/api/zilmoney/accounts/{account}"
-method: PUT
+url: "{{baseUrl}}/api/zilmoney/accounts"
+method: POST
 headers:
   Accept: application/json
   Content-Type: application/json
   Authorization: Bearer {{token}}
-pathVariables:
-  - key: account
-    value: ""
-    description: "Path parameter: account"
 body:
   type: json
   content: >-
     {
         "account_holder_name": "Jane User",
-        "account_nick_name": "Personal Checking",
+        "account_nick_name": "Test Savings",
         "account_number": "1234567890",
         "routing_number": "098765432",
-        "type": "checking",
+        "type": "savings",
         "phone_number": "+1-555-0100",
         "address_line1": "123 Main St",
         "address_line2": "Apt 4B",
@@ -39,4 +35,4 @@ body:
             "digital_sign": "hash_sign_123"
         }
     }
-order: 4000
+order: 3000

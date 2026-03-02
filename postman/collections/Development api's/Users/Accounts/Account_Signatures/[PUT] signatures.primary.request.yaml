@@ -1,0 +1,14 @@
+$kind: http-request
+description: |-
+  Action: App\Http\Controllers\Zilmoney\AccountSignatureController@setPrimary
+  Middleware: api
+url: "{{baseUrl}}/api/zilmoney/accounts/signatures/{signature}/primary"
+method: PUT
+headers:
+  Accept: application/json
+  Authorization: Bearer {{token}}
+pathVariables:
+  - key: signature
+    value: ""
+    description: "Path parameter: signature ID"
+order: 3000

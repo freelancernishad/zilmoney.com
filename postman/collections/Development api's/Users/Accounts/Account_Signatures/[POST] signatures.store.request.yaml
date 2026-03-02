@@ -1,0 +1,19 @@
+$kind: http-request
+description: |-
+  Action: App\Http\Controllers\Zilmoney\AccountSignatureController@store
+  Middleware: api
+url: "{{baseUrl}}/api/zilmoney/accounts/signatures"
+method: POST
+headers:
+  Accept: application/json
+  Content-Type: application/json
+  Authorization: Bearer {{token}}
+body:
+  type: json
+  content: >-
+    {
+        "account_id": 1,
+        "path": "https://example.com/signature_image.png",
+        "is_primary": true
+    }
+order: 2000

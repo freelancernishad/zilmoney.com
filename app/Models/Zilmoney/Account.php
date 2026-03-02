@@ -23,14 +23,17 @@ class Account extends Model
         'official_name',
         'email',
         'phone_number',
-        'address',
+        'address_line1',
+        'address_line2',
+        'city',
+        'state',
+        'postal_code',
+        'country',
         'ach_auth_form',
         'next_check_starting_number',
-        'signature_path',
     ];
-    
+
     protected $casts = [
-        'address' => 'array',
         'ach_auth_form' => 'array',
     ];
 
@@ -48,21 +51,13 @@ class Account extends Model
         return $this->belongsTo(PlaidItem::class, 'plaid_item_id');
     }
 
-    public function getFormattedAddressAttribute()
+    public function signatures()
     {
-        $addr = $this->address;
-        if (is_array($addr)) {
-            // Plaid address structure or manual structure
-            // Manual: line1, city, state, zip
-            // Plaid: data.address (sometimes)
-            
-            $line1 = $addr['street'] ?? $addr['line1'] ?? '';
-            $city = $addr['city'] ?? '';
-            $state = $addr['region'] ?? $addr['state'] ?? '';
-            $zip = $addr['postal_code'] ?? $addr['zip'] ?? '';
-            
-            return implode(', ', array_filter([$line1, $city, "$state $zip"]));
-        }
-        return $this->address; // Fallback if string
+        return $this->hasMany(AccountSignature::class);
+    }
+
+    public function activeSignature()
+    {
+        return $this->hasOne(AccountSignature::class)->where('is_primary', true);
     }
 }

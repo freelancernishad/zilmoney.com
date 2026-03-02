@@ -1,0 +1,14 @@
+$kind: http-request
+description: |-
+  Action: App\Http\Controllers\Zilmoney\AccountSignatureController@destroy
+  Middleware: api
+url: "{{baseUrl}}/api/zilmoney/accounts/signatures/{signature}"
+method: DELETE
+headers:
+  Accept: application/json
+  Authorization: Bearer {{token}}
+pathVariables:
+  - key: signature
+    value: ""
+    description: "Path parameter: signature ID"
+order: 4000
