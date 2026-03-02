@@ -1,0 +1,8 @@
+$kind: http-request
+url: "{{baseUrl}}/api/user/documents"
+method: GET
+headers:
+  Accept: application/json
+  Content-Type: application/json
+  Authorization: Bearer {{token}}
+order: 7000

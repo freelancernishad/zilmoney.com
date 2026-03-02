@@ -1,0 +1,14 @@
+$kind: http-request
+url: "{{baseUrl}}/api/user/profile-picture"
+method: POST
+headers:
+  Accept: application/json
+  Content-Type: application/json
+  Authorization: Bearer {{token}}
+body:
+  type: json
+  content: |-
+    {
+        "photo_url": "https://example.com/profile-pic.jpg"
+    }
+order: 4000

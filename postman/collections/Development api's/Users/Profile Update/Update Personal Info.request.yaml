@@ -1,0 +1,24 @@
+$kind: http-request
+url: "{{baseUrl}}/api/user/personal-info"
+method: PUT
+headers:
+  Accept: application/json
+  Content-Type: application/json
+  Authorization: Bearer {{token}}
+body:
+  type: json
+  content: |-
+    {
+        "first_name": "John",
+        "last_name": "Doe",
+        "display_name": "John Doe",
+        "ssn": "123-45-6789",
+        "date_of_birth": "1990-01-01",
+        "address_line1": "123 Main St",
+        "address_line2": "Apt 4B",
+        "city": "New York",
+        "state": "NY",
+        "postal_code": "10001",
+        "country": "USA"
+    }
+order: 1000

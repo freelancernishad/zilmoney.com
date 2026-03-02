@@ -1,0 +1,44 @@
+$kind: http-request
+url: "{{baseUrl}}/api/user/business-detail"
+method: PUT
+headers:
+  Accept: application/json
+  Content-Type: application/json
+  Authorization: Bearer {{token}}
+body:
+  type: json
+  content: >-
+    {
+        "business_details": {
+            "first_name": "John",
+            "last_name": "Doe",
+            "legal_business_name": "John Doe LLC",
+            "dba": "JD Services",
+            "entity_type": "LLC",
+            "country": "USA",
+            "phone_number": "+1-555-0198",
+            "verification_photo_id": "passport",
+            "business_in": "Tech",
+            "industry": "Software",
+            "website": "https://johndoe.xyz",
+            "description": "A leading tech firm in AI solutions.",
+            "formation_date": "2023-05-15",
+            "physical_address": "{\"line1\": \"123 Main St\", \"city\": \"New York\", \"state\": \"NY\", \"zip\": \"10001\"}",
+            "legal_registered_address": "{\"line1\": \"123 Main St\", \"city\": \"New York\", \"state\": \"NY\", \"zip\": \"10001\"}",
+            "title": "CEO",
+            "control_person": false,
+            "beneficial_owner": true,
+            "percentage_owner_ship": "75.5",
+            "controllers": [
+                {
+                    "first_name": "Jane",
+                    "last_name": "Doe",
+                    "job_title": "CTO",
+                    "email_address": "jane@example.com",
+                    "is_individual_owner": true,
+                    "percentage_owner_ship": "24.5"
+                }
+            ]
+        }
+    }
+order: 2000

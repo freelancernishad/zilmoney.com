@@ -1,0 +1,40 @@
+$kind: http-request
+url: "{{baseUrl}}/api/user/documents"
+method: POST
+headers:
+  Accept: application/json
+  Content-Type: application/json
+  Authorization: Bearer {{token}}
+body:
+  type: json
+  content: |-
+    {
+        "documents": {
+            "formation_document": "https://example.com/formation.pdf",
+            "ownership_document": "https://example.com/ownership.pdf",
+            "principal_officer_id": "https://example.com/officer.pdf",
+            "supporting_documents": [
+                {
+                    "type": "llc_corporation_document",
+                    "file": "https://example.com/file.pdf"
+                },
+                {
+                    "type": "ein_letter",
+                    "file": "https://example.com/file.pdf"
+                },
+                {
+                    "type": "irs",
+                    "file": "https://example.com/file.pdf"
+                },
+                {
+                    "type": "any_business_proof",
+                    "file": "https://example.com/file.pdf"
+                },
+                {
+                    "type": "others",
+                    "file": "https://example.com/file.pdf"
+                }
+            ]
+        }
+    }
+order: 8000

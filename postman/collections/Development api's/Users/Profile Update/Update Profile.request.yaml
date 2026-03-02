@@ -1,0 +1,15 @@
+$kind: http-request
+url: "{{baseUrl}}/api/user/profile"
+method: PUT
+headers:
+  Accept: application/json
+  Content-Type: application/json
+  Authorization: Bearer {{token}}
+body:
+  type: json
+  content: |-
+    {
+        "name": "John Doe Updated",
+        "notes": "Some user notes"
+    }
+order: 3000

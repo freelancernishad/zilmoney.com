@@ -1,0 +1,14 @@
+$kind: http-request
+url: "{{baseUrl}}/api/user/photos/set-primary"
+method: POST
+headers:
+  Accept: application/json
+  Content-Type: application/json
+  Authorization: Bearer {{token}}
+body:
+  type: json
+  content: |-
+    {
+        "photo_id": 1
+    }
+order: 6000

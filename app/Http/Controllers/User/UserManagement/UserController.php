@@ -148,15 +148,50 @@ class UserController extends Controller
     public function updateBusinessDetail(UserUpdateBusinessDetailRequest $request)
     {
         $user = $request->user();
+        
+        $data = $request->validated()['business_details'];
+        
+        // Map frontend key to DB column
+        if (isset($data['percentage_owner_ship'])) {
+            $data['percentage_ownership'] = $data['percentage_owner_ship'];
+            unset($data['percentage_owner_ship']);
+        }
+        
+        // Ensure addresses are cast properly if sent as JSON string
+        foreach(['physical_address', 'legal_registered_address'] as $addressField) {
+            if (isset($data[$addressField]) && is_string($data[$addressField])) {
+                $decoded = json_decode($data[$addressField], true);
+                if (json_last_error() === JSON_ERROR_NONE) {
+                    $data[$addressField] = $decoded;
+                }
+            }
+        }
 
         $businessDetail = $user->businessDetails()->updateOrCreate(
             ['user_id' => $user->id],
-            $request->validated()
+            \Illuminate\Support\Arr::except($data, ['controllers']) // Exclude controllers from main model update
         );
+
+        // Handle controllers associated with the business detail
+        if (isset($data['controllers']) && is_array($data['controllers'])) {
+            // Delete existing controllers to replace them
+            $businessDetail->relatedControllers()->delete();
+            
+            foreach ($data['controllers'] as $controllerData) {
+                // Map percentage ownership for the controller as well
+                if (isset($controllerData['percentage_owner_ship'])) {
+                    $controllerData['percentage_ownership'] = $controllerData['percentage_owner_ship'];
+                    unset($controllerData['percentage_owner_ship']);
+                }
+                
+                $businessDetail->relatedControllers()->create($controllerData);
+            }
+        }
 
         return response()->json([
             'message' => 'Business details updated successfully',
-            'data' => $businessDetail
+            // Return fresh instance with controllers loaded
+            'data' => $businessDetail->load('relatedControllers')
         ]);
     }
 }
