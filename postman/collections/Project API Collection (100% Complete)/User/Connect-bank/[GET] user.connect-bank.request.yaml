@@ -1,0 +1,13 @@
+$kind: http-request
+description: >-
+  Action: App\Http\Controllers\Zilmoney\PlaidController@showLinkPage
+
+  Middleware: web, App\Http\Middleware\AttachJwtFromCookie,
+  App\Http\Middleware\AuthenticateUser
+url: "{{baseUrl}}/user/connect-bank"
+method: GET
+headers:
+  Accept: application/json
+  Content-Type: application/json
+  Authorization: Bearer {{token}}
+order: 1000

@@ -1,0 +1,15 @@
+$kind: http-request
+name: "[POST] api/payment/stripe/save-card"
+description: |-
+  Action: App\Http\Controllers\Gateways\StripeController@saveCard
+  Middleware: api, App\Http\Middleware\AuthenticateUser
+url: "{{baseUrl}}/api/payment/stripe/save-card"
+method: POST
+headers:
+  Accept: application/json
+  Content-Type: application/json
+  Authorization: Bearer {{token}}
+body:
+  type: json
+  content: "[]"
+order: 1000

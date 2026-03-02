@@ -1,0 +1,51 @@
+$kind: http-request
+name: "[POST] api/auth/user/register"
+description: |-
+  Action: App\Http\Controllers\Auth\User\AuthUserController@register
+  Middleware: api
+url: "{{baseUrl}}/api/auth/user/register"
+method: POST
+headers:
+  Accept: application/json
+  Content-Type: application/json
+  Authorization: Bearer {{token}}
+body:
+  type: json
+  content: |-
+    {
+        "name": "New User",
+        "email": "newuser@example.com",
+        "password": "password123",
+        "password_confirmation": "password123",
+        "verify_url": "http:\/\/frontend.app\/verify"
+    }
+scripts:
+  - type: afterResponse
+    code: "let response = pm.response.json();\r
+
+      \r
+
+      if (response.data && response.data.token) {\r
+
+      \    const token = response.data.token;\r
+
+      \r
+
+      \    // Set/update collection variable\r
+
+      \    pm.collectionVariables.set(\"token\", token);\r
+
+      \r
+
+      \    // Log to console\r
+
+      \    console.log(\"✅ Collection token updated:\",
+      pm.collectionVariables.get(\"token\"));\r
+
+      } else {\r
+
+      \    console.warn(\"❌ Token not found in response.\");\r
+
+      }\r\n"
+    language: text/javascript
+order: 1000

@@ -13,6 +13,10 @@ use App\Http\Requests\User\UserUpdateProfileRequest;
 use App\Http\Requests\User\UserUpdateProfilePictureRequest;
 use App\Http\Requests\User\UserUpdatePhotosRequest;
 use App\Http\Requests\User\UserSetPrimaryPhotoRequest;
+use App\Http\Requests\User\UserUpdatePersonalInfoRequest;
+use App\Http\Requests\User\UserUpdateBusinessDetailRequest;
+use App\Models\Zilmoney\PersonalInfo;
+use App\Models\Zilmoney\BusinessDetail;
 
 class UserController extends Controller
 {
@@ -29,7 +33,9 @@ class UserController extends Controller
         $user = $request->user();
 
         $user->fill($request->only([
-            'name', 'email', 'notes'
+            'name',
+            'email',
+            'notes'
         ]));
 
         $user->save();
@@ -119,5 +125,38 @@ class UserController extends Controller
         ]);
     }
 
+    public function updatePersonalInfo(UserUpdatePersonalInfoRequest $request)
+    {
+        $user = $request->user();
 
+        // Update user model core fields if provided
+        if ($request->hasAny(['first_name', 'last_name', 'display_name'])) {
+            $user->update($request->only(['first_name', 'last_name', 'display_name']));
+        }
+
+        $personalInfo = $user->personalInfo()->updateOrCreate(
+            ['user_id' => $user->id],
+            $request->validated()
+        );
+
+        return response()->json([
+            'message' => 'Personal information updated successfully',
+            'data' => $personalInfo
+        ]);
+    }
+
+    public function updateBusinessDetail(UserUpdateBusinessDetailRequest $request)
+    {
+        $user = $request->user();
+
+        $businessDetail = $user->businessDetails()->updateOrCreate(
+            ['user_id' => $user->id],
+            $request->validated()
+        );
+
+        return response()->json([
+            'message' => 'Business details updated successfully',
+            'data' => $businessDetail
+        ]);
+    }
 }

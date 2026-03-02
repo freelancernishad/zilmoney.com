@@ -1,0 +1,15 @@
+$kind: http-request
+description: |-
+  Action: App\Http\Controllers\Zilmoney\PaymentController@destroy
+  Middleware: api
+url: "{{baseUrl}}/api/zilmoney/payments/{payment}"
+method: DELETE
+headers:
+  Accept: application/json
+  Content-Type: application/json
+  Authorization: Bearer {{token}}
+pathVariables:
+  - key: payment
+    value: ""
+    description: "Path parameter: payment"
+order: 6000

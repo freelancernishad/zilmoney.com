@@ -1,0 +1,15 @@
+$kind: http-request
+name: "[POST] api/auth/admin/logout"
+description: |-
+  Action: App\Http\Controllers\Auth\Admin\AdminAuthController@logout
+  Middleware: api, App\Http\Middleware\AuthenticateAdmin
+url: "{{baseUrl}}/api/auth/admin/logout"
+method: POST
+headers:
+  Accept: application/json
+  Content-Type: application/json
+  Authorization: Bearer {{token}}
+body:
+  type: json
+  content: "[]"
+order: 1000

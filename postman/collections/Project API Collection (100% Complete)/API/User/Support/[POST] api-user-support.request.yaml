@@ -1,0 +1,20 @@
+$kind: http-request
+name: "[POST] api/user/support"
+description: |-
+  Action: App\Http\Controllers\Common\SupportAndConnect\User\SupportTicketApiController@store
+  Middleware: api, App\Http\Middleware\AuthenticateUser
+url: "{{baseUrl}}/api/user/support"
+method: POST
+headers:
+  Accept: application/json
+  Content-Type: application/json
+  Authorization: Bearer {{token}}
+body:
+  type: json
+  content: |-
+    {
+        "subject": "Issue with payment",
+        "message": "I cannot process my payment.",
+        "priority": "high"
+    }
+order: 2000

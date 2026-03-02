@@ -1,0 +1,21 @@
+$kind: http-request
+name: "[POST] api/auth/admin/register"
+description: |-
+  Action: App\Http\Controllers\Auth\Admin\AdminAuthController@register
+  Middleware: api
+url: "{{baseUrl}}/api/auth/admin/register"
+method: POST
+headers:
+  Accept: application/json
+  Content-Type: application/json
+  Authorization: Bearer {{token}}
+body:
+  type: json
+  content: |-
+    {
+        "name": "New Admin",
+        "email": "admin@gmail.com",
+        "password": "admin@gmail.com",
+        "password_confirmation": "admin@gmail.com"
+    }
+order: 1000

@@ -1,0 +1,21 @@
+$kind: http-request
+description: |-
+  Action: App\Http\Controllers\Zilmoney\PayeeController@store
+  Middleware: api
+url: "{{baseUrl}}/api/zilmoney/payees"
+method: POST
+headers:
+  Accept: application/json
+  Content-Type: application/json
+  Authorization: Bearer {{token}}
+body:
+  type: json
+  content: |-
+    {
+        "payee_name": "Vendor Inc.",
+        "email": "vendor@example.com",
+        "phone": "555-0123",
+        "type": "vendor",
+        "address": "456 Market St"
+    }
+order: 2000

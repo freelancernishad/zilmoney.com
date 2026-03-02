@@ -1,0 +1,12 @@
+$kind: http-request
+name: "[GET] api/zilmoney/connect-bank"
+description: |-
+  Action: App\Http\Controllers\Zilmoney\PlaidController@showLinkPage
+  Middleware: api
+url: "{{baseUrl}}/api/zilmoney/connect-bank"
+method: GET
+headers:
+  Accept: application/json
+  Content-Type: application/json
+  Authorization: Bearer {{token}}
+order: 1000

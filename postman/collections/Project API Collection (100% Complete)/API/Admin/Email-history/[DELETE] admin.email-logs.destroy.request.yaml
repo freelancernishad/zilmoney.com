@@ -1,0 +1,15 @@
+$kind: http-request
+description: |-
+  Action: App\Http\Controllers\Admins\EmailLogController@destroy
+  Middleware: api
+url: "{{baseUrl}}/api/admin/email-history/{emailLog}"
+method: DELETE
+headers:
+  Accept: application/json
+  Content-Type: application/json
+  Authorization: Bearer {{token}}
+pathVariables:
+  - key: emailLog
+    value: ""
+    description: "Path parameter: emailLog"
+order: 1000

@@ -1,0 +1,17 @@
+$kind: http-request
+name: "[POST] api/resend/verification-link"
+description: >-
+  Action:
+  App\Http\Controllers\Auth\User\VerificationController@resendVerificationLink
+
+  Middleware: api
+url: "{{baseUrl}}/api/resend/verification-link"
+method: POST
+headers:
+  Accept: application/json
+  Content-Type: application/json
+  Authorization: Bearer {{token}}
+body:
+  type: json
+  content: "[]"
+order: 1000

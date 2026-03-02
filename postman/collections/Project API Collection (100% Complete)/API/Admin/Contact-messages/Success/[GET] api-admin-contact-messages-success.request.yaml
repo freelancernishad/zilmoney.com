@@ -1,0 +1,12 @@
+$kind: http-request
+name: "[GET] api/admin/contact-messages/success"
+description: |-
+  Action: App\Http\Controllers\Common\SupportAndConnect\ContactMessageController@successfulAdminEmails
+  Middleware: api, App\Http\Middleware\AuthenticateAdmin
+url: "{{baseUrl}}/api/admin/contact-messages/success"
+method: GET
+headers:
+  Accept: application/json
+  Content-Type: application/json
+  Authorization: Bearer {{token}}
+order: 1000

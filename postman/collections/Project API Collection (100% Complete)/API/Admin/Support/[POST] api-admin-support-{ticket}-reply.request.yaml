@@ -1,0 +1,24 @@
+$kind: http-request
+name: "[POST] api/admin/support/{ticket}/reply"
+description: |-
+  Action: App\Http\Controllers\Common\SupportAndConnect\Admin\AdminSupportTicketApiController@reply
+  Middleware: api, App\Http\Middleware\AuthenticateAdmin
+url: "{{baseUrl}}/api/admin/support/{ticket}/reply"
+method: POST
+headers:
+  Accept: application/json
+  Content-Type: application/json
+  Authorization: Bearer {{token}}
+pathVariables:
+  - key: ticket
+    value: ""
+    description: "Path parameter: ticket"
+body:
+  type: json
+  content: |-
+    {
+        "reply": "We are looking into this.",
+        "status": "pending",
+        "reply_id": null
+    }
+order: 3000

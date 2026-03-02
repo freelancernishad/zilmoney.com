@@ -1,0 +1,12 @@
+$kind: http-request
+name: "[GET] api/user/profile"
+description: |-
+  Action: App\Http\Controllers\User\UserManagement\UserController@profile
+  Middleware: api, App\Http\Middleware\AuthenticateUser
+url: "{{baseUrl}}/api/user/profile"
+method: GET
+headers:
+  Accept: application/json
+  Content-Type: application/json
+  Authorization: Bearer {{token}}
+order: 1000

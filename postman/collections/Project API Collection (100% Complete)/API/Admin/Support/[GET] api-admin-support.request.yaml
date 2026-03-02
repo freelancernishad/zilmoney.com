@@ -1,0 +1,12 @@
+$kind: http-request
+name: "[GET] api/admin/support"
+description: |-
+  Action: App\Http\Controllers\Common\SupportAndConnect\Admin\AdminSupportTicketApiController@index
+  Middleware: api, App\Http\Middleware\AuthenticateAdmin
+url: "{{baseUrl}}/api/admin/support"
+method: GET
+headers:
+  Accept: application/json
+  Content-Type: application/json
+  Authorization: Bearer {{token}}
+order: 1000

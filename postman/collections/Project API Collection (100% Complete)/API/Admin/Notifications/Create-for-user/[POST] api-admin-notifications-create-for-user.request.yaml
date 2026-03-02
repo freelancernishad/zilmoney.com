@@ -1,0 +1,24 @@
+$kind: http-request
+name: "[POST] api/admin/notifications/create-for-user"
+description: >-
+  Action:
+  App\Http\Controllers\Common\Notifications\NotificationController@createForUser
+
+  Middleware: api, App\Http\Middleware\AuthenticateAdmin
+url: "{{baseUrl}}/api/admin/notifications/create-for-user"
+method: POST
+headers:
+  Accept: application/json
+  Content-Type: application/json
+  Authorization: Bearer {{token}}
+body:
+  type: json
+  content: |-
+    {
+        "user_id": 1,
+        "message": "System Alert",
+        "type": "info",
+        "related_model": "Ticket",
+        "related_model_id": 101
+    }
+order: 1000

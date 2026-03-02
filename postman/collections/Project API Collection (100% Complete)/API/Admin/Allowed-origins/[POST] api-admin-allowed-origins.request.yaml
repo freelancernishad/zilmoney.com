@@ -1,0 +1,20 @@
+$kind: http-request
+name: "[POST] api/admin/allowed-origins"
+description: >-
+  Action:
+  App\Http\Controllers\Common\AllowedOrigin\AllowedOriginController@store
+
+  Middleware: api, App\Http\Middleware\AuthenticateAdmin
+url: "{{baseUrl}}/api/admin/allowed-origins"
+method: POST
+headers:
+  Accept: application/json
+  Content-Type: application/json
+  Authorization: Bearer {{token}}
+body:
+  type: json
+  content: |-
+    {
+        "origin_url": "https:\/\/trusted-partner.com"
+    }
+order: 2000

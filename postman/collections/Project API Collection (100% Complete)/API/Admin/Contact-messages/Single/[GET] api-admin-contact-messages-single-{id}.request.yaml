@@ -1,0 +1,18 @@
+$kind: http-request
+name: "[GET] api/admin/contact-messages/single/{id}"
+description: >-
+  Action:
+  App\Http\Controllers\Common\SupportAndConnect\ContactMessageController@show
+
+  Middleware: api, App\Http\Middleware\AuthenticateAdmin
+url: "{{baseUrl}}/api/admin/contact-messages/single/{id}"
+method: GET
+headers:
+  Accept: application/json
+  Content-Type: application/json
+  Authorization: Bearer {{token}}
+pathVariables:
+  - key: id
+    value: ""
+    description: "Path parameter: id"
+order: 1000

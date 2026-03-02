@@ -1,0 +1,22 @@
+$kind: http-request
+name: "[POST] api/admin/blogs/categories"
+description: >-
+  Action:
+  App\Http\Controllers\Common\Blogs\BlogCategory\BlogCategoryController@store
+
+  Middleware: api, App\Http\Middleware\AuthenticateAdmin
+url: "{{baseUrl}}/api/admin/blogs/categories"
+method: POST
+headers:
+  Accept: application/json
+  Content-Type: application/json
+  Authorization: Bearer {{token}}
+body:
+  type: json
+  content: |-
+    {
+        "name": "Tech News",
+        "slug": "tech-news",
+        "parent_id": null
+    }
+order: 4000

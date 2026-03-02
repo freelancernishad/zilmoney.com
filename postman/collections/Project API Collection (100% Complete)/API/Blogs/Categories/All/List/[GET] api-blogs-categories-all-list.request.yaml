@@ -1,0 +1,14 @@
+$kind: http-request
+name: "[GET] api/blogs/categories/all/list"
+description: >-
+  Action:
+  App\Http\Controllers\Common\Blogs\BlogCategory\BlogCategoryController@list
+
+  Middleware: api
+url: "{{baseUrl}}/api/blogs/categories/all/list"
+method: GET
+headers:
+  Accept: application/json
+  Content-Type: application/json
+  Authorization: Bearer {{token}}
+order: 1000

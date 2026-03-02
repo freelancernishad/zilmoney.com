@@ -1,0 +1,15 @@
+$kind: http-request
+name: "[POST] api/zilmoney/plaid/exchange-public-token"
+description: |-
+  Action: App\Http\Controllers\Zilmoney\PlaidController@exchangePublicToken
+  Middleware: api, auth:api
+url: "{{baseUrl}}/api/zilmoney/plaid/exchange-public-token"
+method: POST
+headers:
+  Accept: application/json
+  Content-Type: application/json
+  Authorization: Bearer {{token}}
+body:
+  type: json
+  content: "[]"
+order: 1000

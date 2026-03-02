@@ -1,0 +1,19 @@
+$kind: http-request
+name: "[POST] api/user/subscriptions/{subscriptionId}/cancel"
+description: |-
+  Action: App\Http\Controllers\User\Plan\Stripe\PlanSubscriptionController@cancelSubscription
+  Middleware: api, App\Http\Middleware\AuthenticateUser
+url: "{{baseUrl}}/api/user/subscriptions/{subscriptionId}/cancel"
+method: POST
+headers:
+  Accept: application/json
+  Content-Type: application/json
+  Authorization: Bearer {{token}}
+pathVariables:
+  - key: subscriptionId
+    value: ""
+    description: "Path parameter: subscriptionId"
+body:
+  type: json
+  content: "[]"
+order: 1000

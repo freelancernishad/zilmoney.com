@@ -1,0 +1,21 @@
+$kind: http-request
+name: "[POST] api/admin/blogs/articles/{id}/remove-category"
+description: >-
+  Action:
+  App\Http\Controllers\Common\Blogs\BlogPost\BlogPostController@removeCategory
+
+  Middleware: api, App\Http\Middleware\AuthenticateAdmin
+url: "{{baseUrl}}/api/admin/blogs/articles/{id}/remove-category"
+method: POST
+headers:
+  Accept: application/json
+  Content-Type: application/json
+  Authorization: Bearer {{token}}
+pathVariables:
+  - key: id
+    value: ""
+    description: "Path parameter: id"
+body:
+  type: json
+  content: "[]"
+order: 8000

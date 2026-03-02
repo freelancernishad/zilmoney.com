@@ -1,0 +1,17 @@
+$kind: http-request
+description: >-
+  Action: Closure
+
+  Middleware: web, App\Http\Middleware\AttachJwtFromCookie,
+  App\Http\Middleware\AuthenticateUser
+url: "{{baseUrl}}/user/support/{id}"
+method: GET
+headers:
+  Accept: application/json
+  Content-Type: application/json
+  Authorization: Bearer {{token}}
+pathVariables:
+  - key: id
+    value: ""
+    description: "Path parameter: id"
+order: 2000

@@ -1,0 +1,6 @@
+$kind: collection
+description: Fully comprehensive collection covering every controller, including
+  Admin Management, Media, Email, and Support.
+variables:
+  baseUrl: http://localhost:8000
+  token: ""

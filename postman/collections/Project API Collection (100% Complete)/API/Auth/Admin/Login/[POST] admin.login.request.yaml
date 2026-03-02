@@ -1,0 +1,18 @@
+$kind: http-request
+description: |-
+  Action: App\Http\Controllers\Auth\Admin\AdminAuthController@login
+  Middleware: api
+url: "{{baseUrl}}/api/auth/admin/login"
+method: POST
+headers:
+  Accept: application/json
+  Content-Type: application/json
+  Authorization: Bearer {{token}}
+body:
+  type: json
+  content: |-
+    {
+        "email": "admin@example.com",
+        "password": "adminpass123"
+    }
+order: 1000

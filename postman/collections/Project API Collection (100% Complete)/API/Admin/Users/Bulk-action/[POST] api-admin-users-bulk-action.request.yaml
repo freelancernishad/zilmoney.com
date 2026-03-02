@@ -1,0 +1,25 @@
+$kind: http-request
+name: "[POST] api/admin/users/bulk-action"
+description: >-
+  Action:
+  App\Http\Controllers\Admin\UserManagement\AdminUserController@bulkAction
+
+  Middleware: api, App\Http\Middleware\AuthenticateAdmin
+url: "{{baseUrl}}/api/admin/users/bulk-action"
+method: POST
+headers:
+  Accept: application/json
+  Content-Type: application/json
+  Authorization: Bearer {{token}}
+body:
+  type: json
+  content: |-
+    {
+        "action": "activate",
+        "user_ids": [
+            1,
+            2,
+            3
+        ]
+    }
+order: 1000

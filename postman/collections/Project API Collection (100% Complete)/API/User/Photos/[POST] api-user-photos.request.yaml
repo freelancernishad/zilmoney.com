@@ -1,0 +1,15 @@
+$kind: http-request
+name: "[POST] api/user/photos"
+description: |-
+  Action: App\Http\Controllers\User\UserManagement\UserController@updatePhotos
+  Middleware: api, App\Http\Middleware\AuthenticateUser
+url: "{{baseUrl}}/api/user/photos"
+method: POST
+headers:
+  Accept: application/json
+  Content-Type: application/json
+  Authorization: Bearer {{token}}
+body:
+  type: json
+  content: "[]"
+order: 2000

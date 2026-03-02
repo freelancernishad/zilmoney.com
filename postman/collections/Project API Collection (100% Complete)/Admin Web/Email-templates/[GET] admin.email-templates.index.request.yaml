@@ -1,0 +1,13 @@
+$kind: http-request
+description: >-
+  Action: App\Http\Controllers\Admins\EmailTemplateController@index
+
+  Middleware: web, App\Http\Middleware\AttachJwtFromCookie,
+  App\Http\Middleware\AuthenticateAdmin
+url: "{{baseUrl}}/admin/email-templates"
+method: GET
+headers:
+  Accept: application/json
+  Content-Type: application/json
+  Authorization: Bearer {{token}}
+order: 1000

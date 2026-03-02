@@ -1,0 +1,16 @@
+$kind: http-request
+name: "[DELETE] api/payment/stripe/cards/{id}"
+description: |-
+  Action: App\Http\Controllers\Gateways\StripeController@deleteCard
+  Middleware: api, App\Http\Middleware\AuthenticateUser
+url: "{{baseUrl}}/api/payment/stripe/cards/{id}"
+method: DELETE
+headers:
+  Accept: application/json
+  Content-Type: application/json
+  Authorization: Bearer {{token}}
+pathVariables:
+  - key: id
+    value: ""
+    description: "Path parameter: id"
+order: 2000

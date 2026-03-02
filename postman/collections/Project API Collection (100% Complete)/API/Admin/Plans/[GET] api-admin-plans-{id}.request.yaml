@@ -1,0 +1,16 @@
+$kind: http-request
+name: "[GET] api/admin/plans/{id}"
+description: |-
+  Action: App\Http\Controllers\Admin\Plans\PlanController@show
+  Middleware: api, App\Http\Middleware\AuthenticateAdmin
+url: "{{baseUrl}}/api/admin/plans/{id}"
+method: GET
+headers:
+  Accept: application/json
+  Content-Type: application/json
+  Authorization: Bearer {{token}}
+pathVariables:
+  - key: id
+    value: ""
+    description: "Path parameter: id"
+order: 3000

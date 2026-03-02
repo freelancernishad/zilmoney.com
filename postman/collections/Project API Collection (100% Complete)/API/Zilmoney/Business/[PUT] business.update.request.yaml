@@ -1,0 +1,18 @@
+$kind: http-request
+description: |-
+  Action: App\Http\Controllers\Zilmoney\BusinessController@update
+  Middleware: api
+url: "{{baseUrl}}/api/zilmoney/business/{business}"
+method: PUT
+headers:
+  Accept: application/json
+  Content-Type: application/json
+  Authorization: Bearer {{token}}
+pathVariables:
+  - key: business
+    value: ""
+    description: "Path parameter: business"
+body:
+  type: json
+  content: "[]"
+order: 4000

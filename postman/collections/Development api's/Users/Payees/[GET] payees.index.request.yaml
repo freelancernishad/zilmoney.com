@@ -1,0 +1,11 @@
+$kind: http-request
+description: |-
+  Action: App\Http\Controllers\Zilmoney\PayeeController@index
+  Middleware: api
+url: "{{baseUrl}}/api/zilmoney/payees"
+method: GET
+headers:
+  Accept: application/json
+  Content-Type: application/json
+  Authorization: Bearer {{token}}
+order: 1000

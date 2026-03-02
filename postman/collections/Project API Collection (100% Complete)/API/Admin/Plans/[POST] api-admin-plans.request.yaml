@@ -1,0 +1,28 @@
+$kind: http-request
+name: "[POST] api/admin/plans"
+description: |-
+  Action: App\Http\Controllers\Admin\Plans\PlanController@store
+  Middleware: api, App\Http\Middleware\AuthenticateAdmin
+url: "{{baseUrl}}/api/admin/plans"
+method: POST
+headers:
+  Accept: application/json
+  Content-Type: application/json
+  Authorization: Bearer {{token}}
+body:
+  type: json
+  content: |-
+    {
+        "name": "Enterprise Plan",
+        "duration": "yearly",
+        "original_price": 1200,
+        "monthly_price": 100,
+        "discount_percentage": 0,
+        "features": [
+            {
+                "key": "max_users",
+                "value": "unlimited"
+            }
+        ]
+    }
+order: 2000

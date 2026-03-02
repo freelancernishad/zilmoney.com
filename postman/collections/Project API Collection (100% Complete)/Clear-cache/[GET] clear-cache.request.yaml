@@ -1,0 +1,13 @@
+$kind: http-request
+description: >-
+  Action:
+  App\Http\Controllers\Common\SystemSettings\SystemSettingController@clearCache
+
+  Middleware: web
+url: "{{baseUrl}}/clear-cache"
+method: GET
+headers:
+  Accept: application/json
+  Content-Type: application/json
+  Authorization: Bearer {{token}}
+order: 1000

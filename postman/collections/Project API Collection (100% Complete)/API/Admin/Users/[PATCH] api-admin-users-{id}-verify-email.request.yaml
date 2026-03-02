@@ -1,0 +1,21 @@
+$kind: http-request
+name: "[PATCH] api/admin/users/{id}/verify-email"
+description: >-
+  Action:
+  App\Http\Controllers\Admin\UserManagement\AdminUserController@verifyEmail
+
+  Middleware: api, App\Http\Middleware\AuthenticateAdmin
+url: "{{baseUrl}}/api/admin/users/{id}/verify-email"
+method: PATCH
+headers:
+  Accept: application/json
+  Content-Type: application/json
+  Authorization: Bearer {{token}}
+pathVariables:
+  - key: id
+    value: ""
+    description: "Path parameter: id"
+body:
+  type: json
+  content: "[]"
+order: 9000

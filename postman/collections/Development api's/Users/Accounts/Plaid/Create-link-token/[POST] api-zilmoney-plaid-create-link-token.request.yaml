@@ -1,0 +1,19 @@
+$kind: http-request
+name: "[POST] api/zilmoney/plaid/create-link-token"
+description: |-
+  Action: App\Http\Controllers\Zilmoney\PlaidController@createLinkToken
+  Middleware: api, auth:api
+url: "{{baseUrl}}/api/zilmoney/plaid/create-link-token"
+method: POST
+headers:
+  Accept: application/json
+  Content-Type: application/json
+  Authorization: Bearer {{token}}
+body:
+  type: json
+  content: |-
+    {
+        "redirect_uri": "http:\/\/localhost:3000\/plaid-callback",
+        "item_id": null
+    }
+order: 1000

@@ -1,0 +1,12 @@
+$kind: http-request
+name: "[GET] api/media"
+description: |-
+  Action: App\Http\Controllers\Common\Media\MediaController@index
+  Middleware: api
+url: "{{baseUrl}}/api/media"
+method: GET
+headers:
+  Accept: application/json
+  Content-Type: application/json
+  Authorization: Bearer {{token}}
+order: 1000

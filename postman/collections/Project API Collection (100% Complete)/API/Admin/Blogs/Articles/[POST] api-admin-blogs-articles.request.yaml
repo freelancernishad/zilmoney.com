@@ -1,0 +1,25 @@
+$kind: http-request
+name: "[POST] api/admin/blogs/articles"
+description: |-
+  Action: App\Http\Controllers\Common\Blogs\BlogPost\BlogPostController@store
+  Middleware: api, App\Http\Middleware\AuthenticateAdmin
+url: "{{baseUrl}}/api/admin/blogs/articles"
+method: POST
+headers:
+  Accept: application/json
+  Content-Type: application/json
+  Authorization: Bearer {{token}}
+body:
+  type: json
+  content: |-
+    {
+        "title": "New Blog Post",
+        "slug": "new-blog-post",
+        "content": "<p>Content...<\/p>",
+        "category_ids": [
+            1
+        ],
+        "banner_image": "https:\/\/via.placeholder.com\/800x400",
+        "status": "published"
+    }
+order: 3000

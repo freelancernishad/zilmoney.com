@@ -1,0 +1,19 @@
+$kind: http-request
+description: |-
+  Action: App\Http\Controllers\Auth\User\AuthUserController@login
+  Middleware: api
+url: "{{baseUrl}}/api/auth/user/login"
+method: POST
+headers:
+  Accept: application/json
+  Content-Type: application/json
+  Authorization: Bearer {{token}}
+body:
+  type: json
+  content: |-
+    {
+        "email": "newuser@example.com",
+        "password": "password123",
+        "device_name": "Postman Client"
+    }
+order: 1000

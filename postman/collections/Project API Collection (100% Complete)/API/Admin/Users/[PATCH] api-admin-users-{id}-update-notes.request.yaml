@@ -1,0 +1,24 @@
+$kind: http-request
+name: "[PATCH] api/admin/users/{id}/update-notes"
+description: >-
+  Action:
+  App\Http\Controllers\Admin\UserManagement\AdminUserController@updateNotes
+
+  Middleware: api, App\Http\Middleware\AuthenticateAdmin
+url: "{{baseUrl}}/api/admin/users/{id}/update-notes"
+method: PATCH
+headers:
+  Accept: application/json
+  Content-Type: application/json
+  Authorization: Bearer {{token}}
+pathVariables:
+  - key: id
+    value: ""
+    description: "Path parameter: id"
+body:
+  type: json
+  content: |-
+    {
+        "notes": "Important note about this user."
+    }
+order: 8000

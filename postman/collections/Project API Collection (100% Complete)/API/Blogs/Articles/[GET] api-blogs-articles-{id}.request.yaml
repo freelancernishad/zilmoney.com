@@ -1,0 +1,16 @@
+$kind: http-request
+name: "[GET] api/blogs/articles/{id}"
+description: |-
+  Action: App\Http\Controllers\Common\Blogs\BlogPost\BlogPostController@show
+  Middleware: api
+url: "{{baseUrl}}/api/blogs/articles/{id}"
+method: GET
+headers:
+  Accept: application/json
+  Content-Type: application/json
+  Authorization: Bearer {{token}}
+pathVariables:
+  - key: id
+    value: ""
+    description: "Path parameter: id"
+order: 3000

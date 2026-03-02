@@ -1,0 +1,15 @@
+$kind: http-request
+name: "[POST] api/resend/otp"
+description: |-
+  Action: App\Http\Controllers\Auth\User\VerificationController@resendOtp
+  Middleware: api
+url: "{{baseUrl}}/api/resend/otp"
+method: POST
+headers:
+  Accept: application/json
+  Content-Type: application/json
+  Authorization: Bearer {{token}}
+body:
+  type: json
+  content: "[]"
+order: 1000

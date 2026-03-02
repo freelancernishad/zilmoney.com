@@ -1,0 +1,12 @@
+$kind: http-request
+name: "[GET] api/zilmoney/dashboard"
+description: |-
+  Action: App\Http\Controllers\Zilmoney\DashboardController@index
+  Middleware: api
+url: "{{baseUrl}}/api/zilmoney/dashboard"
+method: GET
+headers:
+  Accept: application/json
+  Content-Type: application/json
+  Authorization: Bearer {{token}}
+order: 1000

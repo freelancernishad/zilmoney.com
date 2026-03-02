@@ -1,0 +1,15 @@
+$kind: http-request
+name: "[POST] api/twilio/send-sms"
+description: |-
+  Action: App\Http\Controllers\Common\Twilio\TwilioController@send
+  Middleware: api
+url: "{{baseUrl}}/api/twilio/send-sms"
+method: POST
+headers:
+  Accept: application/json
+  Content-Type: application/json
+  Authorization: Bearer {{token}}
+body:
+  type: json
+  content: "[]"
+order: 1000

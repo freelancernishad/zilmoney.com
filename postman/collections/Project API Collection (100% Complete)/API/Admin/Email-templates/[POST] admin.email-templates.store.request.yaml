@@ -1,0 +1,20 @@
+$kind: http-request
+description: |-
+  Action: App\Http\Controllers\Admins\EmailTemplateController@store
+  Middleware: api
+url: "{{baseUrl}}/api/admin/email-templates"
+method: POST
+headers:
+  Accept: application/json
+  Content-Type: application/json
+  Authorization: Bearer {{token}}
+body:
+  type: json
+  content: |-
+    {
+        "name": "Welcome Email",
+        "subject": "Welcome to our platform!",
+        "content_html": "<html><body>Welcome!<\/body><\/html>",
+        "content_json": "{}"
+    }
+order: 2000

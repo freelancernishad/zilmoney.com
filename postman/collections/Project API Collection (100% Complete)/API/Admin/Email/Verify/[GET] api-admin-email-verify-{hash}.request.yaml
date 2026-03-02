@@ -1,0 +1,18 @@
+$kind: http-request
+name: "[GET] api/admin/email/verify/{hash}"
+description: >-
+  Action:
+  App\Http\Controllers\Auth\Admin\AdminVerificationController@verifyEmail
+
+  Middleware: api
+url: "{{baseUrl}}/api/admin/email/verify/{hash}"
+method: GET
+headers:
+  Accept: application/json
+  Content-Type: application/json
+  Authorization: Bearer {{token}}
+pathVariables:
+  - key: hash
+    value: ""
+    description: "Path parameter: hash"
+order: 1000

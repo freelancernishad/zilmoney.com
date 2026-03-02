@@ -1,0 +1,12 @@
+$kind: http-request
+name: "[GET] api/admin/notifications"
+description: |-
+  Action: App\Http\Controllers\Common\Notifications\NotificationController@index
+  Middleware: api, App\Http\Middleware\AuthenticateAdmin
+url: "{{baseUrl}}/api/admin/notifications"
+method: GET
+headers:
+  Accept: application/json
+  Content-Type: application/json
+  Authorization: Bearer {{token}}
+order: 2000

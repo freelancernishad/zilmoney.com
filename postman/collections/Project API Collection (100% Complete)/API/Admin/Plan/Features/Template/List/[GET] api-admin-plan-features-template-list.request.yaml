@@ -1,0 +1,12 @@
+$kind: http-request
+name: "[GET] api/admin/plan/features/template/list"
+description: |-
+  Action: App\Http\Controllers\Admin\Plans\FeatureController@templateInputList
+  Middleware: api, App\Http\Middleware\AuthenticateAdmin
+url: "{{baseUrl}}/api/admin/plan/features/template/list"
+method: GET
+headers:
+  Accept: application/json
+  Content-Type: application/json
+  Authorization: Bearer {{token}}
+order: 1000

@@ -1,0 +1,23 @@
+$kind: http-request
+name: "[POST] api/contact/send"
+description: >-
+  Action:
+  App\Http\Controllers\Common\SupportAndConnect\ContactMessageController@send
+
+  Middleware: api
+url: "{{baseUrl}}/api/contact/send"
+method: POST
+headers:
+  Accept: application/json
+  Content-Type: application/json
+  Authorization: Bearer {{token}}
+body:
+  type: json
+  content: |-
+    {
+        "full_name": "John Visitor",
+        "email": "visitor@example.com",
+        "subject": "Inquiry",
+        "message": "I have a question about pricing."
+    }
+order: 1000

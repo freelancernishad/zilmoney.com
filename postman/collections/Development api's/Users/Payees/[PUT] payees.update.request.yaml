@@ -1,0 +1,18 @@
+$kind: http-request
+description: |-
+  Action: App\Http\Controllers\Zilmoney\PayeeController@update
+  Middleware: api
+url: "{{baseUrl}}/api/zilmoney/payees/{payee}"
+method: PUT
+headers:
+  Accept: application/json
+  Content-Type: application/json
+  Authorization: Bearer {{token}}
+pathVariables:
+  - key: payee
+    value: ""
+    description: "Path parameter: payee"
+body:
+  type: json
+  content: "[]"
+order: 4000

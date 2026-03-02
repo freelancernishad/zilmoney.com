@@ -1,0 +1,30 @@
+$kind: http-request
+name: "[POST] api/admin/coupons"
+description: |-
+  Action: App\Http\Controllers\Admin\Coupon\CouponController@store
+  Middleware: api, App\Http\Middleware\AuthenticateAdmin
+url: "{{baseUrl}}/api/admin/coupons"
+method: POST
+headers:
+  Accept: application/json
+  Content-Type: application/json
+  Authorization: Bearer {{token}}
+body:
+  type: json
+  content: |-
+    {
+        "code": "SUMMER2026",
+        "type": "percentage",
+        "value": 20,
+        "valid_from": "2026-02-15",
+        "valid_until": "2026-05-15",
+        "usage_limit": 100,
+        "is_active": true,
+        "associations": [
+            {
+                "item_id": 1,
+                "item_type": "plan"
+            }
+        ]
+    }
+order: 2000

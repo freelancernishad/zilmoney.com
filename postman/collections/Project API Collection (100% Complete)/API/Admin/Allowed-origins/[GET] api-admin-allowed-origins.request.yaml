@@ -1,0 +1,14 @@
+$kind: http-request
+name: "[GET] api/admin/allowed-origins"
+description: >-
+  Action:
+  App\Http\Controllers\Common\AllowedOrigin\AllowedOriginController@index
+
+  Middleware: api, App\Http\Middleware\AuthenticateAdmin
+url: "{{baseUrl}}/api/admin/allowed-origins"
+method: GET
+headers:
+  Accept: application/json
+  Content-Type: application/json
+  Authorization: Bearer {{token}}
+order: 1000

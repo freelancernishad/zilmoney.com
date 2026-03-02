@@ -1,0 +1,21 @@
+$kind: http-request
+description: |-
+  Action: App\Http\Controllers\Zilmoney\BusinessController@store
+  Middleware: api
+url: "{{baseUrl}}/api/zilmoney/business"
+method: POST
+headers:
+  Accept: application/json
+  Content-Type: application/json
+  Authorization: Bearer {{token}}
+body:
+  type: json
+  content: |-
+    {
+        "legal_business_name": "ACME Corp",
+        "email": "business@acme.com",
+        "address": "123 Wall St",
+        "phone": "123-456-7890",
+        "website": "https:\/\/acme.com"
+    }
+order: 2000

@@ -1,0 +1,22 @@
+$kind: http-request
+description: |-
+  Action: App\Http\Controllers\Zilmoney\PaymentController@store
+  Middleware: api
+url: "{{baseUrl}}/api/zilmoney/payments"
+method: POST
+headers:
+  Accept: application/json
+  Content-Type: application/json
+  Authorization: Bearer {{token}}
+body:
+  type: json
+  content: |-
+    {
+        "account_id": 1,
+        "payee_id": 1,
+        "amount": 500,
+        "issue_date": "2026-02-15",
+        "check_number": 1005,
+        "memo": "Consulting Fees"
+    }
+order: 2000

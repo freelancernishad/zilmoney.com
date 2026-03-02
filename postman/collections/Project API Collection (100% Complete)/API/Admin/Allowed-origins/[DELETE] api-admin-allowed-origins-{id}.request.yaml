@@ -1,0 +1,18 @@
+$kind: http-request
+name: "[DELETE] api/admin/allowed-origins/{id}"
+description: >-
+  Action:
+  App\Http\Controllers\Common\AllowedOrigin\AllowedOriginController@destroy
+
+  Middleware: api, App\Http\Middleware\AuthenticateAdmin
+url: "{{baseUrl}}/api/admin/allowed-origins/{id}"
+method: DELETE
+headers:
+  Accept: application/json
+  Content-Type: application/json
+  Authorization: Bearer {{token}}
+pathVariables:
+  - key: id
+    value: ""
+    description: "Path parameter: id"
+order: 4000

@@ -1,0 +1,12 @@
+$kind: http-request
+name: "[GET] /"
+description: |-
+  Action: Closure
+  Middleware: web
+url: "{{baseUrl}}/"
+method: GET
+headers:
+  Accept: application/json
+  Content-Type: application/json
+  Authorization: Bearer {{token}}
+order: 1000

@@ -1,0 +1,16 @@
+$kind: http-request
+name: "[GET] api/zilmoney/payments/{id}/pdf"
+description: |-
+  Action: App\Http\Controllers\Zilmoney\PaymentController@downloadPdf
+  Middleware: api
+url: "{{baseUrl}}/api/zilmoney/payments/{id}/pdf"
+method: GET
+headers:
+  Accept: application/json
+  Content-Type: application/json
+  Authorization: Bearer {{token}}
+pathVariables:
+  - key: id
+    value: ""
+    description: "Path parameter: id"
+order: 3000

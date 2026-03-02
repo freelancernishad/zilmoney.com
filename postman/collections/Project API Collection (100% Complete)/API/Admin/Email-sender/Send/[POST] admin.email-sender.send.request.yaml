@@ -1,0 +1,21 @@
+$kind: http-request
+description: |-
+  Action: App\Http\Controllers\Admins\EmailSenderController@send
+  Middleware: api
+url: "{{baseUrl}}/api/admin/email-sender/send"
+method: POST
+headers:
+  Accept: application/json
+  Content-Type: application/json
+  Authorization: Bearer {{token}}
+body:
+  type: json
+  content: |-
+    {
+        "template_id": 1,
+        "recipients": [
+            "all"
+        ],
+        "manual_emails": "extramail@example.com"
+    }
+order: 1000

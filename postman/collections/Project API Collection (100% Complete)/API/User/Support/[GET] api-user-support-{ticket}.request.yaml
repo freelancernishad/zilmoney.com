@@ -1,0 +1,16 @@
+$kind: http-request
+name: "[GET] api/user/support/{ticket}"
+description: |-
+  Action: App\Http\Controllers\Common\SupportAndConnect\User\SupportTicketApiController@show
+  Middleware: api, App\Http\Middleware\AuthenticateUser
+url: "{{baseUrl}}/api/user/support/{ticket}"
+method: GET
+headers:
+  Accept: application/json
+  Content-Type: application/json
+  Authorization: Bearer {{token}}
+pathVariables:
+  - key: ticket
+    value: ""
+    description: "Path parameter: ticket"
+order: 3000

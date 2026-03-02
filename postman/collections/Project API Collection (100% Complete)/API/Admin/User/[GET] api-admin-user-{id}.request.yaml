@@ -1,0 +1,16 @@
+$kind: http-request
+name: "[GET] api/admin/user/{id}"
+description: |-
+  Action: App\Http\Controllers\Admin\UserManagement\AdminUserController@show
+  Middleware: api, App\Http\Middleware\AuthenticateAdmin
+url: "{{baseUrl}}/api/admin/user/{id}"
+method: GET
+headers:
+  Accept: application/json
+  Content-Type: application/json
+  Authorization: Bearer {{token}}
+pathVariables:
+  - key: id
+    value: ""
+    description: "Path parameter: id"
+order: 1000

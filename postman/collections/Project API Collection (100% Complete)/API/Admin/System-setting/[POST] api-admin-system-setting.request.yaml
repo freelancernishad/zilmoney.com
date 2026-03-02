@@ -1,0 +1,21 @@
+$kind: http-request
+name: "[POST] api/admin/system-setting"
+description: |-
+  Action: App\Http\Controllers\Common\SystemSettings\SystemSettingController@storeOrUpdate
+  Middleware: api, App\Http\Middleware\AuthenticateAdmin
+url: "{{baseUrl}}/api/admin/system-setting"
+method: POST
+headers:
+  Accept: application/json
+  Content-Type: application/json
+  Authorization: Bearer {{token}}
+body:
+  type: json
+  content: |-
+    [
+        {
+            "key": "site_name",
+            "value": "Zilmoney App"
+        }
+    ]
+order: 2000

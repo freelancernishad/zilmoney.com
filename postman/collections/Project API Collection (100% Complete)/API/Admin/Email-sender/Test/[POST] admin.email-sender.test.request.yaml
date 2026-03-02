@@ -1,0 +1,19 @@
+$kind: http-request
+description: |-
+  Action: App\Http\Controllers\Admins\EmailSenderController@sendTest
+  Middleware: api
+url: "{{baseUrl}}/api/admin/email-sender/test"
+method: POST
+headers:
+  Accept: application/json
+  Content-Type: application/json
+  Authorization: Bearer {{token}}
+body:
+  type: json
+  content: |-
+    {
+        "email": "admin@example.com",
+        "subject": "Test Email",
+        "content_html": "<h1>This is a test<\/h1>"
+    }
+order: 1000

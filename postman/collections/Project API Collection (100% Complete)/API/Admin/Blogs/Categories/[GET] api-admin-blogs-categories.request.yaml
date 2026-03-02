@@ -1,0 +1,14 @@
+$kind: http-request
+name: "[GET] api/admin/blogs/categories"
+description: >-
+  Action:
+  App\Http\Controllers\Common\Blogs\BlogCategory\BlogCategoryController@index
+
+  Middleware: api, App\Http\Middleware\AuthenticateAdmin
+url: "{{baseUrl}}/api/admin/blogs/categories"
+method: GET
+headers:
+  Accept: application/json
+  Content-Type: application/json
+  Authorization: Bearer {{token}}
+order: 3000

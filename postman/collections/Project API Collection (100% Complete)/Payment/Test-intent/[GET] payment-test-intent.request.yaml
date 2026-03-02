@@ -1,0 +1,12 @@
+$kind: http-request
+name: "[GET] payment/test-intent"
+description: |-
+  Action: Closure
+  Middleware: web
+url: "{{baseUrl}}/payment/test-intent"
+method: GET
+headers:
+  Accept: application/json
+  Content-Type: application/json
+  Authorization: Bearer {{token}}
+order: 1000

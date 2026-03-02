@@ -1,0 +1,18 @@
+$kind: http-request
+description: |-
+  Action: App\Http\Controllers\Admins\EmailTemplateController@update
+  Middleware: api
+url: "{{baseUrl}}/api/admin/email-templates/{email_template}"
+method: PUT
+headers:
+  Accept: application/json
+  Content-Type: application/json
+  Authorization: Bearer {{token}}
+pathVariables:
+  - key: email_template
+    value: ""
+    description: "Path parameter: email_template"
+body:
+  type: json
+  content: "[]"
+order: 4000

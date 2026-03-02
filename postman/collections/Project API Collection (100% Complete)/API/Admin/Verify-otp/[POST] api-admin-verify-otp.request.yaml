@@ -1,0 +1,15 @@
+$kind: http-request
+name: "[POST] api/admin/verify-otp"
+description: |-
+  Action: App\Http\Controllers\Auth\Admin\AdminVerificationController@verifyOtp
+  Middleware: api
+url: "{{baseUrl}}/api/admin/verify-otp"
+method: POST
+headers:
+  Accept: application/json
+  Content-Type: application/json
+  Authorization: Bearer {{token}}
+body:
+  type: json
+  content: "[]"
+order: 1000

@@ -1,0 +1,47 @@
+$kind: http-request
+description: |-
+  Action: App\Http\Controllers\Auth\User\AuthUserController@login
+  Middleware: api
+url: "{{baseUrl}}/api/auth/user/login"
+method: POST
+headers:
+  Accept: application/json
+  Content-Type: application/json
+  Authorization: Bearer {{token}}
+body:
+  type: json
+  content: |-
+    {
+        "email": "newuser@example.com",
+        "password": "password123"
+    }
+scripts:
+  - type: afterResponse
+    code: "let response = pm.response.json();\r
+
+      \r
+
+      if (response.data && response.data.token) {\r
+
+      \    const token = response.data.token;\r
+
+      \r
+
+      \    // Set/update collection variable\r
+
+      \    pm.collectionVariables.set(\"token\", token);\r
+
+      \r
+
+      \    // Log to console\r
+
+      \    console.log(\"✅ Collection token updated:\",
+      pm.collectionVariables.get(\"token\"));\r
+
+      } else {\r
+
+      \    console.warn(\"❌ Token not found in response.\");\r
+
+      }\r\n"
+    language: text/javascript
+order: 1000

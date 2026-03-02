@@ -1,0 +1,27 @@
+$kind: http-request
+name: "[PATCH] api/admin/user/{id}"
+description: |-
+  Action: App\Http\Controllers\Admin\UserManagement\AdminUserController@update
+  Middleware: api, App\Http\Middleware\AuthenticateAdmin
+url: "{{baseUrl}}/api/admin/user/{id}"
+method: PATCH
+headers:
+  Accept: application/json
+  Content-Type: application/json
+  Authorization: Bearer {{token}}
+pathVariables:
+  - key: id
+    value: ""
+    description: "Path parameter: id"
+body:
+  type: json
+  content: |-
+    {
+        "name": "Updated User Name",
+        "email": "updated@example.com",
+        "is_active": true,
+        "role": "user",
+        "notes": "Updated by Admin",
+        "phone": "1234567890"
+    }
+order: 2000

@@ -1,0 +1,12 @@
+$kind: http-request
+name: "[GET] api/auth/admin/me"
+description: |-
+  Action: App\Http\Controllers\Auth\Admin\AdminAuthController@me
+  Middleware: api, App\Http\Middleware\AuthenticateAdmin
+url: "{{baseUrl}}/api/auth/admin/me"
+method: GET
+headers:
+  Accept: application/json
+  Content-Type: application/json
+  Authorization: Bearer {{token}}
+order: 1000

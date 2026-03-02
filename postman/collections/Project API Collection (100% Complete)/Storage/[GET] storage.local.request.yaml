@@ -1,0 +1,15 @@
+$kind: http-request
+description: |-
+  Action: Closure
+  Middleware: 
+url: "{{baseUrl}}/storage/{path}"
+method: GET
+headers:
+  Accept: application/json
+  Content-Type: application/json
+  Authorization: Bearer {{token}}
+pathVariables:
+  - key: path
+    value: ""
+    description: "Path parameter: path"
+order: 1000

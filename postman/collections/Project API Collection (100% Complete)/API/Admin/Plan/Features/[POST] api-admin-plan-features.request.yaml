@@ -1,0 +1,20 @@
+$kind: http-request
+name: "[POST] api/admin/plan/features"
+description: |-
+  Action: App\Http\Controllers\Admin\Plans\FeatureController@store
+  Middleware: api, App\Http\Middleware\AuthenticateAdmin
+url: "{{baseUrl}}/api/admin/plan/features"
+method: POST
+headers:
+  Accept: application/json
+  Content-Type: application/json
+  Authorization: Bearer {{token}}
+body:
+  type: json
+  content: |-
+    {
+        "key": "new_feature_key",
+        "title_template": "Feature: :value",
+        "unit": "users"
+    }
+order: 3000

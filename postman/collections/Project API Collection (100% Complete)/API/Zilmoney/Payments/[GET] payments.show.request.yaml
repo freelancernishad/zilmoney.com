@@ -1,0 +1,15 @@
+$kind: http-request
+description: |-
+  Action: App\Http\Controllers\Zilmoney\PaymentController@show
+  Middleware: api
+url: "{{baseUrl}}/api/zilmoney/payments/{payment}"
+method: GET
+headers:
+  Accept: application/json
+  Content-Type: application/json
+  Authorization: Bearer {{token}}
+pathVariables:
+  - key: payment
+    value: ""
+    description: "Path parameter: payment"
+order: 4000

@@ -13,16 +13,14 @@ class Document extends Model
 
     protected $fillable = [
         'company_id',
-        'type',
-        'file_path',
-        'original_name',
-        'mime_type',
-        'status',
-        'metadata',
+        'formation_document',
+        'ownership_document',
+        'principal_officer_id',
+        'supporting_documents',
     ];
-    
+
     protected $casts = [
-        'metadata' => 'array',
+        'supporting_documents' => 'array',
     ];
 
     public function businessDetail()

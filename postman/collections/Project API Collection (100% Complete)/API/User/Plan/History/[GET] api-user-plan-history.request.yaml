@@ -1,0 +1,14 @@
+$kind: http-request
+name: "[GET] api/user/plan/history"
+description: >-
+  Action:
+  App\Http\Controllers\User\Plan\UserPlanController@getSubscriptionHistory
+
+  Middleware: api, App\Http\Middleware\AuthenticateUser
+url: "{{baseUrl}}/api/user/plan/history"
+method: GET
+headers:
+  Accept: application/json
+  Content-Type: application/json
+  Authorization: Bearer {{token}}
+order: 1000

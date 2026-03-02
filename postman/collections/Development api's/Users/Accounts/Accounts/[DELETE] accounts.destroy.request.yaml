@@ -1,0 +1,15 @@
+$kind: http-request
+description: |-
+  Action: App\Http\Controllers\Zilmoney\AccountController@destroy
+  Middleware: api
+url: "{{baseUrl}}/api/zilmoney/accounts/{account}"
+method: DELETE
+headers:
+  Accept: application/json
+  Content-Type: application/json
+  Authorization: Bearer {{token}}
+pathVariables:
+  - key: account
+    value: ""
+    description: "Path parameter: account"
+order: 5000

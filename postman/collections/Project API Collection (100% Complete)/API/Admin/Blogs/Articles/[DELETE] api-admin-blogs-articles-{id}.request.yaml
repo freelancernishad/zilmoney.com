@@ -1,0 +1,16 @@
+$kind: http-request
+name: "[DELETE] api/admin/blogs/articles/{id}"
+description: |-
+  Action: App\Http\Controllers\Common\Blogs\BlogPost\BlogPostController@destroy
+  Middleware: api, App\Http\Middleware\AuthenticateAdmin
+url: "{{baseUrl}}/api/admin/blogs/articles/{id}"
+method: DELETE
+headers:
+  Accept: application/json
+  Content-Type: application/json
+  Authorization: Bearer {{token}}
+pathVariables:
+  - key: id
+    value: ""
+    description: "Path parameter: id"
+order: 6000

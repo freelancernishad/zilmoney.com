@@ -1,0 +1,18 @@
+$kind: http-request
+name: "[POST] api/user/media/upload"
+description: |-
+  Action: App\Http\Controllers\Common\Media\MediaController@upload
+  Middleware: api, App\Http\Middleware\AuthenticateUser
+url: "{{baseUrl}}/api/user/media/upload"
+method: POST
+headers:
+  Accept: application/json
+  Content-Type: application/json
+  Authorization: Bearer {{token}}
+body:
+  type: json
+  content: |-
+    {
+        "file_url": "https:\/\/via.placeholder.com\/500.png"
+    }
+order: 1000
