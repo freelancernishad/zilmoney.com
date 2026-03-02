@@ -1,0 +1,14 @@
+$kind: http-request
+url: "{{baseUrl}}/api/zilmoney/payments/{payment}/attachments/{attachment}"
+method: DELETE
+headers:
+  Accept: application/json
+  Authorization: Bearer {{token}}
+pathVariables:
+  - key: payment
+    value: ""
+    description: "Payment ID"
+  - key: attachment
+    value: ""
+    description: "Attachment ID"
+order: 1000

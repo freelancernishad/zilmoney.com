@@ -1,0 +1,18 @@
+$kind: http-request
+url: "{{baseUrl}}/api/zilmoney/payments/{payment}/comments"
+method: POST
+headers:
+  Accept: application/json
+  Authorization: Bearer {{token}}
+  Content-Type: application/json
+pathVariables:
+  - key: payment
+    value: ""
+    description: "Payment ID"
+body:
+  type: json
+  content: >-
+    {
+      "comment": "This is a test comment for the payment."
+    }
+order: 1000

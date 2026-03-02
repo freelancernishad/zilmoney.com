@@ -1,0 +1,23 @@
+$kind: http-request
+url: "{{baseUrl}}/api/zilmoney/payments/{payment}/remittances"
+method: POST
+headers:
+  Accept: application/json
+  Authorization: Bearer {{token}}
+  Content-Type: application/json
+pathVariables:
+  - key: payment
+    value: ""
+    description: "Payment ID"
+body:
+  type: json
+  content: >-
+    {
+      "invoice_number": "INV-10045",
+      "item": "Web Development Consulting",
+      "description": "April Retainer",
+      "quantity": 1,
+      "unit_cost": 2500.00,
+      "total": 2500.00
+    }
+order: 1000

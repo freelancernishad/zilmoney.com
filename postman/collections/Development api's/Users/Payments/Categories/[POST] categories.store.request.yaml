@@ -1,0 +1,15 @@
+$kind: http-request
+url: "{{baseUrl}}/api/zilmoney/payment-categories"
+method: POST
+headers:
+  Accept: application/json
+  Content-Type: application/json
+  Authorization: Bearer {{token}}
+body:
+  type: json
+  content: >-
+    {
+      "name": "Consulting Income",
+      "type": "Income"
+    }
+order: 1000

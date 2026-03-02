@@ -1,0 +1,14 @@
+$kind: http-request
+url: "{{baseUrl}}/api/zilmoney/payments/{payment}/delivery-proofs/{delivery_proof}"
+method: DELETE
+headers:
+  Accept: application/json
+  Authorization: Bearer {{token}}
+pathVariables:
+  - key: payment
+    value: ""
+    description: "Payment ID"
+  - key: delivery_proof
+    value: ""
+    description: "Delivery Proof ID"
+order: 1000

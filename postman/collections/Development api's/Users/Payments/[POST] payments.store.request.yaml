@@ -14,9 +14,14 @@ body:
     {
         "account_id": 1,
         "payee_id": 1,
+        "pay_from": "Bank Account",
+        "pay_as": "Check",
         "amount": 500,
         "issue_date": "2026-02-15",
         "check_number": 1005,
+        "invoice_number": "INV-10029",
+        "payee_id_account_number": "ACC-54321098",
+        "category_id": 1,
         "memo": "Consulting Fees"
     }
 order: 2000

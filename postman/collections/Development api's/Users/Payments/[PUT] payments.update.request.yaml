@@ -14,5 +14,13 @@ pathVariables:
     description: "Path parameter: payment"
 body:
   type: json
-  content: "[]"
+  content: |-
+    {
+        "pay_from": "Wallet",
+        "pay_as": "Wire",
+        "amount": 750,
+        "invoice_number": "INV-10029",
+        "payee_id_account_number": "ACC-54321098",
+        "category_id": 1
+    }
 order: 5000

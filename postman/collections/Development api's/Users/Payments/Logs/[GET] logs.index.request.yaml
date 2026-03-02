@@ -1,0 +1,11 @@
+$kind: http-request
+url: "{{baseUrl}}/api/zilmoney/payments/{payment}/logs"
+method: GET
+headers:
+  Accept: application/json
+  Authorization: Bearer {{token}}
+pathVariables:
+  - key: payment
+    value: ""
+    description: "Payment ID"
+order: 1000

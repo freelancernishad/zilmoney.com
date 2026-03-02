@@ -1,0 +1,7 @@
+$kind: http-request
+url: "{{baseUrl}}/api/zilmoney/payment-categories"
+method: GET
+headers:
+  Accept: application/json
+  Authorization: Bearer {{token}}
+order: 1000

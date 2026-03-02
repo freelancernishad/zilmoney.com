@@ -1,0 +1,11 @@
+$kind: http-request
+url: "{{baseUrl}}/api/zilmoney/payment-categories/{category}"
+method: DELETE
+headers:
+  Accept: application/json
+  Authorization: Bearer {{token}}
+pathVariables:
+  - key: category
+    value: ""
+    description: "Category ID"
+order: 1000

@@ -28,4 +28,21 @@ class Attachment extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    protected static function booted()
+    {
+        static::created(function ($attachment) {
+            if ($attachment->payment) {
+                // If original_name is null, fallback to stripping the path from file_path
+                $filename = $attachment->original_name ?? basename($attachment->file_path);
+
+                $attachment->payment->logs()->create([
+                    'status' => 'Attachment Added',
+                    'initiated_by' => auth()->id() ?? $attachment->user_id,
+                    'note' => 'Attachment added ' . $filename,
+                    'device_info' => request()->ip(),
+                ]);
+            }
+        });
+    }
 }
