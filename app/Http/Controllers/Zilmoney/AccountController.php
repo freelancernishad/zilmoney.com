@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Zilmoney;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class AccountController extends Controller
 {
@@ -16,7 +17,7 @@ class AccountController extends Controller
 
     public function index()
     {
-        $business = auth()->user()->businessDetails;
+        $business = Auth::user()->businessDetails;
         if (!$business) return response()->json([]);
 
         return response()->json($business->accounts);
@@ -38,7 +39,7 @@ class AccountController extends Controller
 
     public function store(Request $request)
     {
-        $business = auth()->user()->businessDetails;
+        $business = Auth::user()->businessDetails;
         if (!$business) return response()->json(['message' => 'Business profile required'], 400);
 
         $validated = $request->validate([
@@ -66,7 +67,7 @@ class AccountController extends Controller
 
     public function update(Request $request, $id)
     {
-        $business = auth()->user()->businessDetails;
+        $business = Auth::user()->businessDetails;
         if (!$business) return response()->json(['message' => 'Business profile required'], 400);
 
         $account = $business->accounts()->findOrFail($id);
