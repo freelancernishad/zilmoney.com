@@ -50,6 +50,49 @@ return new class extends Migration
             'created_at' => now(),
             'updated_at' => now(),
         ]);
+
+        // Insert default record for allowed_origins
+        DB::table('allowed_origins')->insert([
+            'origin_url' => 'http://localhost:3000',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        // Insert default record for allowed_origins
+        DB::table('allowed_origins')->insert([
+            'origin_url' => 'http://localhost:8000',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+
+        // Insert default record for allowed_origins
+        DB::table('allowed_origins')->insert([
+            'origin_url' => 'http://localhost:5173',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        // Insert default admin
+        DB::table('admins')->insert([
+            'name' => 'Admin',
+            'email' => 'admin@gmail.com',
+            'password' => \Illuminate\Support\Facades\Hash::make('12345678'),
+            'email_verified_at' => now(),
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        // Insert default user
+        DB::table('users')->insert([
+            'name' => 'User',
+            'email' => 'user@gmail.com',
+            'password' => \Illuminate\Support\Facades\Hash::make('12345678'),
+            'email_verified_at' => now(),
+            'is_active' => true,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
     }
 
     /**
