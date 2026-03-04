@@ -23,6 +23,16 @@ class AccountController extends Controller
         return response()->json($business->accounts);
     }
 
+    public function show($id)
+    {
+        $business = Auth::user()->businessDetails;
+        if (!$business) return response()->json(['message' => 'Business profile required'], 400);
+
+        $account = $business->accounts()->findOrFail($id);
+
+        return response()->json($account);
+    }
+
     public function validateRouting(Request $request)
     {
         $request->validate([
@@ -93,5 +103,16 @@ class AccountController extends Controller
         $account->update($validated);
 
         return response()->json($account);
+    }
+
+    public function destroy($id)
+    {
+        $business = Auth::user()->businessDetails;
+        if (!$business) return response()->json(['message' => 'Business profile required'], 400);
+
+        $account = $business->accounts()->findOrFail($id);
+        $account->delete();
+
+        return response()->json(['message' => 'Account deleted successfully']);
     }
 }
