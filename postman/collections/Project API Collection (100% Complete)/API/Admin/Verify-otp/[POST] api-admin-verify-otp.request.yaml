@@ -11,5 +11,5 @@ headers:
   Authorization: Bearer {{token}}
 body:
   type: json
-  content: "[]"
+  content: "{\n  \"otp\": \"123456\"\n}"
 order: 1000

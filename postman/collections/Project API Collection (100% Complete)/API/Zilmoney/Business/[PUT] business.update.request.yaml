@@ -14,5 +14,5 @@ pathVariables:
     description: "Path parameter: business"
 body:
   type: json
-  content: "[]"
+  content: "{\n  \"business_name\": \"Zilmoney Inc\",\n  \"ein\": \"12-3456789\",\n  \"address_line1\": \"123 Tech Ave\",\n  \"city\": \"San Jose\",\n  \"state\": \"CA\",\n  \"postal_code\": \"95110\"\n}"
 order: 4000

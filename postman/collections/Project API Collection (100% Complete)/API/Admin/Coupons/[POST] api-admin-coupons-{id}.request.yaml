@@ -15,5 +15,5 @@ pathVariables:
     description: "Path parameter: id"
 body:
   type: json
-  content: "[]"
+  content: "{\n  \"name\": \"Spring Sale\",\n  \"code\": \"SPRING20\",\n  \"type\": \"percentage\",\n  \"value\": 20,\n  \"is_active\": true,\n  \"valid_from\": \"2024-03-01\",\n  \"valid_until\": \"2024-06-01\",\n  \"associations\": [\n    {\n      \"item_id\": 1,\n      \"item_type\": \"plan\"\n    }\n  ]\n}"
 order: 3000

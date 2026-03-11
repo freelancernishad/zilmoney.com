@@ -11,5 +11,5 @@ headers:
   Authorization: Bearer {{token}}
 body:
   type: json
-  content: "[]"
+  content: "{\n  \"to\": \"+1234567890\",\n  \"message\": \"Your verification code is 123456\"\n}"
 order: 1000

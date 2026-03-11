@@ -11,5 +11,5 @@ headers:
   Authorization: Bearer {{token}}
 body:
   type: json
-  content: "[]"
+  content: "{}"
 order: 1000

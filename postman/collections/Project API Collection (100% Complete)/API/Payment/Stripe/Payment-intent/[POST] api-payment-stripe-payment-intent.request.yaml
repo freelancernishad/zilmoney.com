@@ -11,5 +11,5 @@ headers:
   Authorization: Bearer {{token}}
 body:
   type: json
-  content: "[]"
+  content: "{\n  \"amount\": 2000,\n  \"currency\": \"usd\",\n  \"metadata\": {\n    \"order_id\": \"12345\"\n  }\n}"
 order: 1000

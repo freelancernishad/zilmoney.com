@@ -14,5 +14,5 @@ pathVariables:
     description: "Path parameter: payee"
 body:
   type: json
-  content: "[]"
+  content: "{\n  \"type\": \"vendor\",\n  \"payee_name\": \"ACME Corp\",\n  \"email\": \"vendor@example.com\",\n  \"entity_type\": \"business\",\n  \"bank_account\": {\n    \"account_holder_name\": \"ACME Corp\",\n    \"routing_number\": \"123456789\",\n    \"account_number\": \"987654321\",\n    \"account_type\": \"checking\"\n  }\n}"
 order: 4000

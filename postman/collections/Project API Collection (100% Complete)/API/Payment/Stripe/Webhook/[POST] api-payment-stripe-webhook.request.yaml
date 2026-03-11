@@ -11,5 +11,5 @@ headers:
   Authorization: Bearer {{token}}
 body:
   type: json
-  content: "[]"
+  content: "{\n  \"id\": \"evt_123\",\n  \"object\": \"event\",\n  \"type\": \"payment_intent.succeeded\",\n  \"data\": {\n    \"object\": {\n      \"id\": \"pi_123\",\n      \"amount\": 2000,\n      \"currency\": \"usd\"\n    }\n  }\n}"
 order: 1000

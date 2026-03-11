@@ -11,5 +11,5 @@ headers:
   Authorization: Bearer {{token}}
 body:
   type: json
-  content: "[]"
+  content: "{\n  \"email\": \"admin@example.com\",\n  \"verify_url\": \"https://example.com/verify\"\n}"
 order: 1000

@@ -17,5 +17,5 @@ pathVariables:
     description: "Path parameter: id"
 body:
   type: json
-  content: "[]"
+  content: "{}"
 order: 4000

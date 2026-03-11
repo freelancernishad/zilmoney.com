@@ -14,5 +14,5 @@ pathVariables:
     description: "Path parameter: payment"
 body:
   type: json
-  content: "[]"
+  content: "{\n  \"memo\": \"Updated memo for payment\",\n  \"invoice_number\": \"INV-2024-001\",\n  \"issue_date\": \"2024-03-11\"\n}"
 order: 5000

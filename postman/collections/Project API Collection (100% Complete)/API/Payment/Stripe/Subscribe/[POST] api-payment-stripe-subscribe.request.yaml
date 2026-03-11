@@ -11,5 +11,5 @@ headers:
   Authorization: Bearer {{token}}
 body:
   type: json
-  content: "[]"
+  content: "{\n  \"price_id\": \"price_12345\",\n  \"success_url\": \"https://example.com/success\",\n  \"cancel_url\": \"https://example.com/cancel\"\n}"
 order: 1000

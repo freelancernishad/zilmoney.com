@@ -11,5 +11,5 @@ headers:
   Authorization: Bearer {{token}}
 body:
   type: json
-  content: "[]"
+  content: "{\n  \"webhook_type\": \"TRANSACTIONS\",\n  \"webhook_code\": \"INITIAL_UPDATE\",\n  \"item_id\": \"item_123\",\n  \"new_transactions\": 10\n}"
 order: 1000

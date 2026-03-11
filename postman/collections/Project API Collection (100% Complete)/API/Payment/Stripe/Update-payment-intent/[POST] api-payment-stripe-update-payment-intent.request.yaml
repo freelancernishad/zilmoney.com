@@ -11,5 +11,5 @@ headers:
   Authorization: Bearer {{token}}
 body:
   type: json
-  content: "[]"
+  content: "{\n  \"payment_intent_id\": \"pi_12345\",\n  \"save_card\": true\n}"
 order: 1000

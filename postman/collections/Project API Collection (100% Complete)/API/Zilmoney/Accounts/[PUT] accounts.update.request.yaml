@@ -14,5 +14,5 @@ pathVariables:
     description: "Path parameter: account"
 body:
   type: json
-  content: "[]"
+  content: "{\n  \"account_holder_name\": \"John Doe\",\n  \"account_nick_name\": \"Main Checking\",\n  \"account_number\": \"1234567890\",\n  \"routing_number\": \"123456789\",\n  \"type\": \"checking\"\n}"
 order: 4000

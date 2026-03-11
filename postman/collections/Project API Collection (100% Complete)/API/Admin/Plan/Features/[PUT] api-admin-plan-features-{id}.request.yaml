@@ -15,5 +15,5 @@ pathVariables:
     description: "Path parameter: id"
 body:
   type: json
-  content: "[]"
+  content: "{\n  \"key\": \"unlimited_checks\",\n  \"name\": \"Unlimited Checks\",\n  \"title_template\": \"Send :limit checks per month\",\n  \"description\": \"Allows sending unlimited checks.\"\n}"
 order: 5000

@@ -11,5 +11,5 @@ headers:
   Authorization: Bearer {{token}}
 body:
   type: json
-  content: "[]"
+  content: "{\n  \"public_token\": \"public-sandbox-12345678-1234-1234-1234-1234567890ab\"\n}"
 order: 1000
