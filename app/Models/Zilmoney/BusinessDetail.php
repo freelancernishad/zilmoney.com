@@ -82,6 +82,16 @@ class BusinessDetail extends Model
         return $this->hasMany(Payment::class, 'company_id');
     }
 
+    public function cards()
+    {
+        return $this->hasMany(Card::class, 'company_id');
+    }
+
+    public function bills()
+    {
+        return $this->hasMany(Bill::class, 'company_id');
+    }
+
     // Accessors for Template Compatibility
     public function getAddressAttribute()
     {

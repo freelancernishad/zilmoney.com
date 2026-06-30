@@ -22,8 +22,15 @@ class UserResource extends JsonResource
             'phone' => $this->phone,
             'notes' => $this->notes,
             'is_active' => $this->is_active,
-            'created_at' => $this->created_at->toDateTimeString(),
-            'updated_at' => $this->updated_at->toDateTimeString(),
+            'personal_info' => $this->personalInfo,
+            'business_details' => $this->businessDetails ? array_merge(
+                $this->businessDetails->toArray(),
+                ['controllers' => $this->businessDetails->controllers]
+            ) : null,
+            'documents' => $this->documents,
+            'device_logs' => $this->deviceLogs,
+            'created_at' => $this->created_at ? $this->created_at->toDateTimeString() : null,
+            'updated_at' => $this->updated_at ? $this->updated_at->toDateTimeString() : null,
         ];
     }
 }

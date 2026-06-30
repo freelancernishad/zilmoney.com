@@ -151,6 +151,7 @@ class User extends Authenticatable implements JWTSubject, MustVerifyEmail
         'documents',
         'accounts',
         'payees',
+        'cards',
     ];
 
     // Accessor for profile picture
@@ -188,6 +189,11 @@ class User extends Authenticatable implements JWTSubject, MustVerifyEmail
     public function getPayeesAttribute()
     {
         return $this->businessDetails?->payees ?? [];
+    }
+
+    public function getCardsAttribute()
+    {
+        return $this->businessDetails?->cards ?? [];
     }
 
 

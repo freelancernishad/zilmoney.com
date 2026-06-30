@@ -8,8 +8,17 @@ use App\Http\Controllers\Zilmoney\PayeeController;
 use App\Http\Controllers\Zilmoney\PaymentController;
 use App\Http\Controllers\Zilmoney\PlaidController;
 
+use App\Http\Controllers\Zilmoney\CardController;
+use App\Http\Controllers\Zilmoney\BillController;
+
 // Dashboard
 Route::get('dashboard', [DashboardController::class, 'index']);
+
+// Cards
+Route::apiResource('cards', CardController::class);
+
+// Bills
+Route::apiResource('bills', BillController::class);
 
 // Banking
 Route::post('accounts/validate-routing', [AccountController::class, 'validateRouting']);
