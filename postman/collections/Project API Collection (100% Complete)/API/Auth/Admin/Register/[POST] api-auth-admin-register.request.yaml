@@ -14,7 +14,7 @@ body:
   content: |-
     {
         "name": "New Admin",
-        "email": "admin@gmail.com",
+        "email": "admin2@gmail.com",
         "password": "admin@gmail.com",
         "password_confirmation": "admin@gmail.com"
     }
