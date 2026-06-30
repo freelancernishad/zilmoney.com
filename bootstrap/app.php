@@ -13,6 +13,7 @@ $app = Application::configure(basePath: dirname(__DIR__))
         health: '/up'
     )
     ->withMiddleware(function (Middleware $middleware) {
+        $middleware->append(\App\Http\Middleware\AttachJwtFromCookie::class);
         $middleware->append(\App\Http\Middleware\ApiResponse::class);
         $middleware->append(\App\Http\Middleware\CompressionMiddleware::class);
         // $middleware->append(\App\Http\Middleware\Cors::class);
