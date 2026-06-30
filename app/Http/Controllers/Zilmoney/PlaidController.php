@@ -23,7 +23,15 @@ class PlaidController extends Controller
             
             // Assuming user has a business. In real app, might need to select specific business.
             $business = auth()->user()->businessDetails; 
-            $companyId = $business ? $business->id : null;
+            if (!$business) {
+                $business = \App\Models\Zilmoney\BusinessDetail::create([
+                    'user_id' => auth()->id(),
+                    'legal_business_name' => auth()->user()->name ? (auth()->user()->name . "'s Business") : "My Business",
+                    'entity_type' => 'LLC',
+                    'country' => 'United States',
+                ]);
+            }
+            $companyId = $business->id;
 
             $accessToken = null;
             if ($itemId) {
@@ -58,7 +66,14 @@ class PlaidController extends Controller
         try {
             // Assuming 1 business for now
             $business = auth()->user()->businessDetails;
-            if (!$business) return response()->json(['message' => 'Business setup required'], 400);
+            if (!$business) {
+                $business = \App\Models\Zilmoney\BusinessDetail::create([
+                    'user_id' => auth()->id(),
+                    'legal_business_name' => auth()->user()->name ? (auth()->user()->name . "'s Business") : "My Business",
+                    'entity_type' => 'LLC',
+                    'country' => 'United States',
+                ]);
+            }
 
             $this->plaidService->exchangeTokenAndSave($request->public_token, auth()->id(), $business->id);
             
