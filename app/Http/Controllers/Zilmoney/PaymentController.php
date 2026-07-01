@@ -98,7 +98,7 @@ class PaymentController extends Controller
 
         $validated = $request->validate([
             'account_id' => 'required|exists:accounts,id',
-            'payee_id' => 'required|exists:payees,id',
+            'payee_id' => 'nullable|exists:payees,id',
             'pay_from' => 'required|string|in:Bank Account,Credit Card,Wallet,Cloud Bank',
             'pay_as' => 'required|string|in:Check,ACH / Direct Deposit,Wire,Virtual Card,Real Time Instant Payment,Same Day ACH,International Payment',
             'amount' => 'required|numeric|min:0.01',
@@ -253,15 +253,146 @@ class PaymentController extends Controller
         return response()->json(['message' => 'Invalid bulk action'], 400);
     }
 
-    public function downloadPdf($id, \App\Services\Zilmoney\CheckService $checkService)
+    public function downloadPdf(Request $request, $id, \App\Services\Zilmoney\CheckService $checkService)
     {
         $business = auth()->user()->businessDetails;
         if (!$business) return response()->json(['message' => 'Business profile required'], 400);
 
         $payment = $business->payments()->with(['business', 'payee', 'account'])->findOrFail($id);
 
-        $pdf = $checkService->generateCheckPdf($payment);
+        $pdf = $checkService->generateCheckPdf($payment, $request->all());
 
         return $pdf->stream("check_{$payment->check_number}.pdf");
+    }
+
+    public function storeBlankChecks(Request $request)
+    {
+        $business = auth()->user()->businessDetails;
+        if (!$business) return response()->json(['message' => 'Business profile required'], 400);
+
+        $validated = $request->validate([
+            'account_id' => 'required|exists:accounts,id',
+            'number_of_checks' => 'required|integer|min:1|max:100',
+            'category_id' => 'nullable|exists:company_payment_categories,id',
+            'include_signature' => 'nullable|string|in:Yes,No',
+            'memo' => 'nullable|string|max:255',
+        ]);
+
+        $account = \App\Models\Zilmoney\Account::find($validated['account_id']);
+        if (!$business->accounts()->where('id', $account->id)->exists()) {
+            return response()->json(['message' => 'Invalid account'], 403);
+        }
+
+        $createdPayments = [];
+        $includeSignature = ($request->input('include_signature', 'Yes') === 'Yes');
+
+        \DB::transaction(function () use ($validated, $account, $business, $includeSignature, &$createdPayments) {
+            $startCheckNo = $this->getNextCheckNumber($account);
+
+            for ($i = 0; $i < $validated['number_of_checks']; $i++) {
+                $checkNo = $startCheckNo + $i;
+
+                $payment = Payment::create([
+                    'company_id' => $business->id,
+                    'account_id' => $account->id,
+                    'payee_id' => null,
+                    'pay_from' => 'Bank Account',
+                    'pay_as' => 'Check',
+                    'amount' => 0.00,
+                    'status' => 'Blank',
+                    'issue_date' => now()->format('Y-m-d'),
+                    'check_number' => $checkNo,
+                    'category_id' => $validated['category_id'] ?? null,
+                    'memo' => $validated['memo'] ?? 'Blank Check',
+                    'delivery_proof' => $includeSignature ? ['include_signature' => true] : ['include_signature' => false],
+                ]);
+
+                $payment->logs()->create([
+                    'status' => 'Blank',
+                    'initiated_by' => auth()->id(),
+                    'note' => 'Blank check created',
+                    'device_info' => request()->ip()
+                ]);
+
+                $createdPayments[] = $payment;
+            }
+        });
+
+        return response()->json($createdPayments, 201);
+    }
+
+    public function bulkStore(Request $request)
+    {
+        $business = auth()->user()->businessDetails;
+        if (!$business) return response()->json(['message' => 'Business profile required'], 400);
+
+        $validated = $request->validate([
+            'payments' => 'required|array',
+            'payments.*.account_id' => 'required|exists:accounts,id',
+            'payments.*.payee_id' => 'nullable|exists:payees,id',
+            'payments.*.pay_from' => 'required|string',
+            'payments.*.pay_as' => 'required|string',
+            'payments.*.amount' => 'required|numeric|min:0',
+            'payments.*.issue_date' => 'required|date',
+            'payments.*.check_number' => 'nullable|integer',
+            'payments.*.invoice_number' => 'nullable|string|max:255',
+            'payments.*.payee_id_account_number' => 'nullable|string|max:255',
+            'payments.*.category_id' => 'nullable|exists:company_payment_categories,id',
+            'payments.*.memo' => 'nullable|string|max:255',
+        ]);
+
+        $createdPayments = [];
+
+        \DB::transaction(function () use ($validated, $business, &$createdPayments) {
+            foreach ($validated['payments'] as $paymentData) {
+                $account = \App\Models\Zilmoney\Account::find($paymentData['account_id']);
+                
+                $checkNumber = $paymentData['check_number'] ?? null;
+                if (empty($checkNumber) && strtolower($paymentData['pay_as']) === 'check') {
+                    $checkNumber = $this->getNextCheckNumber($account);
+                }
+
+                $payment = Payment::create([
+                    'company_id' => $business->id,
+                    'account_id' => $account->id,
+                    'payee_id' => $paymentData['payee_id'] ?? null,
+                    'pay_from' => $paymentData['pay_from'],
+                    'pay_as' => $paymentData['pay_as'],
+                    'amount' => $paymentData['amount'],
+                    'status' => 'pending',
+                    'issue_date' => $paymentData['issue_date'],
+                    'check_number' => $checkNumber,
+                    'invoice_number' => $paymentData['invoice_number'] ?? null,
+                    'payee_id_account_number' => $paymentData['payee_id_account_number'] ?? null,
+                    'category_id' => $paymentData['category_id'] ?? null,
+                    'memo' => $paymentData['memo'] ?? null,
+                ]);
+
+                if ($paymentData['amount'] > 0) {
+                    $account->decrement('balance', $paymentData['amount']);
+                }
+
+                $payment->logs()->create([
+                    'status' => 'pending',
+                    'initiated_by' => auth()->id(),
+                    'note' => 'Payment created via bulk store',
+                    'device_info' => request()->ip()
+                ]);
+
+                $createdPayments[] = $payment;
+            }
+        });
+
+        return response()->json($createdPayments, 201);
+    }
+
+    private function getNextCheckNumber(\App\Models\Zilmoney\Account $account)
+    {
+        $lastPayment = Payment::where('account_id', $account->id)
+            ->whereNotNull('check_number')
+            ->orderByRaw('CAST(check_number AS UNSIGNED) DESC')
+            ->first();
+
+        return $lastPayment ? ($lastPayment->check_number + 1) : 1001;
     }
 }

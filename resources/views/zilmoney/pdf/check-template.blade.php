@@ -104,14 +104,19 @@
         <div class="absolute check-number">{{ $payment->check_number }}</div>
 
         <!-- Date -->
+        @if(empty($options['withoutDate']))
         <div class="absolute date-label">Date</div>
         <div class="absolute date-value">{{ $payment->created_at->format('m/d/Y') }}</div>
+        @endif
 
         <!-- Pay To -->
+        @if(empty($options['withoutPayee']))
         <div class="absolute pay-to-label">Pay to the<br>Order of</div>
         <div class="absolute pay-to-value">{{ $payment->payee_name ?? 'Unknown Payee' }}</div>
+        @endif
 
         <!-- Amount Box -->
+        @if(empty($options['withoutAmount']))
         <div class="absolute amount-box">
             <span class="currency-symbol">$</span>
             {{ number_format($payment->amount, 2) }}
@@ -122,6 +127,7 @@
             {{ $amountInWords }}
             <span class="dollars-label">Dollars</span>
         </div>
+        @endif
 
         <!-- Bank Info -->
         <div class="absolute bank-info">
@@ -134,6 +140,7 @@
         <div class="absolute memo-value">{{ $payment->memo ?? 'Payment' }}</div>
 
         <!-- Signature -->
+        @if(empty($options['withoutSign']))
         <div class="absolute signature-line">
             @if($payment->signature_image)
                 <img src="{{ $payment->signature_image }}" class="signature-img">
@@ -142,6 +149,7 @@
             @endif
         </div>
         <div class="absolute signature-label">Authorized Signature</div>
+        @endif
 
         <!-- MICR Line -->
         <div class="absolute micr-line">

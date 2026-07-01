@@ -26,20 +26,26 @@ class PaymentRemittanceController extends Controller
 
         $validated = $request->validate([
             'invoice_number' => 'nullable|string|max:255',
+            'invoice_date' => 'nullable|date',
             'item' => 'nullable|string|max:255',
             'description' => 'nullable|string|max:500',
             'quantity' => 'nullable|integer',
             'unit_cost' => 'nullable|numeric',
+            'discount' => 'nullable|numeric',
+            'net' => 'nullable|numeric',
             'total' => 'nullable|numeric'
         ]);
 
         $remittance = $payment->remittances()->create([
             'user_id' => auth()->id(),
             'invoice_number' => $validated['invoice_number'] ?? null,
+            'invoice_date' => $validated['invoice_date'] ?? null,
             'item' => $validated['item'] ?? null,
             'description' => $validated['description'] ?? null,
             'quantity' => $validated['quantity'] ?? null,
             'unit_cost' => $validated['unit_cost'] ?? null,
+            'discount' => $validated['discount'] ?? null,
+            'net' => $validated['net'] ?? null,
             'total' => $validated['total'] ?? null,
         ]);
 

@@ -12,10 +12,13 @@ class Remittance extends Model
         'company_payment_id',
         'user_id',
         'invoice_number',
+        'invoice_date',
         'item',
         'description',
         'quantity',
         'unit_cost',
+        'discount',
+        'net',
         'total',
     ];
 

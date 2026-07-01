@@ -14,7 +14,7 @@ class CheckService
      * @param Payment $payment
      * @return \Barryvdh\DomPDF\PDF
      */
-    public function generateCheckPdf(Payment $payment)
+    public function generateCheckPdf(Payment $payment, array $options = [])
     {
         // 1. Convert amount to words
         $amountInWords = $this->convertAmountToWords($payment->amount);
@@ -23,6 +23,7 @@ class CheckService
         $pdf = Pdf::loadView('zilmoney.pdf.check-template', [
             'payment' => $payment,
             'amountInWords' => $amountInWords,
+            'options' => $options,
         ]);
 
         // 3. Set Paper Size (Letter)

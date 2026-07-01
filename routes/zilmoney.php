@@ -40,8 +40,14 @@ Route::middleware([\App\Http\Middleware\AuthenticateUser::class])->group(functio
 
     // Payments
     Route::post('payments/bulk-action', [PaymentController::class, 'bulkAction']);
+    Route::post('payments/bulk-store', [PaymentController::class, 'bulkStore']);
+    Route::post('payments/blank-checks', [PaymentController::class, 'storeBlankChecks']);
     Route::apiResource('payments', PaymentController::class);
     Route::get('payments/{id}/pdf', [PaymentController::class, 'downloadPdf']);
+
+    // Deposit Slips
+    Route::apiResource('deposit-slips', \App\Http\Controllers\Zilmoney\DepositSlipController::class);
+    Route::get('deposit-slips/{id}/pdf', [\App\Http\Controllers\Zilmoney\DepositSlipController::class, 'downloadPdf']);
 
     // Payment Categories
     Route::apiResource('payment-categories', \App\Http\Controllers\Zilmoney\PaymentCategoryController::class)->only(['index', 'store', 'destroy']);
