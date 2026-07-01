@@ -7,78 +7,78 @@ use App\Http\Controllers\Zilmoney\AccountSignatureController;
 use App\Http\Controllers\Zilmoney\PayeeController;
 use App\Http\Controllers\Zilmoney\PaymentController;
 use App\Http\Controllers\Zilmoney\PlaidController;
-
 use App\Http\Controllers\Zilmoney\CardController;
 use App\Http\Controllers\Zilmoney\BillController;
+use App\Http\Controllers\Zilmoney\PlaidWebhookController;
 
-// Dashboard
-Route::get('dashboard', [DashboardController::class, 'index']);
+// Webhook (MUST be public/unauthenticated)
+Route::post('plaid/webhook', [PlaidWebhookController::class, 'handleWebhook']);
 
-// Cards
-Route::apiResource('cards', CardController::class);
+// Authenticated Routes
+Route::middleware([\App\Http\Middleware\AuthenticateUser::class])->group(function () {
+    // Dashboard
+    Route::get('dashboard', [DashboardController::class, 'index']);
 
-// Bills
-Route::apiResource('bills', BillController::class);
+    // Cards
+    Route::apiResource('cards', CardController::class);
 
-// Banking
-Route::post('accounts/validate-routing', [AccountController::class, 'validateRouting']);
-Route::apiResource('accounts', AccountController::class);
+    // Bills
+    Route::apiResource('bills', BillController::class);
 
-// Account Signatures
-Route::get('accounts/{account}/signatures', [AccountSignatureController::class, 'index']);
-Route::post('accounts/signatures', [AccountSignatureController::class, 'store']);
-Route::put('accounts/signatures/{signature}/primary', [AccountSignatureController::class, 'setPrimary']);
-Route::delete('accounts/signatures/{signature}', [AccountSignatureController::class, 'destroy']);
+    // Banking
+    Route::post('accounts/validate-routing', [AccountController::class, 'validateRouting']);
+    Route::apiResource('accounts', AccountController::class);
 
-// Payees
-Route::apiResource('payees', PayeeController::class);
+    // Account Signatures
+    Route::get('accounts/{account}/signatures', [AccountSignatureController::class, 'index']);
+    Route::post('accounts/signatures', [AccountSignatureController::class, 'store']);
+    Route::put('accounts/signatures/{signature}/primary', [AccountSignatureController::class, 'setPrimary']);
+    Route::delete('accounts/signatures/{signature}', [AccountSignatureController::class, 'destroy']);
 
-// Payments
-Route::apiResource('payments', PaymentController::class);
-Route::get('payments/{id}/pdf', [PaymentController::class, 'downloadPdf']);
+    // Payees
+    Route::apiResource('payees', PayeeController::class);
 
-// Payment Categories
-Route::apiResource('payment-categories', \App\Http\Controllers\Zilmoney\PaymentCategoryController::class)->only(['index', 'store', 'destroy']);
+    // Payments
+    Route::post('payments/bulk-action', [PaymentController::class, 'bulkAction']);
+    Route::apiResource('payments', PaymentController::class);
+    Route::get('payments/{id}/pdf', [PaymentController::class, 'downloadPdf']);
 
-// Payment Sub-Resources
-Route::get('payments/{payment}/logs', [\App\Http\Controllers\Zilmoney\PaymentLogController::class, 'index']);
+    // Payment Categories
+    Route::apiResource('payment-categories', \App\Http\Controllers\Zilmoney\PaymentCategoryController::class)->only(['index', 'store', 'destroy']);
 
-// Comments
-Route::get('payments/{payment}/comments', [\App\Http\Controllers\Zilmoney\PaymentCommentController::class, 'index']);
-Route::post('payments/{payment}/comments', [\App\Http\Controllers\Zilmoney\PaymentCommentController::class, 'store']);
-Route::delete('payments/{payment}/comments/{comment}', [\App\Http\Controllers\Zilmoney\PaymentCommentController::class, 'destroy']);
+    // Payment Sub-Resources
+    Route::get('payments/{payment}/logs', [\App\Http\Controllers\Zilmoney\PaymentLogController::class, 'index']);
 
-// Attachments
-Route::get('payments/{payment}/attachments', [\App\Http\Controllers\Zilmoney\PaymentAttachmentController::class, 'index']);
-Route::post('payments/{payment}/attachments', [\App\Http\Controllers\Zilmoney\PaymentAttachmentController::class, 'store']);
-Route::delete('payments/{payment}/attachments/{attachment}', [\App\Http\Controllers\Zilmoney\PaymentAttachmentController::class, 'destroy']);
+    // Comments
+    Route::get('payments/{payment}/comments', [\App\Http\Controllers\Zilmoney\PaymentCommentController::class, 'index']);
+    Route::post('payments/{payment}/comments', [\App\Http\Controllers\Zilmoney\PaymentCommentController::class, 'store']);
+    Route::delete('payments/{payment}/comments/{comment}', [\App\Http\Controllers\Zilmoney\PaymentCommentController::class, 'destroy']);
 
-// Receipts
-Route::get('payments/{payment}/receipts', [\App\Http\Controllers\Zilmoney\PaymentReceiptController::class, 'index']);
-Route::post('payments/{payment}/receipts', [\App\Http\Controllers\Zilmoney\PaymentReceiptController::class, 'store']);
-Route::delete('payments/{payment}/receipts/{receipt}', [\App\Http\Controllers\Zilmoney\PaymentReceiptController::class, 'destroy']);
+    // Attachments
+    Route::get('payments/{payment}/attachments', [\App\Http\Controllers\Zilmoney\PaymentAttachmentController::class, 'index']);
+    Route::post('payments/{payment}/attachments', [\App\Http\Controllers\Zilmoney\PaymentAttachmentController::class, 'store']);
+    Route::delete('payments/{payment}/attachments/{attachment}', [\App\Http\Controllers\Zilmoney\PaymentAttachmentController::class, 'destroy']);
 
-// Delivery Proofs
-Route::get('payments/{payment}/delivery-proofs', [\App\Http\Controllers\Zilmoney\PaymentDeliveryProofController::class, 'index']);
-Route::post('payments/{payment}/delivery-proofs', [\App\Http\Controllers\Zilmoney\PaymentDeliveryProofController::class, 'store']);
-Route::delete('payments/{payment}/delivery-proofs/{deliveryProof}', [\App\Http\Controllers\Zilmoney\PaymentDeliveryProofController::class, 'destroy']);
+    // Receipts
+    Route::get('payments/{payment}/receipts', [\App\Http\Controllers\Zilmoney\PaymentReceiptController::class, 'index']);
+    Route::post('payments/{payment}/receipts', [\App\Http\Controllers\Zilmoney\PaymentReceiptController::class, 'store']);
+    Route::delete('payments/{payment}/receipts/{receipt}', [\App\Http\Controllers\Zilmoney\PaymentReceiptController::class, 'destroy']);
 
-// Remittances
-Route::get('payments/{payment}/remittances', [\App\Http\Controllers\Zilmoney\PaymentRemittanceController::class, 'index']);
-Route::post('payments/{payment}/remittances', [\App\Http\Controllers\Zilmoney\PaymentRemittanceController::class, 'store']);
-Route::delete('payments/{payment}/remittances/{remittance}', [\App\Http\Controllers\Zilmoney\PaymentRemittanceController::class, 'destroy']);
+    // Delivery Proofs
+    Route::get('payments/{payment}/delivery-proofs', [\App\Http\Controllers\Zilmoney\PaymentDeliveryProofController::class, 'index']);
+    Route::post('payments/{payment}/delivery-proofs', [\App\Http\Controllers\Zilmoney\PaymentDeliveryProofController::class, 'store']);
+    Route::delete('payments/{payment}/delivery-proofs/{deliveryProof}', [\App\Http\Controllers\Zilmoney\PaymentDeliveryProofController::class, 'destroy']);
 
-// Plaid Integration
-Route::middleware(['auth:api'])->group(function () {
+    // Remittances
+    Route::get('payments/{payment}/remittances', [\App\Http\Controllers\Zilmoney\PaymentRemittanceController::class, 'index']);
+    Route::post('payments/{payment}/remittances', [\App\Http\Controllers\Zilmoney\PaymentRemittanceController::class, 'store']);
+    Route::delete('payments/{payment}/remittances/{remittance}', [\App\Http\Controllers\Zilmoney\PaymentRemittanceController::class, 'destroy']);
+
+    // Plaid Integration
     Route::post('plaid/create-link-token', [PlaidController::class, 'createLinkToken']);
     Route::post('plaid/exchange-public-token', [PlaidController::class, 'exchangePublicToken']);
     Route::post('plaid/reset-login', [PlaidController::class, 'resetLogin']);
+
+    // Hosted UI
+    Route::get('connect-bank', [PlaidController::class, 'showLinkPage']);
 });
-
-// Hosted UI
-Route::get('connect-bank', [PlaidController::class, 'showLinkPage']);
-
-// Webhook
-use App\Http\Controllers\Zilmoney\PlaidWebhookController;
-
-Route::post('plaid/webhook', [PlaidWebhookController::class, 'handleWebhook']);

@@ -35,6 +35,12 @@ class Payment extends Model
         'delivery_proof' => 'array',
     ];
 
+    protected $appends = [
+        'payee_name',
+        'signature_image',
+        'signature_image_url',
+    ];
+
     public function businessDetail()
     {
         return $this->belongsTo(BusinessDetail::class, 'company_id');
@@ -95,6 +101,44 @@ class Payment extends Model
     public function getBankAttribute()
     {
         return $this->account; // The Account model has fields like bank_name, routing_number, etc.
+    }
+
+    // Standardized payee name
+    public function getPayeeNameAttribute()
+    {
+        return $this->payee ? $this->payee->payee_name : '';
+    }
+
+    // Active signature image path/url for DomPDF (Absolute Path)
+    public function getSignatureImageAttribute()
+    {
+        $signature = $this->account ? $this->account->activeSignature : null;
+        if ($signature && $signature->path) {
+            if (filter_var($signature->path, FILTER_VALIDATE_URL)) {
+                return $signature->path;
+            }
+            if (file_exists(storage_path('app/public/' . $signature->path))) {
+                return storage_path('app/public/' . $signature->path);
+            }
+            if (file_exists(public_path($signature->path))) {
+                return public_path($signature->path);
+            }
+            return storage_path('app/public/' . $signature->path);
+        }
+        return null;
+    }
+
+    // Active signature image URL for React Frontend (HTTP URL)
+    public function getSignatureImageUrlAttribute()
+    {
+        $signature = $this->account ? $this->account->activeSignature : null;
+        if ($signature && $signature->path) {
+            if (filter_var($signature->path, FILTER_VALIDATE_URL)) {
+                return $signature->path;
+            }
+            return asset('storage/' . $signature->path);
+        }
+        return null;
     }
 
     protected static function booted()

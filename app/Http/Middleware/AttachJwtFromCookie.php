@@ -16,21 +16,23 @@ class AttachJwtFromCookie
      */
     public function handle(Request $request, Closure $next)
     {
-        $token = null;
+        $token = $request->bearerToken() ?? $request->query('token');
 
-        if ($request->is('user') || $request->is('user/*') || $request->is('api/user') || $request->is('api/user/*') || $request->is('api/auth/user') || $request->is('api/auth/user/*')) {
-             $token = $request->cookie('user_token') ?? $_COOKIE['user_token'] ?? null;
-        } elseif ($request->is('admin') || $request->is('admin/*') || $request->is('api/admin') || $request->is('api/admin/*') || $request->is('api/auth/admin') || $request->is('api/auth/admin/*')) {
-             $token = $request->cookie('admin_token') ?? $_COOKIE['admin_token'] ?? null;
-        }
-
-        // Fallback or generic logic if needed
         if (!$token) {
-             if ($request->is('api/admin/*') || $request->is('admin/*') || $request->is('api/auth/admin/*')) {
+            if ($request->is('user') || $request->is('user/*') || $request->is('api/user') || $request->is('api/user/*') || $request->is('api/auth/user') || $request->is('api/auth/user/*')) {
+                 $token = $request->cookie('user_token') ?? $_COOKIE['user_token'] ?? null;
+            } elseif ($request->is('admin') || $request->is('admin/*') || $request->is('api/admin') || $request->is('api/admin/*') || $request->is('api/auth/admin') || $request->is('api/auth/admin/*')) {
                  $token = $request->cookie('admin_token') ?? $_COOKIE['admin_token'] ?? null;
-             } else {
-                 $token = $request->cookie('user_token') ?? $_COOKIE['user_token'] ?? $request->cookie('admin_token') ?? $_COOKIE['admin_token'] ?? null;
-             }
+            }
+
+            // Fallback or generic logic if needed
+            if (!$token) {
+                 if ($request->is('api/admin/*') || $request->is('admin/*') || $request->is('api/auth/admin/*')) {
+                     $token = $request->cookie('admin_token') ?? $_COOKIE['admin_token'] ?? null;
+                 } else {
+                     $token = $request->cookie('user_token') ?? $_COOKIE['user_token'] ?? null;
+                 }
+            }
         }
 
         \Illuminate\Support\Facades\Log::info('AttachJwtFromCookie execution details:', [
@@ -51,6 +53,7 @@ class AttachJwtFromCookie
                     \Illuminate\Support\Facades\Auth::guard('admin')->setToken($token);
                     \Illuminate\Support\Facades\Log::info('Set token on admin guard. Check status: ' . (\Illuminate\Support\Facades\Auth::guard('admin')->check() ? 'Authenticated' : 'Failed'));
                 } else {
+                    \Illuminate\Support\Facades\Auth::guard('web')->setToken($token);
                     \Illuminate\Support\Facades\Auth::guard('api')->setToken($token);
                     \Illuminate\Support\Facades\Auth::guard('user')->setToken($token);
                 }
