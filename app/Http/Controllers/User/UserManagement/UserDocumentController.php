@@ -113,12 +113,24 @@ class UserDocumentController extends Controller
     }
 
     /**
-     * Upload document file directly to AWS S3 Storage
+     * Upload document file directly to AWS S3 Storage using FileUploadService
      */
     private function processDocumentUpload($content, $companyId, $docType)
     {
         if (empty($content)) {
             return null;
+        }
+
+        // If it's an UploadedFile instance
+        if ($content instanceof \Illuminate\Http\UploadedFile) {
+            try {
+                $fileService = app(\App\Services\FileSystem\FileUploadService::class);
+                return $fileService->uploadFileToS3($content, "documents/{$companyId}");
+            } catch (\Exception $e) {
+                Log::error("FileUploadService uploadFileToS3 Error: " . $e->getMessage());
+                $path = $content->store("documents/{$companyId}", 'public');
+                return asset("storage/{$path}");
+            }
         }
 
         // If it's already an HTTP URL (S3 URL or external URL), return as is
@@ -138,18 +150,10 @@ class UserDocumentController extends Controller
             $filename = "documents/{$companyId}/{$docType}_" . time() . ".{$extension}";
 
             try {
-                // If AWS S3 disk is active or configured in .env
-                if (config('filesystems.default') === 's3' || env('FILESYSTEM_DISK') === 's3') {
-                    Storage::disk('s3')->put($filename, $base64Data, 'public');
-                    return Storage::disk('s3')->url($filename);
-                }
-
-                // Fallback to local public disk storage
-                Storage::disk('public')->put($filename, $base64Data);
-                return asset("storage/{$filename}");
+                $fileService = app(\App\Services\FileSystem\FileUploadService::class);
+                return $fileService->uploadContentToS3($base64Data, $filename);
             } catch (\Exception $e) {
-                Log::error("AWS S3 Document Upload Error: " . $e->getMessage());
-                // Fallback to local storage
+                Log::error("FileUploadService uploadContentToS3 Error: " . $e->getMessage());
                 Storage::disk('public')->put($filename, $base64Data);
                 return asset("storage/{$filename}");
             }

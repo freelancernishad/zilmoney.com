@@ -117,24 +117,6 @@ class BusinessDetail extends Model
 
     public function getVerificationPhotoIdAttribute($value)
     {
-        if (empty($value)) {
-            return null;
-        }
-
-        if (filter_var($value, FILTER_VALIDATE_URL)) {
-            return $value;
-        }
-
-        $awsUrl = config('filesystems.disks.s3.url') ?: config('AWS_FILE_LOAD_BASE') ?: config('AWS_URL') ?: env('AWS_URL');
-        $bucket = config('filesystems.disks.s3.bucket') ?: env('AWS_BUCKET');
-
-        if ($awsUrl) {
-            return rtrim($awsUrl, '/') . '/' . ltrim($value, '/');
-        } elseif ($bucket) {
-            $region = config('filesystems.disks.s3.region') ?: env('AWS_DEFAULT_REGION', 'us-east-1');
-            return "https://{$bucket}.s3.{$region}.amazonaws.com/" . ltrim($value, '/');
-        }
-
-        return asset('storage/' . ltrim(str_replace('storage/', '', $value), '/'));
+        return get_file_url($value);
     }
 }

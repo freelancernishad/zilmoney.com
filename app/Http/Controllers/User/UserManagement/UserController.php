@@ -157,7 +157,7 @@ class UserController extends Controller
             unset($data['percentage_owner_ship']);
         }
 
-        // Handle logo / verification_photo_id Base64 upload
+        // Handle logo / verification_photo_id Base64 upload using FileUploadService
         if (isset($data['verification_photo_id']) && str_starts_with($data['verification_photo_id'], 'data:image/')) {
             try {
                 if (preg_match('/^data:(.*?);base64,(.*)$/', $data['verification_photo_id'], $matches)) {
@@ -166,26 +166,10 @@ class UserController extends Controller
                     $ext = str_contains($mimeType, 'png') ? 'png' : 'jpg';
                     $filename = "logos/company_" . $user->id . "_" . time() . ".{$ext}";
                     
-                    $awsUrl = config('filesystems.disks.s3.url') ?: config('AWS_FILE_LOAD_BASE') ?: config('AWS_URL') ?: env('AWS_URL');
-                    $bucket = config('filesystems.disks.s3.bucket') ?: env('AWS_BUCKET');
-                    $isS3Configured = (config('filesystems.default') === 's3' || env('FILESYSTEM_DISK') === 's3' || !empty($bucket) || !empty($awsUrl));
-
-                    if ($isS3Configured) {
-                        try {
-                            \Illuminate\Support\Facades\Storage::disk('s3')->put($filename, $base64Data, 'public');
-                        } catch (\Exception $e) {
-                            \Illuminate\Support\Facades\Storage::disk('public')->put($filename, $base64Data);
-                        }
-
-                        if ($awsUrl) {
-                            $data['verification_photo_id'] = rtrim($awsUrl, '/') . '/' . ltrim($filename, '/');
-                        } elseif ($bucket) {
-                            $region = config('filesystems.disks.s3.region') ?: env('AWS_DEFAULT_REGION', 'us-east-1');
-                            $data['verification_photo_id'] = "https://{$bucket}.s3.{$region}.amazonaws.com/" . ltrim($filename, '/');
-                        } else {
-                            $data['verification_photo_id'] = \Illuminate\Support\Facades\Storage::disk('s3')->url($filename);
-                        }
-                    } else {
+                    try {
+                        $fileService = app(\App\Services\FileSystem\FileUploadService::class);
+                        $data['verification_photo_id'] = $fileService->uploadContentToS3($base64Data, $filename);
+                    } catch (\Exception $e) {
                         \Illuminate\Support\Facades\Storage::disk('public')->put($filename, $base64Data);
                         $data['verification_photo_id'] = asset("storage/{$filename}");
                     }

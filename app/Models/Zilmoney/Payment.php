@@ -147,31 +147,7 @@ class Payment extends Model
     public function getCompanyLogoUrlAttribute()
     {
         $biz = $this->business;
-        if ($biz && $biz->verification_photo_id) {
-            $photo = $biz->verification_photo_id;
-
-            // If it's already a full HTTP/HTTPS URL (e.g. AWS S3 URL or external URL)
-            if (filter_var($photo, FILTER_VALIDATE_URL)) {
-                return $photo;
-            }
-
-            $awsUrl = config('filesystems.disks.s3.url') ?: config('AWS_FILE_LOAD_BASE') ?: config('AWS_URL') ?: env('AWS_URL');
-            $bucket = config('filesystems.disks.s3.bucket') ?: env('AWS_BUCKET');
-
-            if ($awsUrl) {
-                return rtrim($awsUrl, '/') . '/' . ltrim($photo, '/');
-            } elseif ($bucket) {
-                $region = config('filesystems.disks.s3.region') ?: env('AWS_DEFAULT_REGION', 'us-east-1');
-                return "https://{$bucket}.s3.{$region}.amazonaws.com/" . ltrim($photo, '/');
-            }
-
-            if (config('filesystems.default') === 's3' || env('FILESYSTEM_DISK') === 's3') {
-                return \Illuminate\Support\Facades\Storage::disk('s3')->url($photo);
-            }
-
-            return asset('storage/' . ltrim($photo, '/'));
-        }
-        return null;
+        return $biz ? get_file_url($biz->verification_photo_id) : null;
     }
 
     public function getCompanyNameAttribute()
