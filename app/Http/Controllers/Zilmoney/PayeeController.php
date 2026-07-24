@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Zilmoney;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\Services\FileSystem\FileUploadService;
+use Illuminate\Support\Facades\Log;
 
 class PayeeController extends Controller
 {
@@ -168,7 +170,7 @@ class PayeeController extends Controller
         return response()->json($payee);
     }
 
-    public function uploadFile(Request $request)
+    public function uploadFile(Request $request, FileUploadService $fileUploadService)
     {
         $request->validate([
             'file' => 'required|file|max:10240',
@@ -177,15 +179,20 @@ class PayeeController extends Controller
         $file = $request->file('file');
 
         try {
-            if (config('filesystems.disks.s3.key') && config('filesystems.disks.s3.bucket')) {
-                $url = (new \App\Services\FileSystem\FileUploadService())->uploadFileToS3($file, 'uploads/payees');
-            } else {
+            // Primary: S3 upload via FileUploadService
+            $url = $fileUploadService->uploadFileToS3($file, 'uploads/payees');
+        } catch (\Exception $e) {
+            Log::info('S3 upload fallback to protected/public: ' . $e->getMessage());
+            try {
+                // Secondary: Protected disk upload via FileUploadService
+                $path = $fileUploadService->uploadFileToProtected($file, 'uploads/payees');
+                $filename = basename($path);
+                $url = url('/api/zilmoney/payees/view-file/' . $filename);
+            } catch (\Exception $ex) {
+                // Tertiary: Local public storage
                 $path = $file->store('uploads/payees', 'public');
                 $url = asset('storage/' . $path);
             }
-        } catch (\Exception $e) {
-            $path = $file->store('uploads/payees', 'public');
-            $url = asset('storage/' . $path);
         }
 
         return response()->json([
@@ -193,5 +200,14 @@ class PayeeController extends Controller
             'name' => $file->getClientOriginalName(),
             'size' => round($file->getSize() / (1024 * 1024), 2) . ' MB'
         ]);
+    }
+
+    public function viewFile(string $filename, FileUploadService $fileUploadService)
+    {
+        try {
+            return $fileUploadService->readFileFromProtected($filename, 'uploads/payees');
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'File not found on protected storage'], 404);
+        }
     }
 }

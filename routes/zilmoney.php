@@ -44,6 +44,7 @@ Route::middleware([\App\Http\Middleware\AuthenticateUser::class])->group(functio
 
     // Payees
     Route::post('payees/upload-file', [PayeeController::class, 'uploadFile']);
+    Route::get('payees/view-file/{filename}', [PayeeController::class, 'viewFile']);
     Route::apiResource('payees', PayeeController::class);
 
     // Payments
