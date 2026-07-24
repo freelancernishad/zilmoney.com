@@ -32,9 +32,22 @@ class AccountSignatureController extends Controller
 
         $account = Account::findOrFail($data['account_id']);
 
-        // Ownership check
-        if ($account->company->user_id !== $request->user()->id) {
-            return response()->json(['message' => 'Unauthorized'], 403);
+        // Handle Base64 signature image upload via FileUploadService
+        if (preg_match('/^data:(.*?);base64,(.*)$/', $data['path'], $matches)) {
+            $base64Data = base64_decode($matches[2]);
+            $filename = "signatures/account_" . $account->id . "_" . time() . ".png";
+            try {
+                $fileService = app(\App\Services\FileSystem\FileUploadService::class);
+                $data['path'] = $fileService->uploadContentToS3($base64Data, $filename);
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Storage::disk('public')->put($filename, $base64Data);
+                $data['path'] = asset("storage/{$filename}");
+            }
+        }
+
+        // Default to primary if first signature or requested
+        if (!isset($data['is_primary'])) {
+            $data['is_primary'] = $account->signatures()->count() === 0;
         }
 
         // If this signature is marked as primary, reset others

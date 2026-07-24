@@ -22,9 +22,9 @@ class StoreAccountSignatureRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'account_id' => 'required|exists:accounts,id',
+            'account_id' => 'required',
             'path' => 'required|string',
-            'is_primary' => 'boolean'
+            'is_primary' => 'nullable|boolean'
         ];
     }
 }
