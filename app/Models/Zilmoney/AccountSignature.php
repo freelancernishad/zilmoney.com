@@ -21,4 +21,13 @@ class AccountSignature extends Model
     {
         return $this->belongsTo(Account::class);
     }
+
+    public function getImageUrlAttribute()
+    {
+        if (!$this->path) return null;
+        if (filter_var($this->path, FILTER_VALIDATE_URL)) {
+            return $this->path;
+        }
+        return asset('storage/' . $this->path);
+    }
 }

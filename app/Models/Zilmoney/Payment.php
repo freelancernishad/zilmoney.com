@@ -115,6 +115,15 @@ class Payment extends Model
     // Active signature image path/url for DomPDF (Absolute Path)
     public function getSignatureImageAttribute()
     {
+        // 1. Prefer payment's own saved snapshot signature
+        if (!empty($this->attributes['signature_image'])) {
+            $path = $this->attributes['signature_image'];
+            if (filter_var($path, FILTER_VALIDATE_URL)) return $path;
+            if (file_exists(storage_path('app/public/' . $path))) return storage_path('app/public/' . $path);
+            if (file_exists(public_path($path))) return public_path($path);
+        }
+
+        // 2. Fallback to current account activeSignature
         $signature = $this->account ? $this->account->activeSignature : null;
         if ($signature && $signature->path) {
             if (filter_var($signature->path, FILTER_VALIDATE_URL)) {
@@ -134,6 +143,17 @@ class Payment extends Model
     // Active signature image URL for React Frontend (HTTP URL)
     public function getSignatureImageUrlAttribute()
     {
+        // 1. Prefer payment's own saved snapshot signature URL
+        if (!empty($this->attributes['signature_image_url'])) {
+            return $this->attributes['signature_image_url'];
+        }
+        if (!empty($this->attributes['signature_image'])) {
+            $path = $this->attributes['signature_image'];
+            if (filter_var($path, FILTER_VALIDATE_URL)) return $path;
+            return asset('storage/' . $path);
+        }
+
+        // 2. Fallback to current account activeSignature
         $signature = $this->account ? $this->account->activeSignature : null;
         if ($signature && $signature->path) {
             if (filter_var($signature->path, FILTER_VALIDATE_URL)) {

@@ -34,7 +34,12 @@ class PaymentService
                 throw new Exception("Check number {$checkNumber} already exists.");
             }
 
-            // 3. Create Payment
+            // 3. Capture current active signature snapshot
+            $activeSig = $account->activeSignature;
+            $sigImage = $activeSig ? $activeSig->path : null;
+            $sigImageUrl = $activeSig ? $activeSig->image_url : null;
+
+            // 4. Create Payment
             $payment = Payment::create([
                 'company_id' => $business->id,
                 'account_id' => $account->id,
@@ -44,6 +49,8 @@ class PaymentService
                 'status' => 'pending', // Pending approval/processing
                 'issue_date' => $data['issue_date'],
                 'memo' => $data['memo'] ?? null,
+                'signature_image' => $sigImage,
+                'signature_image_url' => $sigImageUrl,
             ]);
 
             // 4. Update Balance (Deduct immediately or on processing? Assuming immediate for now)
