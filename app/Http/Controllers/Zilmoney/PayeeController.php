@@ -37,9 +37,13 @@ class PayeeController extends Controller
             'city' => 'nullable|string',
             'postal_code' => 'nullable|string',
             'bank_name' => 'nullable|string',
+            'bank_account_holder_name' => 'nullable|string',
             'bank_routing_number' => 'nullable|string',
             'bank_account_number' => 'nullable|string',
             'bank_account_type' => 'nullable|string',
+            'routing_number' => 'nullable|string',
+            'account_number' => 'nullable|string',
+            'account_type' => 'nullable|string',
             'swift_code' => 'nullable|string',
             'iban' => 'nullable|string',
             'intl_bank_country' => 'nullable|string',
@@ -56,12 +60,25 @@ class PayeeController extends Controller
 
         // Map TS nested bank_account object to flat table columns
         if (isset($validated['bank_account'])) {
-            $validated['bank_account_holder_name'] = $validated['bank_account']['account_holder_name'] ?? null;
+            $validated['bank_account_holder_name'] = $validated['bank_account']['account_holder_name'] ?? $validated['bank_account_holder_name'] ?? null;
             $validated['bank_name'] = $validated['bank_account']['bank_name'] ?? $validated['bank_name'] ?? null;
-            $validated['bank_routing_number'] = $validated['bank_account']['routing_number'] ?? null;
-            $validated['bank_account_number'] = $validated['bank_account']['account_number'] ?? null;
-            $validated['bank_account_type'] = $validated['bank_account']['account_type'] ?? null;
+            $validated['bank_routing_number'] = $validated['bank_account']['routing_number'] ?? $validated['bank_routing_number'] ?? null;
+            $validated['bank_account_number'] = $validated['bank_account']['account_number'] ?? $validated['bank_account_number'] ?? null;
+            $validated['bank_account_type'] = $validated['bank_account']['account_type'] ?? $validated['bank_account_type'] ?? null;
             unset($validated['bank_account']);
+        }
+
+        if (!empty($validated['routing_number'])) {
+            $validated['bank_routing_number'] = $validated['routing_number'];
+            unset($validated['routing_number']);
+        }
+        if (!empty($validated['account_number'])) {
+            $validated['bank_account_number'] = $validated['account_number'];
+            unset($validated['account_number']);
+        }
+        if (!empty($validated['account_type'])) {
+            $validated['bank_account_type'] = $validated['account_type'];
+            unset($validated['account_type']);
         }
 
         $payee = $business->payees()->create($validated);
@@ -93,9 +110,13 @@ class PayeeController extends Controller
             'city' => 'nullable|string',
             'postal_code' => 'nullable|string',
             'bank_name' => 'nullable|string',
+            'bank_account_holder_name' => 'nullable|string',
             'bank_routing_number' => 'nullable|string',
             'bank_account_number' => 'nullable|string',
             'bank_account_type' => 'nullable|string',
+            'routing_number' => 'nullable|string',
+            'account_number' => 'nullable|string',
+            'account_type' => 'nullable|string',
             'swift_code' => 'nullable|string',
             'iban' => 'nullable|string',
             'intl_bank_country' => 'nullable|string',
@@ -111,12 +132,25 @@ class PayeeController extends Controller
         ]);
 
         if (isset($validated['bank_account'])) {
-            $validated['bank_account_holder_name'] = $validated['bank_account']['account_holder_name'] ?? null;
+            $validated['bank_account_holder_name'] = $validated['bank_account']['account_holder_name'] ?? $validated['bank_account_holder_name'] ?? null;
             $validated['bank_name'] = $validated['bank_account']['bank_name'] ?? $validated['bank_name'] ?? null;
-            $validated['bank_routing_number'] = $validated['bank_account']['routing_number'] ?? null;
-            $validated['bank_account_number'] = $validated['bank_account']['account_number'] ?? null;
-            $validated['bank_account_type'] = $validated['bank_account']['account_type'] ?? null;
+            $validated['bank_routing_number'] = $validated['bank_account']['routing_number'] ?? $validated['bank_routing_number'] ?? null;
+            $validated['bank_account_number'] = $validated['bank_account']['account_number'] ?? $validated['bank_account_number'] ?? null;
+            $validated['bank_account_type'] = $validated['bank_account']['account_type'] ?? $validated['bank_account_type'] ?? null;
             unset($validated['bank_account']);
+        }
+
+        if (!empty($validated['routing_number'])) {
+            $validated['bank_routing_number'] = $validated['routing_number'];
+            unset($validated['routing_number']);
+        }
+        if (!empty($validated['account_number'])) {
+            $validated['bank_account_number'] = $validated['account_number'];
+            unset($validated['account_number']);
+        }
+        if (!empty($validated['account_type'])) {
+            $validated['bank_account_type'] = $validated['account_type'];
+            unset($validated['account_type']);
         }
 
         $payee->update($validated);
