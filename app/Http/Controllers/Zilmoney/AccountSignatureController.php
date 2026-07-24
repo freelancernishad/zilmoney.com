@@ -10,14 +10,34 @@ use App\Http\Requests\Zilmoney\StoreAccountSignatureRequest;
 
 class AccountSignatureController extends Controller
 {
+    private function checkOwnership($account, $user)
+    {
+        if (!$account || !$user) return false;
+
+        // Match user's active businessDetails company_id
+        if ($user->businessDetails && (int)$account->company_id === (int)$user->businessDetails->id) {
+            return true;
+        }
+
+        // Match company's user_id
+        if ($account->company && (int)$account->company->user_id === (int)$user->id) {
+            return true;
+        }
+
+        return false;
+    }
+
     // Fetch signatures for an account
     public function index(Request $request, $accountId)
     {
-        $account = Account::with('signatures')->findOrFail($accountId);
+        $account = Account::with('signatures')->find($accountId);
+        if (!$account) {
+            return response()->json(['message' => 'Account not found'], 404);
+        }
 
         // Ownership check
-        if ($account->company->user_id !== $request->user()->id) {
-            return response()->json(['message' => 'Unauthorized'], 403);
+        if (!$this->checkOwnership($account, $request->user())) {
+            return response()->json(['message' => 'Unauthorized account access'], 403);
         }
 
         return response()->json([
@@ -31,6 +51,11 @@ class AccountSignatureController extends Controller
         $data = $request->validated();
 
         $account = Account::findOrFail($data['account_id']);
+
+        // Ownership check
+        if (!$this->checkOwnership($account, $request->user())) {
+            return response()->json(['message' => 'Unauthorized account access'], 403);
+        }
 
         // Handle Base64 signature image upload via FileUploadService
         if (preg_match('/^data:(.*?);base64,(.*)$/', $data['path'], $matches)) {
@@ -70,8 +95,8 @@ class AccountSignatureController extends Controller
         $account = $signature->account;
 
         // Ownership check
-        if ($account->company && $account->company->user_id !== $request->user()->id) {
-            return response()->json(['message' => 'Unauthorized'], 403);
+        if (!$this->checkOwnership($account, $request->user())) {
+            return response()->json(['message' => 'Unauthorized account access'], 403);
         }
 
         // Check if explicit is_primary boolean is passed or toggle if already primary
@@ -101,8 +126,8 @@ class AccountSignatureController extends Controller
         $account = $signature->account;
 
         // Ownership check
-        if ($account->company->user_id !== $request->user()->id) {
-            return response()->json(['message' => 'Unauthorized'], 403);
+        if (!$this->checkOwnership($account, $request->user())) {
+            return response()->json(['message' => 'Unauthorized account access'], 403);
         }
 
         $signature->delete();
