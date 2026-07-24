@@ -11,11 +11,17 @@ use App\Http\Controllers\Zilmoney\CardController;
 use App\Http\Controllers\Zilmoney\BillController;
 use App\Http\Controllers\Zilmoney\PlaidWebhookController;
 
-// Webhook (MUST be public/unauthenticated)
+use App\Http\Controllers\Zilmoney\SignatureSessionController;
+
+// Webhook & Public Signature Sessions
 Route::post('plaid/webhook', [PlaidWebhookController::class, 'handleWebhook']);
+Route::get('signature-sessions/{token}', [SignatureSessionController::class, 'show']);
+Route::post('signature-sessions/{token}/submit', [SignatureSessionController::class, 'submit']);
 
 // Authenticated Routes
 Route::middleware([\App\Http\Middleware\AuthenticateUser::class])->group(function () {
+    // Signature Sessions (Create Session)
+    Route::post('signature-sessions', [SignatureSessionController::class, 'store']);
     // Dashboard
     Route::get('dashboard', [DashboardController::class, 'index']);
 
