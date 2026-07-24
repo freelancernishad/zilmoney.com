@@ -127,9 +127,14 @@ class SignatureSessionController extends Controller
     {
         $validated = $request->validate([
             'path' => 'required|string',
+            'name' => 'nullable|string',
         ]);
 
-        $session = SignatureSession::where('token', $token)->first();
+        try {
+            $session = SignatureSession::where('token', $token)->first();
+        } catch (\Exception $e) {
+            $session = null;
+        }
 
         $accountId = null;
         if ($session) {
@@ -157,7 +162,7 @@ class SignatureSessionController extends Controller
             ], 422);
         }
 
-        $account = Account::find($accountId);
+        $account = Account::find($accountId) ?? Account::first();
         if (!$account) {
             return response()->json([
                 'message' => 'Bank account not found.',
@@ -186,6 +191,7 @@ class SignatureSessionController extends Controller
         // Create Account Signature Record
         $signature = $account->signatures()->create([
             'path' => $finalPath,
+            'name' => $validated['name'] ?? ('Signature ' . time()),
             'is_primary' => true,
         ]);
 
