@@ -146,19 +146,19 @@ class Payment extends Model
 
     public function getCompanyLogoUrlAttribute()
     {
-        $biz = $this->businessDetail;
+        $biz = $this->business;
         return $biz ? ($biz->verification_photo_id ?? null) : null;
     }
 
     public function getCompanyNameAttribute()
     {
-        $biz = $this->businessDetail;
+        $biz = $this->business;
         return $biz ? ($biz->legal_business_name ?? $biz->dba ?? null) : null;
     }
 
     public function getBusinessDetailAttribute()
     {
-        $biz = $this->businessDetail;
+        $biz = $this->business;
         if ($biz) {
             $addr = $biz->physical_address;
             $addrStr = null;

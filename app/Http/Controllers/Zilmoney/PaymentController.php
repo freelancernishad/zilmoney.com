@@ -135,7 +135,7 @@ class PaymentController extends Controller
         $business = auth()->user()->businessDetails;
         if (!$business) return response()->json(['message' => 'Business profile required'], 400);
 
-        $payment = $business->payments()->with(['payee', 'account', 'logs.initiator', 'comments.user', 'attachments', 'businessDetail'])->findOrFail($id);
+        $payment = $business->payments()->with(['payee', 'account', 'logs.initiator', 'comments.user', 'attachments', 'business'])->findOrFail($id);
 
         return response()->json($payment);
     }
