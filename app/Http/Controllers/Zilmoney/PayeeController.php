@@ -170,6 +170,17 @@ class PayeeController extends Controller
         return response()->json($payee);
     }
 
+    public function destroy($id)
+    {
+        $business = auth()->user()->businessDetails;
+        if (!$business) return response()->json(['message' => 'Business profile required'], 400);
+
+        $payee = $business->payees()->findOrFail($id);
+        $payee->delete();
+
+        return response()->json(['message' => 'Payee deleted successfully']);
+    }
+
     public function uploadFile(Request $request, FileUploadService $fileUploadService)
     {
         $request->validate([
