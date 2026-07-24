@@ -25,10 +25,18 @@ class Payee extends Model
         'state',
         'postal_code',
         'country',
+        'request_bank_account',
+        'bank_name',
         'bank_account_holder_name',
         'bank_routing_number',
         'bank_account_number',
         'bank_account_type',
+        'swift_code',
+        'iban',
+        'intl_bank_country',
+        'intl_bank_address',
+        'tax_id',
+        'notes',
     ];
 
     public function company()

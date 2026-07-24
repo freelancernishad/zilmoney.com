@@ -29,14 +29,26 @@ class PayeeController extends Controller
             'payee_id_account_number' => 'required|integer',
             'entity_type' => 'required|in:individual,business',
             'company_name' => 'nullable|string',
+            'request_bank_account' => 'nullable|boolean',
             'address_line1' => 'nullable|string',
             'address_line2' => 'nullable|string',
             'country' => 'nullable|string',
             'state' => 'nullable|string',
             'city' => 'nullable|string',
             'postal_code' => 'nullable|string',
+            'bank_name' => 'nullable|string',
+            'bank_routing_number' => 'nullable|string',
+            'bank_account_number' => 'nullable|string',
+            'bank_account_type' => 'nullable|string',
+            'swift_code' => 'nullable|string',
+            'iban' => 'nullable|string',
+            'intl_bank_country' => 'nullable|string',
+            'intl_bank_address' => 'nullable|string',
+            'tax_id' => 'nullable|string',
+            'notes' => 'nullable|string',
             'bank_account' => 'nullable|array',
             'bank_account.account_holder_name' => 'nullable|string',
+            'bank_account.bank_name' => 'nullable|string',
             'bank_account.routing_number' => 'nullable|string',
             'bank_account.account_number' => 'nullable|string',
             'bank_account.account_type' => 'nullable|string',
@@ -45,6 +57,7 @@ class PayeeController extends Controller
         // Map TS nested bank_account object to flat table columns
         if (isset($validated['bank_account'])) {
             $validated['bank_account_holder_name'] = $validated['bank_account']['account_holder_name'] ?? null;
+            $validated['bank_name'] = $validated['bank_account']['bank_name'] ?? $validated['bank_name'] ?? null;
             $validated['bank_routing_number'] = $validated['bank_account']['routing_number'] ?? null;
             $validated['bank_account_number'] = $validated['bank_account']['account_number'] ?? null;
             $validated['bank_account_type'] = $validated['bank_account']['account_type'] ?? null;
@@ -72,14 +85,26 @@ class PayeeController extends Controller
             'payee_id_account_number' => 'nullable|integer',
             'entity_type' => 'nullable|in:individual,business',
             'company_name' => 'nullable|string',
+            'request_bank_account' => 'nullable|boolean',
             'address_line1' => 'nullable|string',
             'address_line2' => 'nullable|string',
             'country' => 'nullable|string',
             'state' => 'nullable|string',
             'city' => 'nullable|string',
             'postal_code' => 'nullable|string',
+            'bank_name' => 'nullable|string',
+            'bank_routing_number' => 'nullable|string',
+            'bank_account_number' => 'nullable|string',
+            'bank_account_type' => 'nullable|string',
+            'swift_code' => 'nullable|string',
+            'iban' => 'nullable|string',
+            'intl_bank_country' => 'nullable|string',
+            'intl_bank_address' => 'nullable|string',
+            'tax_id' => 'nullable|string',
+            'notes' => 'nullable|string',
             'bank_account' => 'nullable|array',
             'bank_account.account_holder_name' => 'nullable|string',
+            'bank_account.bank_name' => 'nullable|string',
             'bank_account.routing_number' => 'nullable|string',
             'bank_account.account_number' => 'nullable|string',
             'bank_account.account_type' => 'nullable|string',
@@ -87,6 +112,7 @@ class PayeeController extends Controller
 
         if (isset($validated['bank_account'])) {
             $validated['bank_account_holder_name'] = $validated['bank_account']['account_holder_name'] ?? null;
+            $validated['bank_name'] = $validated['bank_account']['bank_name'] ?? $validated['bank_name'] ?? null;
             $validated['bank_routing_number'] = $validated['bank_account']['routing_number'] ?? null;
             $validated['bank_account_number'] = $validated['bank_account']['account_number'] ?? null;
             $validated['bank_account_type'] = $validated['bank_account']['account_type'] ?? null;
