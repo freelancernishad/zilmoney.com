@@ -147,7 +147,20 @@ class Payment extends Model
     public function getCompanyLogoUrlAttribute()
     {
         $biz = $this->business;
-        return $biz ? ($biz->verification_photo_id ?? null) : null;
+        if ($biz && $biz->verification_photo_id) {
+            $photo = $biz->verification_photo_id;
+
+            if (filter_var($photo, FILTER_VALIDATE_URL)) {
+                return $photo;
+            }
+
+            if (config('filesystems.default') === 's3' || env('FILESYSTEM_DISK') === 's3') {
+                return \Illuminate\Support\Facades\Storage::disk('s3')->url($photo);
+            }
+
+            return asset('storage/' . ltrim($photo, '/'));
+        }
+        return null;
     }
 
     public function getCompanyNameAttribute()
