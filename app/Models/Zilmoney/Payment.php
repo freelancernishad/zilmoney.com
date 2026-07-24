@@ -27,6 +27,14 @@ class Payment extends Model
         'memo',
         'remittance_info',
         'delivery_proof',
+        'signature_image',
+        'signature_image_url',
+        'company_name',
+        'company_address',
+        'company_logo_url',
+        'bank_name',
+        'bank_routing_number',
+        'bank_account_number',
     ];
 
     protected $casts = [
@@ -166,18 +174,36 @@ class Payment extends Model
 
     public function getCompanyLogoUrlAttribute()
     {
+        if (!empty($this->attributes['company_logo_url'])) {
+            return $this->attributes['company_logo_url'];
+        }
         $biz = $this->business;
         return $biz ? get_file_url($biz->verification_photo_id) : null;
     }
 
     public function getCompanyNameAttribute()
     {
+        if (!empty($this->attributes['company_name'])) {
+            return $this->attributes['company_name'];
+        }
         $biz = $this->business;
         return $biz ? ($biz->legal_business_name ?? $biz->dba ?? null) : null;
     }
 
     public function getBusinessDetailAttribute()
     {
+        if (!empty($this->attributes['company_name']) || !empty($this->attributes['company_address'])) {
+            return [
+                'id' => $this->company_id,
+                'company_name' => $this->attributes['company_name'] ?? null,
+                'legal_business_name' => $this->attributes['company_name'] ?? null,
+                'verification_photo_id' => null,
+                'company_logo_url' => $this->company_logo_url,
+                'address_line1' => $this->attributes['company_address'] ?? null,
+                'physical_address' => $this->attributes['company_address'] ?? null,
+            ];
+        }
+
         $biz = $this->business;
         if ($biz) {
             $addr = $biz->physical_address;

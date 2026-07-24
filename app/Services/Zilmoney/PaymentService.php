@@ -34,12 +34,25 @@ class PaymentService
                 throw new Exception("Check number {$checkNumber} already exists.");
             }
 
-            // 3. Capture current active signature snapshot
+            // 3. Capture current active signature, company info, and bank account snapshot
             $activeSig = $account->activeSignature;
             $sigImage = $activeSig ? $activeSig->path : null;
             $sigImageUrl = $activeSig ? $activeSig->image_url : null;
 
-            // 4. Create Payment
+            $addr = $business->physical_address;
+            $addrStr = null;
+            if (is_array($addr)) {
+                $parts = array_filter([
+                    $addr['address1'] ?? '',
+                    $addr['city'] ?? '',
+                    isset($addr['state']) ? $addr['state'] . " " . ($addr['zip'] ?? '') : ''
+                ]);
+                $addrStr = implode(', ', $parts);
+            } elseif (is_string($addr)) {
+                $addrStr = $addr;
+            }
+
+            // 4. Create Payment with full snapshot details
             $payment = Payment::create([
                 'company_id' => $business->id,
                 'account_id' => $account->id,
@@ -51,6 +64,12 @@ class PaymentService
                 'memo' => $data['memo'] ?? null,
                 'signature_image' => $sigImage,
                 'signature_image_url' => $sigImageUrl,
+                'company_name' => $business->legal_business_name ?? $business->dba,
+                'company_address' => $addrStr,
+                'company_logo_url' => get_file_url($business->verification_photo_id),
+                'bank_name' => $account->bank_name,
+                'bank_routing_number' => $account->routing_number,
+                'bank_account_number' => $account->account_number,
             ]);
 
             // 4. Update Balance (Deduct immediately or on processing? Assuming immediate for now)
