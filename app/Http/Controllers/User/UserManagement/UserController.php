@@ -156,6 +156,28 @@ class UserController extends Controller
             $data['percentage_ownership'] = $data['percentage_owner_ship'];
             unset($data['percentage_owner_ship']);
         }
+
+        // Handle logo / verification_photo_id Base64 upload
+        if (isset($data['verification_photo_id']) && str_starts_with($data['verification_photo_id'], 'data:image/')) {
+            try {
+                if (preg_match('/^data:(.*?);base64,(.*)$/', $data['verification_photo_id'], $matches)) {
+                    $mimeType = $matches[1];
+                    $base64Data = base64_decode($matches[2]);
+                    $ext = str_contains($mimeType, 'png') ? 'png' : 'jpg';
+                    $filename = "logos/company_" . $user->id . "_" . time() . ".{$ext}";
+                    
+                    if (config('filesystems.default') === 's3' || env('FILESYSTEM_DISK') === 's3') {
+                        \Illuminate\Support\Facades\Storage::disk('s3')->put($filename, $base64Data, 'public');
+                        $data['verification_photo_id'] = \Illuminate\Support\Facades\Storage::disk('s3')->url($filename);
+                    } else {
+                        \Illuminate\Support\Facades\Storage::disk('public')->put($filename, $base64Data);
+                        $data['verification_photo_id'] = asset("storage/{$filename}");
+                    }
+                }
+            } catch (\Exception $e) {
+                // Keep original if failed
+            }
+        }
         
         // Ensure addresses are cast properly if sent as JSON string
         foreach(['physical_address', 'legal_registered_address'] as $addressField) {

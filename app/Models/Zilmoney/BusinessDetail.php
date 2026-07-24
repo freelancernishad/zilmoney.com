@@ -12,6 +12,8 @@ class BusinessDetail extends Model
 
     protected $table = 'companies'; // Maps to companies
 
+    protected $with = ['relatedControllers'];
+
     protected $fillable = [
         'user_id',
         'first_name',
@@ -49,7 +51,7 @@ class BusinessDetail extends Model
 
     public function getControllersAttribute()
     {
-        return $this->relatedControllers->where('is_individual_owner', false)->values();
+        return $this->relatedControllers ? $this->relatedControllers->values() : collect();
     }
 
     public function user()

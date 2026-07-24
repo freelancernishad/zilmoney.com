@@ -30,14 +30,14 @@ class UserUpdateBusinessDetailRequest extends FormRequest
             'business_details.entity_type' => 'nullable|string|max:255',
             'business_details.country' => 'nullable|string|max:255',
             'business_details.phone_number' => 'nullable|string|max:255',
-            'business_details.verification_photo_id' => 'nullable|string|max:255',
+            'business_details.verification_photo_id' => 'nullable|string',
             'business_details.business_in' => 'nullable|string|max:255',
             'business_details.industry' => 'nullable|string|max:255',
             'business_details.website' => 'nullable|string|max:255',
             'business_details.description' => 'nullable|string|max:1000',
             'business_details.formation_date' => 'nullable|date',
-            'business_details.physical_address' => 'nullable|string|array',
-            'business_details.legal_registered_address' => 'nullable|string|array',
+            'business_details.physical_address' => 'nullable',
+            'business_details.legal_registered_address' => 'nullable',
             
             // New explicitly defined fields for title/owners
             'business_details.title' => 'nullable|string|max:255',
