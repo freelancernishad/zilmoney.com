@@ -137,6 +137,59 @@ class PaymentController extends Controller
 
         $payment = $business->payments()->with(['payee', 'account', 'logs.initiator', 'comments.user', 'attachments', 'business'])->findOrFail($id);
 
+        // Auto-sync & backfill missing snapshot fields for legacy checks using raw DB columns
+        $dirty = false;
+
+        $rawSigUrl = $payment->getRawOriginal('signature_image_url');
+        $rawSigPath = $payment->getRawOriginal('signature_image');
+
+        if (empty($rawSigUrl) && empty($rawSigPath) && $payment->account) {
+            $activeSig = $payment->account->activeSignature;
+            if ($activeSig) {
+                $payment->signature_image = $activeSig->path;
+                $payment->signature_image_url = $activeSig->image_url;
+                $dirty = true;
+            }
+        }
+
+        if (empty($payment->getRawOriginal('company_name')) && $payment->business) {
+            $payment->company_name = $payment->business->legal_business_name ?? $payment->business->dba;
+            $dirty = true;
+        }
+
+        if (empty($payment->getRawOriginal('company_address')) && $payment->business) {
+            $addr = $payment->business->physical_address;
+            $addrStr = null;
+            if (is_array($addr)) {
+                $parts = array_filter([
+                    $addr['address1'] ?? '',
+                    $addr['city'] ?? '',
+                    isset($addr['state']) ? $addr['state'] . " " . ($addr['zip'] ?? '') : ''
+                ]);
+                $addrStr = implode(', ', $parts);
+            } elseif (is_string($addr)) {
+                $addrStr = $addr;
+            }
+            $payment->company_address = $addrStr;
+            $dirty = true;
+        }
+
+        if (empty($payment->getRawOriginal('company_logo_url')) && $payment->business) {
+            $payment->company_logo_url = get_file_url($payment->business->verification_photo_id);
+            $dirty = true;
+        }
+
+        if (empty($payment->getRawOriginal('bank_name')) && $payment->account) {
+            $payment->bank_name = $payment->account->bank_name;
+            $payment->bank_routing_number = $payment->account->routing_number;
+            $payment->bank_account_number = $payment->account->account_number;
+            $dirty = true;
+        }
+
+        if ($dirty) {
+            $payment->save();
+        }
+
         return response()->json($payment);
     }
 

@@ -123,12 +123,13 @@ class Payment extends Model
     // Active signature image path/url for DomPDF (Absolute Path)
     public function getSignatureImageAttribute()
     {
-        // 1. Prefer payment's own saved snapshot signature
-        if (!empty($this->attributes['signature_image'])) {
-            $path = $this->attributes['signature_image'];
-            if (filter_var($path, FILTER_VALIDATE_URL)) return $path;
-            if (file_exists(storage_path('app/public/' . $path))) return storage_path('app/public/' . $path);
-            if (file_exists(public_path($path))) return public_path($path);
+        // 1. Prefer payment's own saved raw column snapshot
+        $rawPath = $this->getRawOriginal('signature_image');
+        if (!empty($rawPath)) {
+            if (filter_var($rawPath, FILTER_VALIDATE_URL)) return $rawPath;
+            if (file_exists(storage_path('app/public/' . $rawPath))) return storage_path('app/public/' . $rawPath);
+            if (file_exists(public_path($rawPath))) return public_path($rawPath);
+            return storage_path('app/public/' . $rawPath);
         }
 
         // 2. Fallback to current account activeSignature
@@ -151,14 +152,16 @@ class Payment extends Model
     // Active signature image URL for React Frontend (HTTP URL)
     public function getSignatureImageUrlAttribute()
     {
-        // 1. Prefer payment's own saved snapshot signature URL
-        if (!empty($this->attributes['signature_image_url'])) {
-            return $this->attributes['signature_image_url'];
+        // 1. Prefer payment's own saved raw column snapshot URL
+        $rawUrl = $this->getRawOriginal('signature_image_url');
+        if (!empty($rawUrl)) {
+            return $rawUrl;
         }
-        if (!empty($this->attributes['signature_image'])) {
-            $path = $this->attributes['signature_image'];
-            if (filter_var($path, FILTER_VALIDATE_URL)) return $path;
-            return asset('storage/' . $path);
+
+        $rawPath = $this->getRawOriginal('signature_image');
+        if (!empty($rawPath)) {
+            if (filter_var($rawPath, FILTER_VALIDATE_URL)) return $rawPath;
+            return asset('storage/' . $rawPath);
         }
 
         // 2. Fallback to current account activeSignature
@@ -174,8 +177,9 @@ class Payment extends Model
 
     public function getCompanyLogoUrlAttribute()
     {
-        if (!empty($this->attributes['company_logo_url'])) {
-            return $this->attributes['company_logo_url'];
+        $rawLogo = $this->getRawOriginal('company_logo_url');
+        if (!empty($rawLogo)) {
+            return $rawLogo;
         }
         $biz = $this->business;
         return $biz ? get_file_url($biz->verification_photo_id) : null;
@@ -183,8 +187,9 @@ class Payment extends Model
 
     public function getCompanyNameAttribute()
     {
-        if (!empty($this->attributes['company_name'])) {
-            return $this->attributes['company_name'];
+        $rawName = $this->getRawOriginal('company_name');
+        if (!empty($rawName)) {
+            return $rawName;
         }
         $biz = $this->business;
         return $biz ? ($biz->legal_business_name ?? $biz->dba ?? null) : null;
@@ -192,15 +197,18 @@ class Payment extends Model
 
     public function getBusinessDetailAttribute()
     {
-        if (!empty($this->attributes['company_name']) || !empty($this->attributes['company_address'])) {
+        $rawName = $this->getRawOriginal('company_name');
+        $rawAddr = $this->getRawOriginal('company_address');
+
+        if (!empty($rawName) || !empty($rawAddr)) {
             return [
                 'id' => $this->company_id,
-                'company_name' => $this->attributes['company_name'] ?? null,
-                'legal_business_name' => $this->attributes['company_name'] ?? null,
+                'company_name' => $rawName,
+                'legal_business_name' => $rawName,
                 'verification_photo_id' => null,
                 'company_logo_url' => $this->company_logo_url,
-                'address_line1' => $this->attributes['company_address'] ?? null,
-                'physical_address' => $this->attributes['company_address'] ?? null,
+                'address_line1' => $rawAddr,
+                'physical_address' => $rawAddr,
             ];
         }
 
