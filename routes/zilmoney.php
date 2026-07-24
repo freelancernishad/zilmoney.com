@@ -20,8 +20,9 @@ Route::post('signature-sessions/{token}/submit', [SignatureSessionController::cl
 
 // Authenticated Routes
 Route::middleware([\App\Http\Middleware\AuthenticateUser::class])->group(function () {
-    // Signature Sessions (Create Session)
+    // Signature Sessions (Create Session & Send Email)
     Route::post('signature-sessions', [SignatureSessionController::class, 'store']);
+    Route::post('signature-sessions/send-email', [SignatureSessionController::class, 'sendEmail']);
     // Dashboard
     Route::get('dashboard', [DashboardController::class, 'index']);
 

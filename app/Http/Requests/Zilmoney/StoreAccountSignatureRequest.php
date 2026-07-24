@@ -23,6 +23,7 @@ class StoreAccountSignatureRequest extends FormRequest
     {
         return [
             'account_id' => 'required',
+            'name' => 'nullable|string',
             'path' => 'required|string',
             'is_primary' => 'nullable|boolean'
         ];

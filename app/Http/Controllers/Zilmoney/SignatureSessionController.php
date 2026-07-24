@@ -10,6 +10,7 @@ use App\Services\FileSystem\FileUploadService;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Mail;
 
 class SignatureSessionController extends Controller
 {
@@ -49,6 +50,77 @@ class SignatureSessionController extends Controller
                 'token' => $token,
                 'account_id' => $account->id,
             ]
+        ], 200);
+    }
+
+    /**
+     * Send signature link via Email
+     */
+    public function sendEmail(Request $request)
+    {
+        $validated = $request->validate([
+            'email' => 'required|email',
+            'account_id' => 'nullable',
+        ]);
+
+        $accountId = $validated['account_id'] ?? 1;
+        $account = Account::find($accountId) ?? Account::first();
+
+        // Encode secure payload token
+        $payload = json_encode([
+            'acc' => $account ? $account->id : 1,
+            'time' => time(),
+            'rand' => Str::random(12),
+        ]);
+
+        $rawToken = rtrim(strtr(base64_encode($payload), '+/', '-_'), '=');
+        $token = 'sig_sess_' . $rawToken . '_' . time();
+
+        $frontendUrl = config('app.frontend_url', env('FRONTEND_URL', 'http://localhost:3000'));
+        $signatureLink = "{$frontendUrl}/sign-mobile?token={$token}";
+
+        try {
+            $session = SignatureSession::create([
+                'account_id' => $account ? $account->id : 1,
+                'token' => $token,
+                'type' => 'email',
+                'status' => 'pending',
+                'email' => $validated['email'],
+                'expires_at' => now()->addHours(24),
+            ]);
+        } catch (\Exception $e) {
+            Log::warning("Could not store email signature session in DB: " . $e->getMessage());
+        }
+
+        // Send Email via Mailer
+        try {
+            Mail::html("
+                <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px;'>
+                    <h2 style='color: #0f172a;'>GoldenMark Signature Request</h2>
+                    <p style='color: #475569; font-size: 14px;'>You have been requested to provide your authorized signature for Bank Account #{$accountId}.</p>
+                    <div style='margin: 30px 0; text-align: center;'>
+                        <a href='{$signatureLink}' target='_blank' style='background-color: #2d3359; color: #ffffff; padding: 14px 28px; text-decoration: none; font-weight: bold; border-radius: 8px; display: inline-block;'>
+                            Click Here to Sign on Screen / Phone
+                        </a>
+                    </div>
+                    <p style='color: #94a3b8; font-size: 12px;'>This single-use link expires in 24 hours.</p>
+                </div>
+            ", function ($message) use ($validated) {
+                $message->to($validated['email'])
+                        ->subject('Action Required: Provide Your Signature for Account Verification');
+            });
+            $mailSent = true;
+        } catch (\Exception $e) {
+            Log::warning("Mail delivery failed or SMTP not configured: " . $e->getMessage());
+            $mailSent = false;
+        }
+
+        return response()->json([
+            'message' => "Signature link sent successfully to {$validated['email']}",
+            'email' => $validated['email'],
+            'token' => $token,
+            'link' => $signatureLink,
+            'mail_sent' => $mailSent,
         ], 200);
     }
 

@@ -8,6 +8,7 @@ class AccountSignature extends Model
 {
     protected $fillable = [
         'account_id',
+        'name',
         'path',
         'is_primary',
     ];

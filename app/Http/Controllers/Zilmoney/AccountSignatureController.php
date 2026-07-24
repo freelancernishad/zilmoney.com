@@ -63,26 +63,33 @@ class AccountSignatureController extends Controller
         ], 201);
     }
 
-    // Set a specific signature as primary
+    // Set or unset a signature as primary / active
     public function setPrimary(Request $request, $id)
     {
         $signature = AccountSignature::findOrFail($id);
         $account = $signature->account;
 
         // Ownership check
-        if ($account->company->user_id !== $request->user()->id) {
+        if ($account->company && $account->company->user_id !== $request->user()->id) {
             return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        // Check if explicit is_primary boolean is passed or toggle if already primary
+        if ($request->has('is_primary')) {
+            $newPrimary = filter_var($request->input('is_primary'), FILTER_VALIDATE_BOOLEAN);
+        } else {
+            $newPrimary = !$signature->is_primary;
         }
 
         // Reset others to false
         $account->signatures()->update(['is_primary' => false]);
 
-        // Mark selected as true
-        $signature->is_primary = true;
+        // Save selected primary state
+        $signature->is_primary = $newPrimary;
         $signature->save();
 
         return response()->json([
-            'message' => 'Primary signature updated successfully',
+            'message' => $newPrimary ? 'Set as primary signature' : 'Primary signature deactivated',
             'data' => $signature
         ]);
     }
