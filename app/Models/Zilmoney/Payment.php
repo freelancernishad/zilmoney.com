@@ -39,6 +39,9 @@ class Payment extends Model
         'payee_name',
         'signature_image',
         'signature_image_url',
+        'company_logo_url',
+        'company_name',
+        'business_detail',
     ];
 
     public function businessDetail()
@@ -137,6 +140,49 @@ class Payment extends Model
                 return $signature->path;
             }
             return asset('storage/' . $signature->path);
+        }
+        return null;
+    }
+
+    public function getCompanyLogoUrlAttribute()
+    {
+        $biz = $this->businessDetail;
+        return $biz ? ($biz->verification_photo_id ?? null) : null;
+    }
+
+    public function getCompanyNameAttribute()
+    {
+        $biz = $this->businessDetail;
+        return $biz ? ($biz->legal_business_name ?? $biz->dba ?? null) : null;
+    }
+
+    public function getBusinessDetailAttribute()
+    {
+        $biz = $this->businessDetail;
+        if ($biz) {
+            $addr = $biz->physical_address;
+            $addrStr = null;
+            if (is_array($addr)) {
+                $parts = array_filter([
+                    $addr['address1'] ?? '',
+                    $addr['city'] ?? '',
+                    isset($addr['state']) ? $addr['state'] . " " . ($addr['zip'] ?? '') : ''
+                ]);
+                $addrStr = implode(', ', $parts);
+            } elseif (is_string($addr)) {
+                $addrStr = $addr;
+            }
+
+            return [
+                'id' => $biz->id,
+                'company_name' => $biz->legal_business_name ?? $biz->dba,
+                'legal_business_name' => $biz->legal_business_name,
+                'verification_photo_id' => $biz->verification_photo_id,
+                'address_line1' => $addrStr,
+                'physical_address' => $biz->physical_address,
+                'phone_number' => $biz->phone_number,
+                'email' => $biz->email,
+            ];
         }
         return null;
     }
