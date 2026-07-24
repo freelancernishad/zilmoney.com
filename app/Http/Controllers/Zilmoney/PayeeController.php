@@ -182,21 +182,14 @@ class PayeeController extends Controller
             // Primary: S3 upload via FileUploadService
             $url = $fileUploadService->uploadFileToS3($file, 'uploads/payees');
         } catch (\Exception $e) {
-            Log::info('S3 upload fallback to protected/public: ' . $e->getMessage());
-            try {
-                // Secondary: Protected disk upload via FileUploadService
-                $path = $fileUploadService->uploadFileToProtected($file, 'uploads/payees');
-                $filename = basename($path);
-                $url = url('/api/zilmoney/payees/view-file/' . $filename);
-            } catch (\Exception $ex) {
-                // Tertiary: Local public storage
-                $path = $file->store('uploads/payees', 'public');
-                $url = asset('storage/' . $path);
-            }
+            Log::info('S3 upload fallback to protected storage: ' . $e->getMessage());
+            $path = $fileUploadService->uploadFileToProtected($file, 'uploads/payees');
+            $url = asset('storage/' . $path);
         }
 
         return response()->json([
             'url' => $url,
+            'file_url' => $url,
             'name' => $file->getClientOriginalName(),
             'size' => round($file->getSize() / (1024 * 1024), 2) . ' MB'
         ]);
