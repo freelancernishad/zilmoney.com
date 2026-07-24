@@ -50,6 +50,11 @@ class PayeeController extends Controller
             'intl_bank_address' => 'nullable|string',
             'tax_id' => 'nullable|string',
             'notes' => 'nullable|string',
+            'contacts' => 'nullable|array',
+            'todos' => 'nullable|array',
+            'comments' => 'nullable|array',
+            'attachments' => 'nullable|array',
+            'audit_trials' => 'nullable|array',
             'bank_account' => 'nullable|array',
             'bank_account.account_holder_name' => 'nullable|string',
             'bank_account.bank_name' => 'nullable|string',
@@ -123,6 +128,11 @@ class PayeeController extends Controller
             'intl_bank_address' => 'nullable|string',
             'tax_id' => 'nullable|string',
             'notes' => 'nullable|string',
+            'contacts' => 'nullable|array',
+            'todos' => 'nullable|array',
+            'comments' => 'nullable|array',
+            'attachments' => 'nullable|array',
+            'audit_trials' => 'nullable|array',
             'bank_account' => 'nullable|array',
             'bank_account.account_holder_name' => 'nullable|string',
             'bank_account.bank_name' => 'nullable|string',
@@ -156,5 +166,32 @@ class PayeeController extends Controller
         $payee->update($validated);
 
         return response()->json($payee);
+    }
+
+    public function uploadFile(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|file|max:10240',
+        ]);
+
+        $file = $request->file('file');
+
+        try {
+            if (config('filesystems.disks.s3.key') && config('filesystems.disks.s3.bucket')) {
+                $url = (new \App\Services\FileSystem\FileUploadService())->uploadFileToS3($file, 'uploads/payees');
+            } else {
+                $path = $file->store('uploads/payees', 'public');
+                $url = asset('storage/' . $path);
+            }
+        } catch (\Exception $e) {
+            $path = $file->store('uploads/payees', 'public');
+            $url = asset('storage/' . $path);
+        }
+
+        return response()->json([
+            'url' => $url,
+            'name' => $file->getClientOriginalName(),
+            'size' => round($file->getSize() / (1024 * 1024), 2) . ' MB'
+        ]);
     }
 }

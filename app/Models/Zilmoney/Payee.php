@@ -37,6 +37,19 @@ class Payee extends Model
         'intl_bank_address',
         'tax_id',
         'notes',
+        'contacts',
+        'todos',
+        'comments',
+        'attachments',
+        'audit_trials',
+    ];
+
+    protected $casts = [
+        'contacts' => 'array',
+        'todos' => 'array',
+        'comments' => 'array',
+        'attachments' => 'array',
+        'audit_trials' => 'array',
     ];
 
     public function company()

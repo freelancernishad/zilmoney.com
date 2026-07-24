@@ -43,6 +43,7 @@ Route::middleware([\App\Http\Middleware\AuthenticateUser::class])->group(functio
     Route::delete('accounts/signatures/{signature}', [AccountSignatureController::class, 'destroy']);
 
     // Payees
+    Route::post('payees/upload-file', [PayeeController::class, 'uploadFile']);
     Route::apiResource('payees', PayeeController::class);
 
     // Payments
