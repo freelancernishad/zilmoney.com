@@ -324,6 +324,73 @@ class PlaidService
         return $response->json();
     }
 
+    /**
+     * Remove an Item from Plaid (Disconnect bank account).
+     */
+    public function removeItem($accessToken)
+    {
+        $response = Http::post("{$this->baseUrl}/item/remove", [
+            'client_id' => $this->clientId,
+            'secret' => $this->secret,
+            'access_token' => $accessToken,
+        ]);
+
+        if ($response->failed()) {
+            \Log::error('Plaid Item Remove Error: ' . $response->body());
+            throw new Exception('Plaid Item Remove Error: ' . ($response->json('error_message') ?? 'Failed to remove Plaid item'));
+        }
+
+        return $response->json();
+    }
+
+    /**
+     * Disconnect a specific Plaid Item and clean up database accounts.
+     */
+    public function disconnectItem($itemId, $userId)
+    {
+        $plaidItem = PlaidItem::where('user_id', $userId)
+            ->where(function ($q) use ($itemId) {
+                $q->where('id', $itemId)->orWhere('item_id', $itemId);
+            })
+            ->first();
+
+        if (!$plaidItem) {
+            throw new Exception('Plaid bank connection item not found.');
+        }
+
+        try {
+            $this->removeItem($plaidItem->access_token);
+        } catch (\Exception $e) {
+            \Log::warning("Plaid API item/remove failed (might already be removed): " . $e->getMessage());
+        }
+
+        // Delete associated local accounts
+        Account::where('plaid_item_id', $plaidItem->id)->delete();
+        $plaidItem->delete();
+
+        return true;
+    }
+
+    /**
+     * Delete all banking data & disconnect all Plaid items for a user (Data Privacy / Compliance).
+     */
+    public function deleteUserBankingData($userId)
+    {
+        $plaidItems = PlaidItem::where('user_id', $userId)->get();
+
+        foreach ($plaidItems as $item) {
+            try {
+                $this->removeItem($item->access_token);
+            } catch (\Exception $e) {
+                \Log::warning("Plaid item/remove failed for user {$userId}, item {$item->id}: " . $e->getMessage());
+            }
+            Account::where('plaid_item_id', $item->id)->delete();
+            $item->delete();
+        }
+
+        return true;
+    }
+
     private function getWebhookUrl()
     {
         return SystemSetting::getValue('plaid_webhook_url') 

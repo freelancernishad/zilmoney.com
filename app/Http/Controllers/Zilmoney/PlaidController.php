@@ -112,4 +112,28 @@ class PlaidController extends Controller
         
         return view('zilmoney.connect-bank', compact('accounts'));
     }
+
+    public function disconnectItem(Request $request)
+    {
+        $request->validate([
+            'item_id' => 'required',
+        ]);
+
+        try {
+            $this->plaidService->disconnectItem($request->item_id, auth()->id());
+            return response()->json(['message' => 'Bank account disconnected successfully.']);
+        } catch (\Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 500);
+        }
+    }
+
+    public function deleteBankingData(Request $request)
+    {
+        try {
+            $this->plaidService->deleteUserBankingData(auth()->id());
+            return response()->json(['message' => 'All banking data and connections have been permanently deleted.']);
+        } catch (\Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 500);
+        }
+    }
 }

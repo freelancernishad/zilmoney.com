@@ -89,10 +89,15 @@ Route::middleware([\App\Http\Middleware\AuthenticateUser::class])->group(functio
     Route::post('payments/{payment}/remittances', [\App\Http\Controllers\Zilmoney\PaymentRemittanceController::class, 'store']);
     Route::delete('payments/{payment}/remittances/{remittance}', [\App\Http\Controllers\Zilmoney\PaymentRemittanceController::class, 'destroy']);
 
-    // Plaid Integration
+    // Payments
+    Route::post('payments/{id}/void', [PaymentController::class, 'voidPayment']);
+
+    // Plaid Integration & Compliance
     Route::post('plaid/create-link-token', [PlaidController::class, 'createLinkToken']);
     Route::post('plaid/exchange-public-token', [PlaidController::class, 'exchangePublicToken']);
     Route::post('plaid/reset-login', [PlaidController::class, 'resetLogin']);
+    Route::post('plaid/disconnect', [PlaidController::class, 'disconnectItem']);
+    Route::post('plaid/delete-banking-data', [PlaidController::class, 'deleteBankingData']);
 
     // Hosted UI
     Route::get('connect-bank', [PlaidController::class, 'showLinkPage']);

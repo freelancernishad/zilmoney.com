@@ -313,6 +313,18 @@ class PaymentController extends Controller
 
         $payment = $business->payments()->with(['business', 'payee', 'account'])->findOrFail($id);
 
+        // Audit Log for check printing compliance
+        $payment->logs()->create([
+            'status' => $payment->status,
+            'initiated_by' => auth()->id(),
+            'note' => 'Check PDF printed / downloaded',
+            'device_info' => request()->ip()
+        ]);
+
+        if ($payment->status === 'pending') {
+            $payment->update(['status' => 'printed']);
+        }
+
         $pdf = $checkService->generateCheckPdf($payment, $request->all());
 
         return $pdf->stream("check_{$payment->check_number}.pdf");
@@ -447,5 +459,27 @@ class PaymentController extends Controller
             ->first();
 
         return $lastPayment ? ($lastPayment->check_number + 1) : 1001;
+    }
+
+
+    public function voidPayment($id)
+    {
+        $business = auth()->user()->businessDetails;
+        if (!$business) return response()->json(['message' => 'Business profile required'], 400);
+
+        $payment = Payment::where('company_id', $business->id)->findOrFail($id);
+        $payment->update(['status' => 'voided']);
+
+        $payment->logs()->create([
+            'status' => 'voided',
+            'initiated_by' => auth()->id(),
+            'note' => 'Payment check marked as VOID',
+            'device_info' => request()->ip()
+        ]);
+
+        return response()->json([
+            'message' => 'Check marked as VOID successfully.',
+            'payment' => $payment
+        ]);
     }
 }
