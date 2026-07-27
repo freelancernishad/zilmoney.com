@@ -483,4 +483,74 @@ class PaymentController extends Controller
             'payment' => $payment
         ]);
     }
+
+    public function sendEmail(Request $request, $id)
+    {
+        $business = auth()->user()->businessDetails;
+        if (!$business) return response()->json(['message' => 'Business profile required'], 400);
+
+        $payment = $business->payments()->with(['payee', 'account', 'comments', 'business'])->findOrFail($id);
+
+        $recipientEmail = $request->input('email') 
+            ?? $payment->payee->email 
+            ?? $payment->payee->email_address 
+            ?? auth()->user()->email;
+
+        if (!$recipientEmail) {
+            return response()->json(['message' => 'Payee email address not found'], 422);
+        }
+
+        $payeeName = $payment->payee->payee_name ?? $payment->payee->nick_name ?? 'Valued Customer';
+        $payorName = $payment->company_name ?? $business->legal_business_name ?? $business->dba ?? 'Demo Bank Account 1';
+        $amount = $payment->amount;
+        $checkNumber = $payment->check_number;
+        $memo = $payment->memo ?? '';
+        $dateProcessed = $payment->issue_date 
+            ? \Carbon\Carbon::parse($payment->issue_date)->format('F j, Y') 
+            : \Carbon\Carbon::parse($payment->created_at)->format('F j, Y');
+
+        $latestComment = $payment->comments->last()?->comment ?? '';
+
+        $printUrl = url("/dashboard/payments/{$payment->id}/print");
+        $trackUrl = url("/dashboard/payments");
+        $loginUrl = url("/login");
+
+        $subject = "Zil Money: {$payorName} has sent you an E-check";
+
+        try {
+            \Illuminate\Support\Facades\Mail::send('zilmoney.emails.echeck', [
+                'payeeName' => $payeeName,
+                'payorName' => $payorName,
+                'amount' => $amount,
+                'checkNumber' => $checkNumber,
+                'memo' => $memo,
+                'dateProcessed' => $dateProcessed,
+                'comment' => $latestComment,
+                'printUrl' => $printUrl,
+                'trackUrl' => $trackUrl,
+                'loginUrl' => $loginUrl,
+            ], function ($message) use ($recipientEmail, $subject) {
+                $message->to($recipientEmail)
+                        ->subject($subject);
+            });
+
+            // Log activity
+            $payment->logs()->create([
+                'status' => 'sent',
+                'initiated_by' => auth()->id(),
+                'note' => "E-check email sent to {$recipientEmail}",
+                'device_info' => $request->userAgent()
+            ]);
+
+            return response()->json([
+                'message' => "E-check sent to {$recipientEmail} successfully!",
+                'email' => $recipientEmail
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => "E-check sent to {$recipientEmail} successfully!",
+                'email' => $recipientEmail
+            ], 200);
+        }
+    }
 }

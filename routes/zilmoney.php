@@ -53,6 +53,7 @@ Route::middleware([\App\Http\Middleware\AuthenticateUser::class])->group(functio
     Route::post('payments/blank-checks', [PaymentController::class, 'storeBlankChecks']);
     Route::apiResource('payments', PaymentController::class);
     Route::get('payments/{id}/pdf', [PaymentController::class, 'downloadPdf']);
+    Route::post('payments/{id}/email', [PaymentController::class, 'sendEmail']);
 
     // Deposit Slips
     Route::apiResource('deposit-slips', \App\Http\Controllers\Zilmoney\DepositSlipController::class);
