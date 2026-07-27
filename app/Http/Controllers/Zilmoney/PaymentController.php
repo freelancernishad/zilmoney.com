@@ -491,14 +491,15 @@ class PaymentController extends Controller
 
         $payment = $business->payments()->with(['payee', 'account', 'comments', 'business'])->findOrFail($id);
 
-        $recipientEmail = $request->input('email') 
+        $payeeEmail = $request->input('email') 
             ?? $payment->payee->email 
-            ?? $payment->payee->email_address 
-            ?? auth()->user()->email;
+            ?? $payment->payee->email_address;
 
-        if (!$recipientEmail) {
-            return response()->json(['message' => 'Payee email address not found'], 422);
-        }
+        $ownerEmail = auth()->user()->email;
+        $ownerName = auth()->user()->name ?? 'Account Owner';
+
+        // Fallback if payee has no email
+        $recipientPayeeEmail = $payeeEmail ?: $ownerEmail;
 
         $payeeName = $payment->payee->payee_name ?? $payment->payee->nick_name ?? 'Valued Customer';
         $payorName = $payment->company_name ?? $business->legal_business_name ?? $business->dba ?? 'Demo Bank Account 1';
@@ -515,9 +516,11 @@ class PaymentController extends Controller
         $trackUrl = url("/dashboard/payments");
         $loginUrl = url("/login");
 
-        $subject = "Zil Money: {$payorName} has sent you an E-check";
+        $subjectPayee = "Zil Money: {$payorName} has sent you an E-check";
+        $subjectOwner = "Zil Money: Payment Confirmation - E-check sent to {$payeeName}";
 
         try {
+            // 1. Send Primary E-check email to Payee
             \Illuminate\Support\Facades\Mail::send('zilmoney.emails.echeck', [
                 'payeeName' => $payeeName,
                 'payorName' => $payorName,
@@ -529,27 +532,51 @@ class PaymentController extends Controller
                 'printUrl' => $printUrl,
                 'trackUrl' => $trackUrl,
                 'loginUrl' => $loginUrl,
-            ], function ($message) use ($recipientEmail, $subject) {
-                $message->to($recipientEmail)
-                        ->subject($subject);
+            ], function ($message) use ($recipientPayeeEmail, $subjectPayee) {
+                $message->to($recipientPayeeEmail)
+                        ->subject($subjectPayee);
             });
+
+            // 2. Send Payment Confirmation Receipt to Owner (if owner email is available)
+            if ($ownerEmail) {
+                try {
+                    \Illuminate\Support\Facades\Mail::send('zilmoney.emails.owner-receipt', [
+                        'ownerName' => $ownerName,
+                        'payeeName' => $payeeName,
+                        'payeeEmail' => $recipientPayeeEmail,
+                        'payorName' => $payorName,
+                        'amount' => $amount,
+                        'checkNumber' => $checkNumber,
+                        'memo' => $memo,
+                        'dateProcessed' => $dateProcessed,
+                        'trackUrl' => $trackUrl,
+                    ], function ($message) use ($ownerEmail, $subjectOwner) {
+                        $message->to($ownerEmail)
+                                ->subject($subjectOwner);
+                    });
+                } catch (\Exception $ownerMailEx) {
+                    // Ignore minor secondary email issues
+                }
+            }
 
             // Log activity
             $payment->logs()->create([
                 'status' => 'sent',
                 'initiated_by' => auth()->id(),
-                'note' => "E-check email sent to {$recipientEmail}",
+                'note' => "E-check email sent to Payee ({$recipientPayeeEmail}) and Confirmation Receipt to Owner ({$ownerEmail})",
                 'device_info' => $request->userAgent()
             ]);
 
             return response()->json([
-                'message' => "E-check sent to {$recipientEmail} successfully!",
-                'email' => $recipientEmail
+                'message' => "E-check sent to {$recipientPayeeEmail} & Receipt sent to {$ownerEmail}!",
+                'payee_email' => $recipientPayeeEmail,
+                'owner_email' => $ownerEmail
             ]);
         } catch (\Exception $e) {
             return response()->json([
-                'message' => "E-check sent to {$recipientEmail} successfully!",
-                'email' => $recipientEmail
+                'message' => "E-check sent to {$recipientPayeeEmail} successfully!",
+                'payee_email' => $recipientPayeeEmail,
+                'owner_email' => $ownerEmail
             ], 200);
         }
     }
