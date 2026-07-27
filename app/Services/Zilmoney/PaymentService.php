@@ -26,12 +26,14 @@ class PaymentService
                 throw new Exception("Insufficient funds. Available: {$account->balance}");
             }
 
-            // 2. Check Number Logic
-            $checkNumber = $data['check_number'] ?? $this->getNextCheckNumber($account);
+            // 2. Check Number Logic (Auto-increment to next unique check number)
+            $checkNumber = (!empty($data['check_number']) && is_numeric($data['check_number']))
+                ? (int)$data['check_number']
+                : $this->getNextCheckNumber($account);
             
-            // Validate Check Number Uniqueness if provided manually
+            // If check number already exists, automatically auto-increment to the next unique check number
             if (Payment::where('account_id', $account->id)->where('check_number', $checkNumber)->exists()) {
-                throw new Exception("Check number {$checkNumber} already exists.");
+                $checkNumber = $this->getNextCheckNumber($account);
             }
 
             // 3. Capture current active signature, company info, and bank account snapshot
