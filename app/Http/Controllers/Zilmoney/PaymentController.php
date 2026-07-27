@@ -101,13 +101,14 @@ class PaymentController extends Controller
             'payee_id' => 'nullable|exists:payees,id',
             'pay_from' => 'required|string|in:Bank Account,Credit Card,Wallet,Cloud Bank',
             'pay_as' => 'required|string|in:Check,ACH / Direct Deposit,Wire,Virtual Card,Real Time Instant Payment,Same Day ACH,International Payment',
-            'amount' => 'required|numeric|min:0.01',
-            'issue_date' => 'required|date',
+            'amount' => 'required|numeric|min:0',
+            'issue_date' => 'nullable|date',
             'check_number' => 'nullable|integer',
             'invoice_number' => 'nullable|string|max:255',
             'payee_id_account_number' => 'nullable|string|max:255',
             'category_id' => 'nullable|exists:company_payment_categories,id',
             'memo' => 'nullable|string|max:255',
+            'include_signature' => 'nullable|boolean',
         ]);
 
         if (!$business->accounts()->where('id', $validated['account_id'])->exists()) {

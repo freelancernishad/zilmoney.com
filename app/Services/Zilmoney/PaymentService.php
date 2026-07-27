@@ -35,7 +35,8 @@ class PaymentService
             }
 
             // 3. Capture current active signature, company info, and bank account snapshot
-            $activeSig = $account->activeSignature;
+            $includeSig = isset($data['include_signature']) ? (bool)$data['include_signature'] : true;
+            $activeSig = $includeSig ? $account->activeSignature : null;
             $sigImage = $activeSig ? $activeSig->path : null;
             $sigImageUrl = $activeSig ? $activeSig->image_url : null;
 
@@ -56,11 +57,11 @@ class PaymentService
             $payment = Payment::create([
                 'company_id' => $business->id,
                 'account_id' => $account->id,
-                'payee_id' => $data['payee_id'],
-                'amount' => $data['amount'],
+                'payee_id' => $data['payee_id'] ?? null,
+                'amount' => $data['amount'] ?? 0,
                 'check_number' => $checkNumber,
                 'status' => 'pending', // Pending approval/processing
-                'issue_date' => $data['issue_date'],
+                'issue_date' => $data['issue_date'] ?? date('Y-m-d'),
                 'memo' => $data['memo'] ?? null,
                 'signature_image' => $sigImage,
                 'signature_image_url' => $sigImageUrl,
