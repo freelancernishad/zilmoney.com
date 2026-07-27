@@ -23,13 +23,16 @@ class PaymentCategoryController extends Controller
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'type' => 'nullable|string|in:Income,Expense',
+            'type' => 'nullable|string|max:255',
+            'category_type' => 'nullable|string|max:255',
         ]);
+
+        $type = $validated['type'] ?? $validated['category_type'] ?? null;
 
         $category = \App\Models\Zilmoney\Category::create([
             'company_id' => $business->id,
             'name' => $validated['name'],
-            'type' => $validated['type'] ?? null,
+            'type' => $type,
         ]);
 
         return response()->json($category, 201);

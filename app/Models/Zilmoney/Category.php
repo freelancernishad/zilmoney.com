@@ -14,6 +14,18 @@ class Category extends Model
         'type'
     ];
 
+    protected $appends = ['category_type'];
+
+    public function getTypeAttribute($value)
+    {
+        return $value ?: 'Expense';
+    }
+
+    public function getCategoryTypeAttribute()
+    {
+        return $this->attributes['type'] ?? 'Expense';
+    }
+
     public function business()
     {
         return $this->belongsTo(BusinessDetail::class, 'company_id');
