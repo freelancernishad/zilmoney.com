@@ -559,6 +559,9 @@ class PaymentController extends Controller
                 }
             }
 
+            // Update payment status to sent in DB so it shows under Mailed filter
+            $payment->update(['status' => 'sent']);
+
             // Log activity
             $payment->logs()->create([
                 'status' => 'sent',

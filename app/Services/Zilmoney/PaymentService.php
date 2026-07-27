@@ -69,7 +69,8 @@ class PaymentService
                 'payee_id' => $data['payee_id'] ?? null,
                 'amount' => $data['amount'] ?? 0,
                 'check_number' => $checkNumber,
-                'status' => 'pending', // Pending approval/processing
+                'pay_as' => $data['pay_as'] ?? 'Check',
+                'status' => $data['status'] ?? 'pending', // Pending or sent
                 'issue_date' => $issueDate,
                 'memo' => $data['memo'] ?? null,
                 'signature_image' => $sigImage,
