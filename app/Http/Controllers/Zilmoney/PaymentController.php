@@ -144,7 +144,7 @@ class PaymentController extends Controller
         $rawSigUrl = $payment->getRawOriginal('signature_image_url');
         $rawSigPath = $payment->getRawOriginal('signature_image');
 
-        if (empty($rawSigUrl) && empty($rawSigPath) && $payment->account) {
+        if ($rawSigUrl !== 'NO_SIGNATURE' && $rawSigPath !== 'NO_SIGNATURE' && empty($rawSigUrl) && empty($rawSigPath) && $payment->account) {
             $activeSig = $payment->account->activeSignature;
             if ($activeSig) {
                 $payment->signature_image = $activeSig->path;

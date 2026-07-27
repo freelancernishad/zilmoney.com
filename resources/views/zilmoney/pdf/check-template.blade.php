@@ -104,9 +104,9 @@
         <div class="absolute check-number">{{ $payment->check_number }}</div>
 
         <!-- Date -->
-        @if(empty($options['withoutDate']))
+        @if(empty($options['withoutDate']) && !empty($payment->issue_date))
         <div class="absolute date-label">Date</div>
-        <div class="absolute date-value">{{ $payment->created_at->format('m/d/Y') }}</div>
+        <div class="absolute date-value">{{ \Carbon\Carbon::parse($payment->issue_date)->format('m/d/Y') }}</div>
         @endif
 
         <!-- Pay To -->
@@ -142,7 +142,7 @@
         <!-- Signature -->
         @if(empty($options['withoutSign']))
         <div class="absolute signature-line">
-            @if($payment->signature_image)
+            @if($payment->signature_image && $payment->signature_image !== 'NO_SIGNATURE')
                 <img src="{{ $payment->signature_image }}" class="signature-img">
             @else
                 <div style="height: 30px;"></div> <!-- Space for wet signature -->

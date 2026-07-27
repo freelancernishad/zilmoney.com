@@ -37,10 +37,17 @@ class PaymentService
             }
 
             // 3. Capture current active signature, company info, and bank account snapshot
-            $includeSig = isset($data['include_signature']) ? (bool)$data['include_signature'] : true;
-            $activeSig = $includeSig ? $account->activeSignature : null;
-            $sigImage = $activeSig ? $activeSig->path : null;
-            $sigImageUrl = $activeSig ? $activeSig->image_url : null;
+            $includeSig = array_key_exists('include_signature', $data) ? (bool)$data['include_signature'] : true;
+            if (!$includeSig) {
+                $sigImage = 'NO_SIGNATURE';
+                $sigImageUrl = 'NO_SIGNATURE';
+            } else {
+                $activeSig = $account->activeSignature;
+                $sigImage = $activeSig ? $activeSig->path : null;
+                $sigImageUrl = $activeSig ? $activeSig->image_url : null;
+            }
+
+            $issueDate = array_key_exists('issue_date', $data) ? $data['issue_date'] : date('Y-m-d');
 
             $addr = $business->physical_address;
             $addrStr = null;
@@ -63,7 +70,7 @@ class PaymentService
                 'amount' => $data['amount'] ?? 0,
                 'check_number' => $checkNumber,
                 'status' => 'pending', // Pending approval/processing
-                'issue_date' => $data['issue_date'] ?? date('Y-m-d'),
+                'issue_date' => $issueDate,
                 'memo' => $data['memo'] ?? null,
                 'signature_image' => $sigImage,
                 'signature_image_url' => $sigImageUrl,
