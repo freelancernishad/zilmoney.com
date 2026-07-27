@@ -99,8 +99,9 @@ class PaymentController extends Controller
         $validated = $request->validate([
             'account_id' => 'required|exists:accounts,id',
             'payee_id' => 'nullable|exists:payees,id',
-            'pay_from' => 'required|string|in:Bank Account,Credit Card,Wallet,Cloud Bank',
-            'pay_as' => 'required|string|in:Check,ACH / Direct Deposit,Wire,Virtual Card,Real Time Instant Payment,Same Day ACH,International Payment',
+            'pay_from' => 'nullable|string',
+            'pay_as' => 'nullable|string',
+            'status' => 'nullable|string',
             'amount' => 'required|numeric|min:0',
             'issue_date' => 'nullable|date',
             'check_number' => 'nullable|integer',
