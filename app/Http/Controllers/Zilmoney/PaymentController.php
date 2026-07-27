@@ -270,7 +270,7 @@ class PaymentController extends Controller
         $validated = $request->validate([
             'ids' => 'required|array',
             'ids.*' => 'exists:company_payments,id',
-            'action' => 'required|string|in:delete,void,print',
+            'action' => 'required|string|in:delete,void,print,process,paid',
         ]);
 
         $payments = $business->payments()->whereIn('id', $validated['ids'])->get();
@@ -301,6 +301,19 @@ class PaymentController extends Controller
                 }
             });
             return response()->json(['message' => 'Payments voided successfully']);
+        } elseif (in_array($validated['action'], ['process', 'paid'])) {
+            \DB::transaction(function () use ($payments) {
+                foreach ($payments as $payment) {
+                    $payment->update(['status' => 'paid']);
+                    $payment->logs()->create([
+                        'status' => 'paid',
+                        'initiated_by' => auth()->id(),
+                        'note' => 'Payment processed and marked as paid',
+                        'device_info' => request()->ip()
+                    ]);
+                }
+            });
+            return response()->json(['message' => 'Selected payments processed successfully']);
         } elseif ($validated['action'] === 'print') {
             return response()->json(['message' => 'Printing processed']);
         }
