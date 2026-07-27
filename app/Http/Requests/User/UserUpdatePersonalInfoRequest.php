@@ -33,6 +33,7 @@ class UserUpdatePersonalInfoRequest extends FormRequest
             'state' => 'nullable|string|max:255',
             'postal_code' => 'nullable|string|max:255',
             'country' => 'nullable|string|max:255',
+            'profile_picture' => 'nullable|string',
         ];
     }
 }

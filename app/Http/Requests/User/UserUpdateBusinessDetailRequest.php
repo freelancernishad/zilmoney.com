@@ -31,6 +31,7 @@ class UserUpdateBusinessDetailRequest extends FormRequest
             'business_details.tax_id' => 'nullable|string|max:255',
             'business_details.country' => 'nullable|string|max:255',
             'business_details.phone_number' => 'nullable|string|max:255',
+            'business_details.email' => 'nullable|email|max:255',
             'business_details.verification_photo_id' => 'nullable|string',
             'business_details.business_in' => 'nullable|string|max:255',
             'business_details.industry' => 'nullable|string|max:255',

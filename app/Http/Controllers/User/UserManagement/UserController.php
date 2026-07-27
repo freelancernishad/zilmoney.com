@@ -52,12 +52,35 @@ class UserController extends Controller
     {
         $user = $request->user();
 
+        $photoPath = $request->photo_url;
+
+        if (str_starts_with($photoPath, 'data:image/')) {
+            try {
+                if (preg_match('/^data:(.*?);base64,(.*)$/', $photoPath, $matches)) {
+                    $mimeType = $matches[1];
+                    $base64Data = base64_decode($matches[2]);
+                    $ext = str_contains($mimeType, 'png') ? 'png' : (str_contains($mimeType, 'webp') ? 'webp' : 'jpg');
+                    $filename = "photos/profile_" . $user->id . "_" . time() . ".{$ext}";
+                    
+                    try {
+                        $fileService = app(\App\Services\FileSystem\FileUploadService::class);
+                        $photoPath = $fileService->uploadContentToS3($base64Data, $filename);
+                    } catch (\Exception $e) {
+                        \Illuminate\Support\Facades\Storage::disk('public')->put($filename, $base64Data);
+                        $photoPath = asset("storage/{$filename}");
+                    }
+                }
+            } catch (\Exception $e) {
+                // Keep original if failed
+            }
+        }
+
         // Unset previous primary photo
         $user->photos()->where('is_primary', true)->update(['is_primary' => false]);
 
         // Create new photo and set as primary
         $photo = $user->photos()->create([
-            'path' => $request->photo_url,
+            'path' => $photoPath,
             'is_primary' => true,
         ]);
 
@@ -134,9 +157,42 @@ class UserController extends Controller
             $user->update($request->only(['first_name', 'last_name', 'display_name']));
         }
 
+        // Handle profile picture update if passed
+        if ($request->filled('profile_picture')) {
+            $photoPath = $request->profile_picture;
+
+            if (str_starts_with($photoPath, 'data:image/')) {
+                try {
+                    if (preg_match('/^data:(.*?);base64,(.*)$/', $photoPath, $matches)) {
+                        $mimeType = $matches[1];
+                        $base64Data = base64_decode($matches[2]);
+                        $ext = str_contains($mimeType, 'png') ? 'png' : (str_contains($mimeType, 'webp') ? 'webp' : 'jpg');
+                        $filename = "photos/profile_" . $user->id . "_" . time() . ".{$ext}";
+                        
+                        try {
+                            $fileService = app(\App\Services\FileSystem\FileUploadService::class);
+                            $photoPath = $fileService->uploadContentToS3($base64Data, $filename);
+                        } catch (\Exception $e) {
+                            \Illuminate\Support\Facades\Storage::disk('public')->put($filename, $base64Data);
+                            $photoPath = asset("storage/{$filename}");
+                        }
+                    }
+                } catch (\Exception $e) {
+                    // Keep original if failed
+                }
+            }
+
+            $user->photos()->where('is_primary', true)->update(['is_primary' => false]);
+            $user->photos()->create([
+                'path' => $photoPath,
+                'is_primary' => true,
+            ]);
+            $user->refresh();
+        }
+
         $personalInfo = $user->personalInfo()->updateOrCreate(
             ['user_id' => $user->id],
-            $request->validated()
+            \Illuminate\Support\Arr::except($request->validated(), ['profile_picture'])
         );
 
         return response()->json([
