@@ -100,7 +100,7 @@ class Payment extends Model
 
     public function logs()
     {
-        return $this->hasMany(Log::class, 'company_payment_id');
+        return $this->hasMany(Log::class, 'company_payment_id')->orderBy('id', 'desc');
     }
 
     public function comments()
