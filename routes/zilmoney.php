@@ -18,6 +18,7 @@ Route::post('plaid/webhook', [PlaidWebhookController::class, 'handleWebhook']);
 Route::get('signature-sessions/{token}', [SignatureSessionController::class, 'show']);
 Route::post('signature-sessions/{token}/submit', [SignatureSessionController::class, 'submit']);
 Route::get('everify/{id}', [PaymentController::class, 'everifyCheck']);
+Route::get('outside/payments/{code}', [PaymentController::class, 'getPublicPaymentByCode']);
 
 
 // Authenticated Routes

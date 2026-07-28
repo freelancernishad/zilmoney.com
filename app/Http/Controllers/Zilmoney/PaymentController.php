@@ -526,7 +526,19 @@ class PaymentController extends Controller
 
         $latestComment = $payment->comments->last()?->comment ?? '';
 
-        $printUrl = url("/dashboard/payments/{$payment->id}/print");
+        // Ensure unique_check_id and email_token exist for this payment
+        if (empty($payment->unique_check_id)) {
+            $payment->unique_check_id = \App\Models\Zilmoney\Payment::generateUniqueCheckId();
+        }
+        if (empty($payment->email_token)) {
+            $payment->email_token = \App\Models\Zilmoney\Payment::generateEmailToken();
+        }
+        $payment->save();
+
+        $tokenCode = $payment->email_token ?: $payment->unique_check_id;
+
+        $frontendUrl = env('FRONTEND_URL', 'http://localhost:3000');
+        $printUrl = "{$frontendUrl}/outside/emailchecks/disclaimer/{$tokenCode}";
         $trackUrl = url("/dashboard/payments");
         $loginUrl = url("/login");
 
@@ -660,6 +672,42 @@ class PaymentController extends Controller
         ]);
 
 
+    }
+
+    public function getPublicPaymentByCode($code)
+    {
+        $payment = Payment::with(['payee', 'account', 'business'])
+            ->where('email_token', $code)
+            ->orWhere('unique_check_id', $code)
+            ->orWhere('id', $code)
+            ->first();
+
+        if (!$payment) {
+            return response()->json(['message' => 'Invalid or expired check link'], 404);
+        }
+
+        $payeeName = $payment->payee->payee_name ?? $payment->payee->nick_name ?? 'Valued Customer';
+        $payorName = $payment->company_name ?? $payment->business?->legal_business_name ?? $payment->business?->dba ?? 'Demo Account';
+
+        return response()->json([
+            'id' => $payment->id,
+            'unique_check_id' => $payment->unique_check_id,
+            'amount' => $payment->amount,
+            'check_number' => $payment->check_number,
+            'issue_date' => $payment->issue_date ? \Carbon\Carbon::parse($payment->issue_date)->format('Y-m-d') : null,
+            'memo' => $payment->memo,
+            'status' => $payment->status,
+            'signature_image_url' => $payment->signature_image_url,
+            'company_name' => $payorName,
+            'company_address' => $payment->company_address,
+            'company_logo_url' => $payment->company_logo_url,
+            'bank_name' => $payment->bank_name ?? $payment->account?->bank_name ?? '',
+            'bank_routing_number' => $payment->bank_routing_number ?? $payment->account?->routing_number ?? '',
+            'bank_account_number' => $payment->bank_account_number ?? $payment->account?->account_number ?? '',
+            'payee_name' => $payeeName,
+            'payee' => $payment->payee,
+            'account' => $payment->account,
+        ]);
     }
 }
 

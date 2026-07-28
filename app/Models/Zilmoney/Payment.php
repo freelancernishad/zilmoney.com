@@ -12,6 +12,7 @@ class Payment extends Model
     protected $table = 'company_payments'; // Maps to company_payments
 
     protected $fillable = [
+        'email_token',
         'unique_check_id',
         'company_id',
         'account_id',
@@ -53,6 +54,15 @@ class Payment extends Model
         'company_name',
         'business_detail',
     ];
+
+    public static function generateEmailToken()
+    {
+        do {
+            $token = bin2hex(random_bytes(16));
+        } while (self::where('email_token', $token)->exists());
+
+        return $token;
+    }
 
     public static function generateUniqueCheckId()
     {
