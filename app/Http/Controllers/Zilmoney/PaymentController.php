@@ -414,12 +414,12 @@ class PaymentController extends Controller
                         'without_sign' => !$includeSignature,
                         'without_date' => true,
                         'without_payee' => true,
-                        'process_without' => [
-                            'amount' => true,
-                            'sign' => !$includeSignature,
-                            'date' => true,
-                            'payee' => true,
-                        ]
+                    ],
+                    'process_without' => [
+                        'amount' => true,
+                        'sign' => !$includeSignature,
+                        'date' => true,
+                        'payee' => true,
                     ],
                 ]);
 

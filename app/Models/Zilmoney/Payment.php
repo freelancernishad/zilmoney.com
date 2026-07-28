@@ -29,6 +29,7 @@ class Payment extends Model
         'memo',
         'remittance_info',
         'delivery_proof',
+        'process_without',
         'signature_image',
         'signature_image_url',
         'company_name',
@@ -43,6 +44,7 @@ class Payment extends Model
         'issue_date' => 'date',
         'remittance_info' => 'array',
         'delivery_proof' => 'array',
+        'process_without' => 'array',
     ];
 
     protected $appends = [

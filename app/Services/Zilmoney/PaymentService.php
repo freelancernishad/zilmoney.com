@@ -101,6 +101,12 @@ class PaymentService
                 'bank_routing_number' => $account->routing_number,
                 'bank_account_number' => $account->account_number,
                 'delivery_proof' => $deliveryProof,
+                'process_without' => [
+                    'amount' => !empty($processWithoutData['amount']) || (array_key_exists('amount', $data) && $data['amount'] == 0),
+                    'sign' => !$includeSig || !empty($processWithoutData['sign']),
+                    'date' => empty($data['issue_date']) || !empty($processWithoutData['date']),
+                    'payee' => empty($data['payee_id']) || !empty($processWithoutData['payee']),
+                ],
             ]);
 
             // 4. Update Balance (Deduct immediately or on processing? Assuming immediate for now)
