@@ -183,8 +183,22 @@ class Payment extends Model
     // Active signature image URL for React Frontend (HTTP URL)
     public function getSignatureImageUrlAttribute()
     {
+        // 0. Check if delivery_proof explicitly turned off signature
+        $deliveryProof = $this->delivery_proof;
+        if (is_string($deliveryProof)) {
+            $deliveryProof = json_decode($deliveryProof, true);
+        }
+        if (is_array($deliveryProof)) {
+            if (isset($deliveryProof['include_signature']) && ($deliveryProof['include_signature'] === false || $deliveryProof['include_signature'] === 'No' || $deliveryProof['include_signature'] === 0 || $deliveryProof['include_signature'] === '0')) {
+                return null;
+            }
+        }
+
         // 1. Prefer payment's own saved raw column snapshot URL
         $rawUrl = $this->getRawOriginal('signature_image_url');
+        if ($rawUrl === 'none' || $rawUrl === '0' || $rawUrl === 'false' || $rawUrl === '') {
+            return null;
+        }
         if (!empty($rawUrl)) {
             return $rawUrl;
         }

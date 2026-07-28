@@ -384,7 +384,8 @@ class PaymentController extends Controller
                     'check_number' => $checkNo,
                     'category_id' => $validated['category_id'] ?? null,
                     'memo' => $validated['memo'] ?? 'Blank Check',
-                    'delivery_proof' => $includeSignature ? ['include_signature' => true] : ['include_signature' => false],
+                    'signature_image_url' => $includeSignature ? ($account->activeSignature ? asset('storage/' . $account->activeSignature->path) : null) : 'none',
+                    'delivery_proof' => ['include_signature' => $includeSignature],
                 ]);
 
                 $payment->logs()->create([
