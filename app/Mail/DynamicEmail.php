@@ -37,7 +37,7 @@ class DynamicEmail extends Mailable
         // Default data for expansion
         $allData = array_merge([
             'date' => date('M d, Y'),
-            'company' => config('app.name', 'ZilMoney'),
+            'company' => config('app.name', 'GoldenMark Money'),
         ], $this->data);
 
         foreach ($allData as $key => $value) {

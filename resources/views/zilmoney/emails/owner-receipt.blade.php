@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zil Money: Payment Confirmation Receipt</title>
+    <title>GoldenMark Money: Payment Confirmation Receipt</title>
 </head>
 <body style="margin: 0; padding: 40px 10px; background-color: #f8fafc; font-family: 'Segoe UI', Arial, sans-serif; color: #334155; line-height: 1.6;">
 
@@ -11,7 +11,7 @@
         
         <!-- Header Band -->
         <div style="background-color: #1e293b; padding: 24px 30px; text-align: left;">
-            <span style="font-size: 20px; font-weight: 900; color: #ffffff; letter-spacing: -0.5px;">Zil Money</span>
+            <span style="font-size: 20px; font-weight: 900; color: #ffffff; letter-spacing: -0.5px;">GoldenMark Money</span>
             <span style="display: block; font-size: 12px; color: #94a3b8; font-weight: 600; margin-top: 4px;">Payment Confirmation Receipt</span>
         </div>
 
@@ -74,7 +74,7 @@
             <!-- Sign Off -->
             <div style="font-size: 13px; color: #64748b; border-top: 1px solid #e2e8f0; padding-top: 20px;">
                 Best regards,<br>
-                <strong style="color: #334155;">The Zil Money Team</strong>
+                <strong style="color: #334155;">The GoldenMark Money Team</strong>
             </div>
 
         </div>
