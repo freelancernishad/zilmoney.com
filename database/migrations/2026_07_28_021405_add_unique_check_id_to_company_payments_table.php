@@ -12,7 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('company_payments', function (Blueprint $table) {
-            //
+            if (!Schema::hasColumn('company_payments', 'unique_check_id')) {
+                $table->string('unique_check_id', 64)->nullable()->unique();
+            }
         });
     }
 
@@ -22,7 +24,9 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('company_payments', function (Blueprint $table) {
-            //
+            if (Schema::hasColumn('company_payments', 'unique_check_id')) {
+                $table->dropColumn('unique_check_id');
+            }
         });
     }
 };

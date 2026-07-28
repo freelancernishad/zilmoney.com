@@ -10,7 +10,11 @@ return new class extends Migration
     {
         Schema::table('company_payments', function (Blueprint $table) {
             if (!Schema::hasColumn('company_payments', 'email_token')) {
-                $table->string('email_token', 64)->nullable()->unique()->after('unique_check_id');
+                if (Schema::hasColumn('company_payments', 'unique_check_id')) {
+                    $table->string('email_token', 64)->nullable()->unique()->after('unique_check_id');
+                } else {
+                    $table->string('email_token', 64)->nullable()->unique();
+                }
             }
         });
     }
