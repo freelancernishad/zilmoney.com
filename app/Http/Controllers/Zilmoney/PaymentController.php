@@ -641,6 +641,8 @@ class PaymentController extends Controller
             $formattedDate = date('Y-m-d');
         }
 
+        $isAccountVerified = !empty($account->plaid_item_id) || !empty($account->routing_number);
+
         return response()->json([
             'success' => true,
             'data' => [
@@ -653,8 +655,10 @@ class PaymentController extends Controller
                 'bank_account_account_name' => $account->official_name ?? $account->account_nick_name ?? 'Bank Account',
                 'bank_account_account_number' => $maskedAccount,
                 'bank_routing_number' => (string) ($account->routing_number ?? $payment->bank_routing_number ?? ''),
+                'is_account_verified' => $isAccountVerified ? "1" : "0",
             ]
         ]);
+
 
     }
 }
