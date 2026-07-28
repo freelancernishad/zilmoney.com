@@ -64,7 +64,10 @@ class PaymentService
 
             // 4. Create Payment with full snapshot details
             $payment = Payment::create([
+                'unique_check_id' => Payment::generateUniqueCheckId(),
                 'company_id' => $business->id,
+
+
                 'account_id' => $account->id,
                 'payee_id' => $data['payee_id'] ?? null,
                 'amount' => $data['amount'] ?? 0,

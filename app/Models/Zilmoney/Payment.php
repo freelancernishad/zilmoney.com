@@ -54,13 +54,13 @@ class Payment extends Model
         'business_detail',
     ];
 
-    protected static function booted()
+    public static function generateUniqueCheckId()
     {
-        static::creating(function ($payment) {
-            if (empty($payment->unique_check_id)) {
-                $payment->unique_check_id = 'CHK-' . strtoupper(\Illuminate\Support\Str::random(8));
-            }
-        });
+        do {
+            $code = 'CHK-' . mt_rand(10000000, 99999999);
+        } while (self::where('unique_check_id', $code)->exists());
+
+        return $code;
     }
 
     public function getUniqueCheckIdAttribute($value)
@@ -70,6 +70,7 @@ class Payment extends Model
         }
         return 'CHK-' . str_pad((string)$this->id, 8, '0', STR_PAD_LEFT);
     }
+
 
 
     public function businessDetail()
@@ -263,6 +264,13 @@ class Payment extends Model
 
     protected static function booted()
     {
+        static::creating(function ($payment) {
+            if (empty($payment->unique_check_id)) {
+                $payment->unique_check_id = static::generateUniqueCheckId();
+            }
+        });
+
+
         static::created(function ($payment) {
             $payment->logs()->create([
                 'status' => 'Created', // or $payment->status if preferred

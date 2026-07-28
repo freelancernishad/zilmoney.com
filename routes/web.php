@@ -58,6 +58,13 @@ Route::get('/run-migrate', function() {
 
 
 
+
+
+
+
+
+
+
 // For web routes
 Route::get('/clear-cache', [App\Http\Controllers\Common\SystemSettings\SystemSettingController::class, 'clearCache']);
 
