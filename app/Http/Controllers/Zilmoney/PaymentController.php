@@ -714,6 +714,8 @@ class PaymentController extends Controller
                 'bank_account_account_number' => $maskedAccount,
                 'bank_routing_number' => (string) ($account->routing_number ?? $payment->bank_routing_number ?? ''),
                 'is_account_verified' => $isAccountVerified ? "1" : "0",
+                'status' => (string) ($payment->status ?? 'pending'),
+                'is_voided' => (strtolower((string)($payment->status ?? '')) === 'void' || !empty($payment->is_voided)) ? "1" : "0",
             ]
         ]);
 
