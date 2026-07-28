@@ -20,7 +20,13 @@ class PaymentController extends Controller
         $business = auth()->user()->businessDetails;
         if (!$business) return response()->json([]);
 
-        $query = $business->payments()->with(['payee', 'account', 'logs.initiator']);
+        $query = Payment::where('company_id', $business->id);
+
+        if ($request->boolean('compact')) {
+            $query->select('id', 'company_id', 'account_id', 'check_number', 'amount', 'status', 'issue_date');
+        } else {
+            $query->with(['payee', 'account.activeSignature', 'logs.initiator']);
+        }
 
         // Tab filters (Check, ACH, Wire, Virtual Card, Recurring)
         if ($request->filled('tab')) {
@@ -757,6 +763,48 @@ class PaymentController extends Controller
             'account' => $payment->account,
             'business' => $payment->business,
             'business_detail' => $payment->business,
+        ]);
+    }
+
+    public function getNextCheckNumberInfo(Request $request)
+    {
+        $accountId = $request->input('account_id');
+        if (!$accountId) {
+            return response()->json([
+                'success' => false,
+                'message' => 'account_id is required'
+            ], 400);
+        }
+
+        $account = \App\Models\Zilmoney\Account::find($accountId);
+        if (!$account) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Account not found'
+            ], 404);
+        }
+
+        $maxCheckNumber = Payment::where('account_id', $accountId)
+            ->whereNotNull('check_number')
+            ->whereRaw("check_number REGEXP '^[0-9]+$'")
+            ->max(\DB::raw('CAST(check_number AS UNSIGNED)'));
+
+        $startingNumber = (int)($account->next_check_starting_number ?? 1000);
+
+        if ($maxCheckNumber) {
+            $nextCheckNumber = max((int)$maxCheckNumber + 1, $startingNumber);
+        } else {
+            $nextCheckNumber = $startingNumber;
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'account_id' => (int) $accountId,
+                'last_check_number' => $maxCheckNumber ? (string)$maxCheckNumber : null,
+                'next_check_number' => (string) $nextCheckNumber,
+                'starting_check_number' => (string) $startingNumber,
+            ]
         ]);
     }
 }

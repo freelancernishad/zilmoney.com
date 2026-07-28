@@ -50,11 +50,9 @@ class Payment extends Model
     protected $appends = [
         'unique_check_id',
         'payee_name',
-        'signature_image',
         'signature_image_url',
         'company_logo_url',
         'company_name',
-        'business_detail',
     ];
 
     public static function generateEmailToken()
@@ -211,16 +209,12 @@ class Payment extends Model
             return asset('storage/' . $rawPath);
         }
 
-        // 2. Fallback to current account activeSignature or business signature
-        $signature = $this->account ? ($this->account->activeSignature ?? $this->account->signatures()->latest()->first()) : null;
-        if (!$signature && $this->business) {
-            $signature = AccountSignature::whereIn('account_id', $this->business->accounts()->pluck('id'))
-                ->orderBy('is_primary', 'desc')
-                ->latest()
-                ->first();
-        }
-        if ($signature) {
-            return $signature->image_url;
+        // 2. Fallback to current account activeSignature
+        if ($this->account) {
+            $signature = $this->account->activeSignature;
+            if ($signature) {
+                return $signature->image_url;
+            }
         }
         return null;
     }

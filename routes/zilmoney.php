@@ -51,6 +51,7 @@ Route::middleware([\App\Http\Middleware\AuthenticateUser::class])->group(functio
     Route::apiResource('payees', PayeeController::class);
 
     // Payments
+    Route::get('payments/next-check-number', [PaymentController::class, 'getNextCheckNumberInfo']);
     Route::post('payments/bulk-action', [PaymentController::class, 'bulkAction']);
     Route::post('payments/bulk-store', [PaymentController::class, 'bulkStore']);
     Route::post('payments/blank-checks', [PaymentController::class, 'storeBlankChecks']);
