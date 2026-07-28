@@ -110,6 +110,8 @@ class PaymentController extends Controller
             'category_id' => 'nullable|exists:company_payment_categories,id',
             'memo' => 'nullable|string|max:255',
             'include_signature' => 'nullable|boolean',
+            'delivery_proof' => 'nullable|array',
+            'process_without' => 'nullable|array',
         ]);
 
         if (!$business->accounts()->where('id', $validated['account_id'])->exists()) {
@@ -406,7 +408,19 @@ class PaymentController extends Controller
                     'memo' => $validated['memo'] ?? null,
                     'signature_image' => $sigImage,
                     'signature_image_url' => $sigImageUrl,
-                    'delivery_proof' => ['include_signature' => $includeSignature],
+                    'delivery_proof' => [
+                        'include_signature' => $includeSignature,
+                        'without_amount' => true,
+                        'without_sign' => !$includeSignature,
+                        'without_date' => true,
+                        'without_payee' => true,
+                        'process_without' => [
+                            'amount' => true,
+                            'sign' => !$includeSignature,
+                            'date' => true,
+                            'payee' => true,
+                        ]
+                    ],
                 ]);
 
                 $payment->logs()->create([

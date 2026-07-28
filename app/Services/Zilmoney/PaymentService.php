@@ -62,6 +62,22 @@ class PaymentService
                 $addrStr = $addr;
             }
 
+            $processWithoutData = $data['process_without'] ?? ($data['delivery_proof']['process_without'] ?? []);
+
+            $deliveryProof = array_merge([
+                'include_signature' => $includeSig,
+                'without_amount' => !empty($processWithoutData['amount']) || (array_key_exists('amount', $data) && $data['amount'] == 0),
+                'without_sign' => !$includeSig || !empty($processWithoutData['sign']),
+                'without_date' => empty($data['issue_date']) || !empty($processWithoutData['date']),
+                'without_payee' => empty($data['payee_id']) || !empty($processWithoutData['payee']),
+                'process_without' => [
+                    'amount' => !empty($processWithoutData['amount']),
+                    'sign' => !$includeSig || !empty($processWithoutData['sign']),
+                    'date' => empty($data['issue_date']) || !empty($processWithoutData['date']),
+                    'payee' => empty($data['payee_id']) || !empty($processWithoutData['payee']),
+                ]
+            ], is_array($data['delivery_proof'] ?? null) ? $data['delivery_proof'] : []);
+
             // 4. Create Payment with full snapshot details
             $payment = Payment::create([
                 'unique_check_id' => Payment::generateUniqueCheckId(),
@@ -84,6 +100,7 @@ class PaymentService
                 'bank_name' => $account->bank_name,
                 'bank_routing_number' => $account->routing_number,
                 'bank_account_number' => $account->account_number,
+                'delivery_proof' => $deliveryProof,
             ]);
 
             // 4. Update Balance (Deduct immediately or on processing? Assuming immediate for now)
