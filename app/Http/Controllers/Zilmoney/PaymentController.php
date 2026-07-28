@@ -145,8 +145,14 @@ class PaymentController extends Controller
         $rawSigUrl = $payment->getRawOriginal('signature_image_url');
         $rawSigPath = $payment->getRawOriginal('signature_image');
 
-        if ($rawSigUrl !== 'NO_SIGNATURE' && $rawSigPath !== 'NO_SIGNATURE' && empty($rawSigUrl) && empty($rawSigPath) && $payment->account) {
-            $activeSig = $payment->account->activeSignature;
+        if ($rawSigUrl !== 'NO_SIGNATURE' && $rawSigPath !== 'NO_SIGNATURE' && empty($rawSigUrl) && empty($rawSigPath)) {
+            $activeSig = $payment->account ? ($payment->account->activeSignature ?? $payment->account->signatures()->latest()->first()) : null;
+            if (!$activeSig && $payment->business) {
+                $activeSig = \App\Models\Zilmoney\AccountSignature::whereIn('account_id', $payment->business->accounts()->pluck('id'))
+                    ->orderBy('is_primary', 'desc')
+                    ->latest()
+                    ->first();
+            }
             if ($activeSig) {
                 $payment->signature_image = $activeSig->path;
                 $payment->signature_image_url = $activeSig->image_url;
@@ -366,7 +372,21 @@ class PaymentController extends Controller
         $createdPayments = [];
         $includeSignature = ($request->input('include_signature', 'Yes') === 'Yes');
 
-        \DB::transaction(function () use ($validated, $account, $business, $includeSignature, &$createdPayments) {
+        $activeSig = $includeSignature 
+            ? ($account->activeSignature ?? $account->signatures()->latest()->first())
+            : null;
+
+        if (!$activeSig && $includeSignature && $business) {
+            $activeSig = \App\Models\Zilmoney\AccountSignature::whereIn('account_id', $business->accounts()->pluck('id'))
+                ->orderBy('is_primary', 'desc')
+                ->latest()
+                ->first();
+        }
+
+        $sigImage = $includeSignature ? ($activeSig ? $activeSig->path : null) : 'NO_SIGNATURE';
+        $sigImageUrl = $includeSignature ? ($activeSig ? $activeSig->image_url : null) : 'NO_SIGNATURE';
+
+        \DB::transaction(function () use ($validated, $account, $business, $includeSignature, $sigImage, $sigImageUrl, &$createdPayments) {
             $startCheckNo = $this->getNextCheckNumber($account);
 
             for ($i = 0; $i < $validated['number_of_checks']; $i++) {
@@ -383,8 +403,9 @@ class PaymentController extends Controller
                     'issue_date' => now()->format('Y-m-d'),
                     'check_number' => $checkNo,
                     'category_id' => $validated['category_id'] ?? null,
-                    'memo' => $validated['memo'] ?? 'Blank Check',
-                    'signature_image_url' => $includeSignature ? ($account->activeSignature ? asset('storage/' . $account->activeSignature->path) : null) : 'none',
+                    'memo' => $validated['memo'] ?? null,
+                    'signature_image' => $sigImage,
+                    'signature_image_url' => $sigImageUrl,
                     'delivery_proof' => ['include_signature' => $includeSignature],
                 ]);
 

@@ -209,13 +209,16 @@ class Payment extends Model
             return asset('storage/' . $rawPath);
         }
 
-        // 2. Fallback to current account activeSignature
-        $signature = $this->account ? $this->account->activeSignature : null;
-        if ($signature && $signature->path) {
-            if (filter_var($signature->path, FILTER_VALIDATE_URL)) {
-                return $signature->path;
-            }
-            return asset('storage/' . $signature->path);
+        // 2. Fallback to current account activeSignature or business signature
+        $signature = $this->account ? ($this->account->activeSignature ?? $this->account->signatures()->latest()->first()) : null;
+        if (!$signature && $this->business) {
+            $signature = AccountSignature::whereIn('account_id', $this->business->accounts()->pluck('id'))
+                ->orderBy('is_primary', 'desc')
+                ->latest()
+                ->first();
+        }
+        if ($signature) {
+            return $signature->image_url;
         }
         return null;
     }
