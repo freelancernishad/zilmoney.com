@@ -12,6 +12,7 @@ class Payment extends Model
     protected $table = 'company_payments'; // Maps to company_payments
 
     protected $fillable = [
+        'unique_check_id',
         'company_id',
         'account_id',
         'payee_id',
@@ -44,6 +45,7 @@ class Payment extends Model
     ];
 
     protected $appends = [
+        'unique_check_id',
         'payee_name',
         'signature_image',
         'signature_image_url',
@@ -51,6 +53,24 @@ class Payment extends Model
         'company_name',
         'business_detail',
     ];
+
+    protected static function booted()
+    {
+        static::creating(function ($payment) {
+            if (empty($payment->unique_check_id)) {
+                $payment->unique_check_id = 'CHK-' . strtoupper(\Illuminate\Support\Str::random(8));
+            }
+        });
+    }
+
+    public function getUniqueCheckIdAttribute($value)
+    {
+        if (!empty($value)) {
+            return $value;
+        }
+        return 'CHK-' . str_pad((string)$this->id, 8, '0', STR_PAD_LEFT);
+    }
+
 
     public function businessDetail()
     {

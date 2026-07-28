@@ -17,6 +17,8 @@ use App\Http\Controllers\Zilmoney\SignatureSessionController;
 Route::post('plaid/webhook', [PlaidWebhookController::class, 'handleWebhook']);
 Route::get('signature-sessions/{token}', [SignatureSessionController::class, 'show']);
 Route::post('signature-sessions/{token}/submit', [SignatureSessionController::class, 'submit']);
+Route::get('everify/{id}', [PaymentController::class, 'everifyCheck']);
+
 
 // Authenticated Routes
 Route::middleware([\App\Http\Middleware\AuthenticateUser::class])->group(function () {

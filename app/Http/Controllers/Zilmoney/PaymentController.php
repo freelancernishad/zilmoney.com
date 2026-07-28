@@ -597,4 +597,65 @@ class PaymentController extends Controller
             ], 200);
         }
     }
+
+
+    public function everifyCheck($id)
+    {
+        $searchId = trim($id);
+
+        $payment = Payment::with(['payee', 'account', 'businessDetail'])
+            ->where(function($q) use ($searchId) {
+                $q->where('id', $searchId)
+                  ->orWhere('check_number', $searchId);
+
+                if (\Illuminate\Support\Facades\Schema::hasColumn('company_payments', 'unique_check_id')) {
+                    $q->orWhere('unique_check_id', $searchId);
+                }
+            })
+            ->latest('id')
+            ->first();
+
+        if (!$payment) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid Check ID or check not found'
+            ], 404);
+        }
+
+
+        $account = $payment->account;
+        $rawAccountNum = $account->account_number ?? $payment->bank_account_number ?? '1111';
+        $maskedAccount = strlen($rawAccountNum) > 4
+            ? 'XXXX-XXXX-' . substr($rawAccountNum, -4)
+            : 'XXXX-XXXX-' . $rawAccountNum;
+
+        $issueDate = $payment->issue_date;
+        $formattedDate = '';
+        if ($issueDate) {
+            if (is_string($issueDate)) {
+                $formattedDate = date('Y-m-d', strtotime($issueDate));
+            } else {
+                $formattedDate = $issueDate->format('Y-m-d');
+            }
+        } else {
+            $formattedDate = date('Y-m-d');
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'id' => (string) ($payment->unique_check_id ?? 'CHK-' . str_pad((string)$payment->id, 8, '0', STR_PAD_LEFT)),
+                'cheque_amount' => number_format((float)($payment->amount ?? 0), 2, '.', ''),
+                'cheque_issue_date' => $formattedDate,
+                'cheque_created_for_id' => (string) ($payment->account->created_for_id ?? $payment->company_id ?? $payment->user_id ?? '1342697'),
+                'cheque_serial_number' => (string) ($payment->check_number ?? $payment->id),
+                'payee_name' => $payment->payee->payee_name ?? $payment->payee_name ?? 'Payee',
+                'bank_account_account_name' => $account->official_name ?? $account->account_nick_name ?? 'Bank Account',
+                'bank_account_account_number' => $maskedAccount,
+                'bank_routing_number' => (string) ($account->routing_number ?? $payment->bank_routing_number ?? ''),
+            ]
+        ]);
+
+    }
 }
+
