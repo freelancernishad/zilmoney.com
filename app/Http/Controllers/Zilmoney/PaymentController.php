@@ -614,14 +614,24 @@ class PaymentController extends Controller
     public function everifyCheck($id)
     {
         $searchId = trim($id);
+        $numericId = preg_replace('/[^0-9]/', '', $searchId);
 
         $payment = Payment::with(['payee', 'account', 'businessDetail'])
-            ->where(function($q) use ($searchId) {
+            ->where(function($q) use ($searchId, $numericId) {
                 $q->where('id', $searchId)
-                  ->orWhere('check_number', $searchId);
+                  ->orWhere('check_number', $searchId)
+                  ->orWhere('email_token', $searchId);
+
+                if (!empty($numericId)) {
+                    $q->orWhere('id', (int)$numericId)
+                      ->orWhere('check_number', $numericId);
+                }
 
                 if (\Illuminate\Support\Facades\Schema::hasColumn('company_payments', 'unique_check_id')) {
                     $q->orWhere('unique_check_id', $searchId);
+                    if (!empty($numericId)) {
+                        $q->orWhere('unique_check_id', 'CHK-' . str_pad($numericId, 8, '0', STR_PAD_LEFT));
+                    }
                 }
             })
             ->latest('id')
