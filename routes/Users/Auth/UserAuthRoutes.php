@@ -33,7 +33,13 @@ Route::post('/resend/otp', [VerificationController::class, 'resendOtp']);
 Route::get('/email/verify/{hash}', [VerificationController::class, 'verifyEmail']);
 Route::post('/resend/verification-link', [VerificationController::class, 'resendVerificationLink']);
 
-// Google and Apple OAuth routes
+// Google and Apple OAuth routes (supports all URL variations)
 Route::post('auth/google/login', [AuthUserController::class, 'googleLogin']);
+Route::post('auth/user/google-login', [AuthUserController::class, 'googleLogin']);
+Route::post('auth/user/google/login', [AuthUserController::class, 'googleLogin']);
+
 Route::post('auth/apple/login', [AuthUserController::class, 'appleLogin']);
+Route::post('auth/user/apple-login', [AuthUserController::class, 'appleLogin']);
+Route::post('auth/user/apple/login', [AuthUserController::class, 'appleLogin']);
+
 
