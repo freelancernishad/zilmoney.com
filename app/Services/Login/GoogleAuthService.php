@@ -64,8 +64,20 @@ class GoogleAuthService
 
             return response()->json([
                 'success' => true,
+                'statusCode' => 200,
+                'status_code' => 200,
                 'token' => $token,
-                'user' => $userPayload,
+                'access_token' => $token,
+                'user' => [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'is_verified' => true,
+                    'role' => $user->role ?? 'user',
+                    'status' => $user->status ?? 'active',
+                    'email_verified' => true,
+                    'profile_picture' => $userData['picture'] ?? null,
+                ],
             ], 200);
 
         } catch (\Exception $e) {

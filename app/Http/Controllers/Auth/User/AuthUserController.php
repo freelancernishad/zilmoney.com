@@ -377,4 +377,23 @@ class AuthUserController extends Controller
             return response()->json(['message' => 'Token is missing or malformed.'], 401);
         }
     }
+
+    /**
+     * Handle Google OAuth Login
+     */
+    public function googleLogin(Request $request)
+    {
+        $googleAuthService = new GoogleAuthService();
+        return $googleAuthService->login($request);
+    }
+
+    /**
+     * Handle Apple OAuth Login
+     */
+    public function appleLogin(Request $request)
+    {
+        $appleAuthService = new AppleAuthService();
+        return $appleAuthService->login($request);
+    }
 }
+
