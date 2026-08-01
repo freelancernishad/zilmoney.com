@@ -194,7 +194,7 @@ class PlaidService
                     'routing_number' => $routingNumber ?? '000000000',
                     'type' => $accountData['subtype'] ?? $accountData['type'],
                     'mask' => $accountData['mask'] ?? null,
-                    'balance' => $accountData['balances']['current'] ?? 0,
+                    'balance' => $accountData['balances']['available'] ?? $accountData['balances']['current'] ?? 0,
                     'status' => 'active', // Ensure active status
                 ]
             );
