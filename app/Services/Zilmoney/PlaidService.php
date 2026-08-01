@@ -401,11 +401,13 @@ class PlaidService
             'client_id' => $this->clientId,
             'secret' => $this->secret,
             'access_token' => $accessToken,
-            'transaction' => [
-                'account_id' => $accountId,
-                'amount' => (float) $amount,
-                'description' => $description,
-                'date' => $date ?? date('Y-m-d'),
+            'transactions' => [
+                [
+                    'account_id' => $accountId,
+                    'amount' => (float) $amount,
+                    'description' => $description,
+                    'date' => $date ?? date('Y-m-d'),
+                ]
             ]
         ]);
 
