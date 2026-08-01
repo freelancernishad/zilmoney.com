@@ -54,7 +54,9 @@
                         <select id="plaid-item-select" onchange="filterAccounts()" class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-indigo-500 transition-all">
                             <option value="">-- Select Bank Item --</option>
                             @foreach($plaidItems as $item)
-                                <option value="{{ $item->id }}">ID: {{ $item->id }} (Status: {{ $item->status }})</option>
+                                <option value="{{ $item->id }}">
+                                    {{ $item->institution_name ?? 'Bank Item #' . $item->id }} (ID: {{ $item->id }}, Status: {{ $item->status }})
+                                </option>
                             @endforeach
                         </select>
                     </div>
