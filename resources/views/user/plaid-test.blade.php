@@ -252,12 +252,13 @@
 
             const result = await response.json();
 
-            if (result.success) {
+            if (response.ok && !result.isError) {
                 logToTerminal("Transaction created in Plaid Sandbox database successfully!", "success");
                 logToTerminal(`Plaid Response: ${JSON.stringify(result.data)}`, "success");
                 logToTerminal("Please proceed to Step 2 to fire the webhook and notify the system.", "system");
             } else {
-                logToTerminal(`Failed to create transaction: ${result.message || 'Unknown error'}`, "error");
+                const errMsg = result.error?.errMsg || result.Message || 'Unknown error';
+                logToTerminal(`Failed to create transaction: ${errMsg}`, "error");
             }
         } catch (e) {
             logToTerminal(`API Request Error: ${e.message}`, "error");
@@ -298,12 +299,13 @@
 
             const result = await response.json();
 
-            if (result.success) {
+            if (response.ok && !result.isError) {
                 logToTerminal(`Plaid webhook trigger requested successfully.`, "success");
                 logToTerminal(`Webhook: ${webhookCode} should be processed by your receiver endpoint shortly.`, "success");
                 logToTerminal(`Check your application server log (laravel.log) to see how the webhook was handled.`, "system");
             } else {
-                logToTerminal(`Failed to fire webhook: ${result.message || 'Unknown error'}`, "error");
+                const errMsg = result.error?.errMsg || result.Message || 'Unknown error';
+                logToTerminal(`Failed to fire webhook: ${errMsg}`, "error");
             }
         } catch (e) {
             logToTerminal(`API Request Error: ${e.message}`, "error");

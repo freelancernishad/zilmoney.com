@@ -163,7 +163,7 @@ class PlaidController extends Controller
                 'message' => 'Sandbox transaction created successfully.',
                 'data' => $data
             ]);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
     }
@@ -191,7 +191,7 @@ class PlaidController extends Controller
                 'message' => 'Sandbox webhook triggered successfully.',
                 'data' => $data
             ]);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
     }
