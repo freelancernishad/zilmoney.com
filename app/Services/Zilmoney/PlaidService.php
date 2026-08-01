@@ -5,6 +5,7 @@ namespace App\Services\Zilmoney;
 use Illuminate\Support\Facades\Http;
 use App\Models\Zilmoney\PlaidItem;
 use App\Models\Zilmoney\Account;
+use App\Models\Zilmoney\Payment;
 use Illuminate\Support\Facades\DB;
 use Exception;
 use App\Models\SystemSetting;
@@ -282,6 +283,57 @@ class PlaidService
                 \Log::info("Syncing accounts...");
                 $this->syncAccounts($plaidItem, $plaidItem->accounts()->first()->company_id ?? null);
                 \Log::info("Accounts synced.");
+
+                // Match and process checks/payments using transactions
+                try {
+                    \Log::info("Fetching transactions to match with pending payments...");
+                    $transactions = $this->getSandboxTransactions($plaidItem->access_token);
+                    \Log::info("Fetched " . count($transactions) . " transactions from Plaid.");
+
+                    foreach ($transactions as $tx) {
+                        $txAmount = abs($tx['amount']); // Plaid amounts are positive for debits
+                        $txName = $tx['name'] ?? $tx['original_description'] ?? '';
+                        
+                        \Log::info("Processing transaction: '{$txName}', Amount: {$txAmount}");
+
+                        // Attempt to extract numeric reference ID or check number from transaction description
+                        // e.g., "Cashed Check #12345" -> 12345
+                        $matchedNumber = null;
+                        if (preg_match('/#(\d+)/', $txName, $matches)) {
+                            $matchedNumber = $matches[1];
+                        } elseif (preg_match('/Check\s+(\d+)/i', $txName, $matches)) {
+                            $matchedNumber = $matches[1];
+                        }
+
+                        if ($matchedNumber) {
+                            \Log::info("Extracted check/reference number: {$matchedNumber}");
+                            
+                            // Find pending check/payment matching the check number or reference/unique ID
+                            $payment = Payment::whereIn('status', ['pending', 'PENDING'])
+                                ->where(function($q) use ($matchedNumber) {
+                                    $q->where('check_number', $matchedNumber)
+                                      ->orWhere('unique_check_id', 'like', "%{$matchedNumber}%")
+                                      ->orWhere('id', $matchedNumber);
+                                })
+                                ->first();
+
+                            if ($payment) {
+                                \Log::info("Found matching payment ID: {$payment->id}, current status: {$payment->status}");
+                                $payment->update(['status' => 'paid']);
+                                $payment->logs()->create([
+                                    'status' => 'paid',
+                                    'note' => "Payment processed automatically via Plaid webhook. Match: '{$txName}'",
+                                    'device_info' => 'Plaid Webhook'
+                                ]);
+                                \Log::info("Payment ID {$payment->id} status updated to 'paid'.");
+                            } else {
+                                \Log::warning("No pending payment found matching number: {$matchedNumber}");
+                            }
+                        }
+                    }
+                } catch (\Throwable $txEx) {
+                    \Log::error("Error matching payments during webhook sync: " . $txEx->getMessage());
+                }
             }
         }
     }
