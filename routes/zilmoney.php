@@ -103,6 +103,8 @@ Route::middleware([\App\Http\Middleware\AuthenticateUser::class])->group(functio
     Route::post('plaid/reset-login', [PlaidController::class, 'resetLogin']);
     Route::post('plaid/disconnect', [PlaidController::class, 'disconnectItem']);
     Route::post('plaid/delete-banking-data', [PlaidController::class, 'deleteBankingData']);
+    Route::post('plaid/sandbox/create-transaction', [PlaidController::class, 'createSandboxTransaction']);
+    Route::post('plaid/sandbox/fire-webhook', [PlaidController::class, 'fireSandboxWebhook']);
 
     // Hosted UI
     Route::get('connect-bank', [PlaidController::class, 'showLinkPage']);

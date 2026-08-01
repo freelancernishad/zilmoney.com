@@ -391,6 +391,51 @@ class PlaidService
         return true;
     }
 
+    /**
+     * Create a mock transaction in the Sandbox environment.
+     * Note: Only works for Items created with the 'user_transactions_dynamic' username.
+     */
+    public function createSandboxTransaction($accessToken, $accountId, $amount, $description, $date = null)
+    {
+        $response = Http::post("{$this->baseUrl}/sandbox/transactions/create", [
+            'client_id' => $this->clientId,
+            'secret' => $this->secret,
+            'access_token' => $accessToken,
+            'transaction' => [
+                'account_id' => $accountId,
+                'amount' => (float) $amount,
+                'description' => $description,
+                'date' => $date ?? date('Y-m-d'),
+            ]
+        ]);
+
+        if ($response->failed()) {
+            throw new Exception('Plaid Create Sandbox Transaction Error: ' . ($response->json('error_message') ?? $response->body()));
+        }
+
+        return $response->json();
+    }
+
+    /**
+     * Force fire a webhook in the Sandbox environment.
+     */
+    public function fireSandboxWebhook($accessToken, $webhookType = 'TRANSACTIONS', $webhookCode = 'DEFAULT_UPDATE')
+    {
+        $response = Http::post("{$this->baseUrl}/sandbox/item/fire_webhook", [
+            'client_id' => $this->clientId,
+            'secret' => $this->secret,
+            'access_token' => $accessToken,
+            'webhook_type' => $webhookType,
+            'webhook_code' => $webhookCode,
+        ]);
+
+        if ($response->failed()) {
+            throw new Exception('Plaid Fire Sandbox Webhook Error: ' . ($response->json('error_message') ?? $response->body()));
+        }
+
+        return $response->json();
+    }
+
     private function getWebhookUrl()
     {
         return SystemSetting::getValue('plaid_webhook_url') 

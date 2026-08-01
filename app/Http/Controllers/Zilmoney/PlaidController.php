@@ -136,4 +136,63 @@ class PlaidController extends Controller
             return response()->json(['message' => $e->getMessage()], 500);
         }
     }
+
+    public function createSandboxTransaction(Request $request)
+    {
+        $request->validate([
+            'plaid_item_id' => 'required',
+            'plaid_account_id' => 'required|string',
+            'amount' => 'required|numeric',
+            'description' => 'required|string',
+        ]);
+
+        try {
+            $plaidItem = \App\Models\Zilmoney\PlaidItem::where('user_id', auth()->id())
+                ->where('id', $request->plaid_item_id)
+                ->firstOrFail();
+
+            $data = $this->plaidService->createSandboxTransaction(
+                $plaidItem->access_token,
+                $request->plaid_account_id,
+                $request->amount,
+                $request->description
+            );
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Sandbox transaction created successfully.',
+                'data' => $data
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
+
+    public function fireSandboxWebhook(Request $request)
+    {
+        $request->validate([
+            'plaid_item_id' => 'required',
+            'webhook_code' => 'required|string',
+        ]);
+
+        try {
+            $plaidItem = \App\Models\Zilmoney\PlaidItem::where('user_id', auth()->id())
+                ->where('id', $request->plaid_item_id)
+                ->firstOrFail();
+
+            $data = $this->plaidService->fireSandboxWebhook(
+                $plaidItem->access_token,
+                'TRANSACTIONS',
+                $request->webhook_code
+            );
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Sandbox webhook triggered successfully.',
+                'data' => $data
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
 }

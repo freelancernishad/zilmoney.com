@@ -196,6 +196,12 @@ Route::prefix('user')->middleware([AttachJwtFromCookie::class, AuthenticateUser:
         return view('user.docs');
     })->name('user.docs');
 
+    Route::get('/plaid-test', function() {
+        $plaidItems = \App\Models\Zilmoney\PlaidItem::where('user_id', auth()->id())->get();
+        $accounts = \App\Models\Zilmoney\Account::whereIn('plaid_item_id', $plaidItems->pluck('id'))->get();
+        return view('user.plaid-test', compact('plaidItems', 'accounts'));
+    })->name('user.plaid-test');
+
     // Hosted UI
     Route::get('/connect-bank', [PlaidController::class, 'showLinkPage'])->name('user.connect-bank');
 });
