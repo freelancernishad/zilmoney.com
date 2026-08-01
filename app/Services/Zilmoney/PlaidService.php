@@ -419,6 +419,26 @@ class PlaidService
     }
 
     /**
+     * Retrieve transactions for a specific Item from Plaid API.
+     */
+    public function getSandboxTransactions($accessToken, $startDate = null, $endDate = null)
+    {
+        $response = Http::post("{$this->baseUrl}/transactions/get", [
+            'client_id' => $this->clientId,
+            'secret' => $this->secret,
+            'access_token' => $accessToken,
+            'start_date' => $startDate ?? date('Y-m-d', strtotime('-30 days')),
+            'end_date' => $endDate ?? date('Y-m-d'),
+        ]);
+
+        if ($response->failed()) {
+            throw new Exception('Plaid Get Transactions Error: ' . ($response->json('error_message') ?? $response->body()));
+        }
+
+        return $response->json('transactions') ?? [];
+    }
+
+    /**
      * Force fire a webhook in the Sandbox environment.
      */
     public function fireSandboxWebhook($accessToken, $webhookType = 'TRANSACTIONS', $webhookCode = 'DEFAULT_UPDATE')
