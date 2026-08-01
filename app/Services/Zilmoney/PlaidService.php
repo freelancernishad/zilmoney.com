@@ -403,10 +403,10 @@ class PlaidService
             'access_token' => $accessToken,
             'transactions' => [
                 [
-                    'account_id' => $accountId,
                     'amount' => (float) $amount,
                     'description' => $description,
-                    'date' => $date ?? date('Y-m-d'),
+                    'date_posted' => $date ?? date('Y-m-d'),
+                    'date_transacted' => $date ?? date('Y-m-d'),
                 ]
             ]
         ]);
