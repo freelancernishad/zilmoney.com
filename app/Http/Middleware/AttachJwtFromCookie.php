@@ -18,6 +18,11 @@ class AttachJwtFromCookie
     {
         $token = $request->bearerToken() ?? $request->query('token');
 
+        if ($token === 'undefined' || $token === 'null') {
+            $token = null;
+            $request->headers->remove('Authorization');
+        }
+
         if (!$token) {
             if ($request->is('user') || $request->is('user/*') || $request->is('api/user') || $request->is('api/user/*') || $request->is('api/auth/user') || $request->is('api/auth/user/*')) {
                  $token = $request->cookie('user_token') ?? $_COOKIE['user_token'] ?? null;

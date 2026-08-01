@@ -324,14 +324,19 @@
 
         async function logout() {
             try {
+                const token = getCookie('admin_token');
+                const headers = {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                };
+                if (token && token !== 'undefined' && token !== 'null') {
+                    headers['Authorization'] = 'Bearer ' + token;
+                }
+
                 // Call Logout API
-                 await fetch("/api/auth/admin/logout", {
+                await fetch("/api/auth/admin/logout", {
                     method: 'POST',
-                     headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json',
-                        'Authorization': 'Bearer ' + getCookie('admin_token')
-                    },
+                    headers: headers
                 });
             } catch (e) {
                 console.error("Logout failed", e);
@@ -345,6 +350,7 @@
             const value = `; ${document.cookie}`;
             const parts = value.split(`; ${name}=`);
             if (parts.length === 2) return parts.pop().split(';').shift();
+            return null;
         }
     </script>
     

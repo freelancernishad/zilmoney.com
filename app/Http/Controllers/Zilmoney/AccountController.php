@@ -115,4 +115,27 @@ class AccountController extends Controller
 
         return response()->json(['message' => 'Account deleted successfully']);
     }
+
+    public function syncBalance($id)
+    {
+        $business = Auth::user()->businessDetails;
+        if (!$business) return response()->json(['message' => 'Business profile required'], 400);
+
+        $account = $business->accounts()->findOrFail($id);
+
+        if ($account->plaid_item_id) {
+            $plaidItem = \App\Models\Zilmoney\PlaidItem::find($account->plaid_item_id);
+            if ($plaidItem) {
+                $plaidService = new \App\Services\Zilmoney\PlaidService();
+                $plaidService->syncAccounts($plaidItem, $business->id);
+                $account = $account->fresh();
+            }
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Account balance synced with Plaid successfully.',
+            'account' => $account
+        ]);
+    }
 }

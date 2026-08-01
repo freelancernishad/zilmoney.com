@@ -151,14 +151,62 @@ class PlaidController extends Controller
                 ->where('id', $request->plaid_item_id)
                 ->firstOrFail();
 
-            $data = $this->plaidService->createSandboxTransaction(
-                $plaidItem->access_token,
-                $request->plaid_account_id,
-                $request->amount,
-                $request->description
-            );
+            $data = null;
+            try {
+                $data = $this->plaidService->createSandboxTransaction(
+                    $plaidItem->access_token,
+                    $request->plaid_account_id,
+                    $request->amount,
+                    $request->description
+                );
+            } catch (\Throwable $plaidEx) {
+                \Log::warning("Plaid API sandbox transaction creation warning: " . $plaidEx->getMessage());
+                $data = ['info' => $plaidEx->getMessage()];
+            }
 
-            // Simulate the webhook locally to trigger account syncing and balance updates
+            // Perform direct payment matching for the generated transaction
+            try {
+                $txAmount = abs((float) $request->amount);
+                $txName = $request->description;
+
+                $matchedNumber = null;
+                if (preg_match('/#(\d+)/', $txName, $matches)) {
+                    $matchedNumber = $matches[1];
+                } elseif (preg_match('/(?:check|ref|reference|payment)\s*#?\s*(\d+)/i', $txName, $matches)) {
+                    $matchedNumber = $matches[1];
+                }
+
+                $payment = null;
+                if ($matchedNumber) {
+                    $payment = \App\Models\Zilmoney\Payment::whereNotIn('status', ['paid', 'void', 'voided', 'failed'])
+                        ->where(function($q) use ($matchedNumber) {
+                            $q->where('check_number', $matchedNumber)
+                              ->orWhere('unique_check_id', 'like', "%{$matchedNumber}%")
+                              ->orWhere('id', $matchedNumber);
+                        })
+                        ->first();
+                }
+
+                if (!$payment && $txAmount > 0) {
+                    $payment = \App\Models\Zilmoney\Payment::whereNotIn('status', ['paid', 'void', 'voided', 'failed'])
+                        ->where('amount', $txAmount)
+                        ->first();
+                }
+
+                if ($payment) {
+                    $payment->update(['status' => 'paid']);
+                    $payment->logs()->create([
+                        'status' => 'paid',
+                        'note' => "Payment processed automatically via generated Sandbox transaction: '{$txName}'",
+                        'device_info' => 'Plaid Sandbox Generator'
+                    ]);
+                    \Log::info("Payment ID {$payment->id} updated to 'paid' via createSandboxTransaction.");
+                }
+            } catch (\Throwable $matchEx) {
+                \Log::error("Error matching payment in createSandboxTransaction: " . $matchEx->getMessage());
+            }
+
+            // Also simulate the webhook locally to trigger account syncing
             try {
                 $this->plaidService->processWebhook(
                     $plaidItem,

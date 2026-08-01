@@ -146,6 +146,11 @@ class User extends Authenticatable implements JWTSubject, MustVerifyEmail
         return $this->hasMany(\App\Models\Plan\PlanSubscription::class);
     }
 
+    public function payments()
+    {
+        return $this->hasMany(\App\Models\Payment::class);
+    }
+
     protected $appends = [
         'profile_picture',
         'documents',

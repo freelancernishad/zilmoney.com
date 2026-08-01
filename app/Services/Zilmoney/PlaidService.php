@@ -278,64 +278,76 @@ class PlaidService
                 // Good to know
             }
         } elseif ($type === 'TRANSACTIONS') {
-            \Log::info("PlaidService: Handling TRANSACTIONS webhook for Item ID: {$plaidItem->id}");
-            if ($code === 'SYNC_UPDATES_AVAILABLE' || $code === 'DEFAULT_UPDATE') {
-                \Log::info("Syncing accounts...");
-                $this->syncAccounts($plaidItem, $plaidItem->accounts()->first()->company_id ?? null);
-                \Log::info("Accounts synced.");
+            \Log::info("PlaidService: Handling TRANSACTIONS webhook for Item ID: {$plaidItem->id}, Code: {$code}");
+            \Log::info("Syncing accounts...");
+            $this->syncAccounts($plaidItem, $plaidItem->accounts()->first()->company_id ?? null);
+            \Log::info("Accounts synced.");
 
-                // Match and process checks/payments using transactions
-                try {
-                    \Log::info("Fetching transactions to match with pending payments...");
-                    $transactions = $this->getSandboxTransactions($plaidItem->access_token);
-                    \Log::info("Fetched " . count($transactions) . " transactions from Plaid.");
+            // Match and process checks/payments using transactions
+            try {
+                \Log::info("Fetching transactions to match with pending payments...");
+                $transactions = $this->getSandboxTransactions($plaidItem->access_token);
+                \Log::info("Fetched " . count($transactions) . " transactions from Plaid.");
 
-                    foreach ($transactions as $tx) {
-                        $txAmount = abs($tx['amount']); // Plaid amounts are positive for debits
-                        $txName = $tx['name'] ?? $tx['original_description'] ?? '';
+                foreach ($transactions as $tx) {
+                    $txAmount = abs((float) ($tx['amount'] ?? 0)); // Plaid amounts are positive for debits
+                    $txName = $tx['name'] ?? $tx['original_description'] ?? '';
+                    
+                    \Log::info("Processing transaction: '{$txName}', Amount: {$txAmount}");
+
+                    // Attempt to extract numeric reference ID or check number from transaction description
+                    // e.g., "Cashed Check #12345" -> 12345, "Check 71", "Payment 71"
+                    $matchedNumber = null;
+                    if (preg_match('/#(\d+)/', $txName, $matches)) {
+                        $matchedNumber = $matches[1];
+                    } elseif (preg_match('/(?:check|ref|reference|payment)\s*#?\s*(\d+)/i', $txName, $matches)) {
+                        $matchedNumber = $matches[1];
+                    }
+
+                    $payment = null;
+
+                    if ($matchedNumber) {
+                        \Log::info("Extracted check/reference number: {$matchedNumber}");
                         
-                        \Log::info("Processing transaction: '{$txName}', Amount: {$txAmount}");
+                        // Find active check/payment matching the check number or reference/unique ID
+                        $payment = Payment::whereNotIn('status', ['paid', 'void', 'voided', 'failed'])
+                            ->where(function($q) use ($matchedNumber) {
+                                $q->where('check_number', $matchedNumber)
+                                  ->orWhere('unique_check_id', 'like', "%{$matchedNumber}%")
+                                  ->orWhere('id', $matchedNumber);
+                            })
+                            ->first();
+                    }
 
-                        // Attempt to extract numeric reference ID or check number from transaction description
-                        // e.g., "Cashed Check #12345" -> 12345
-                        $matchedNumber = null;
-                        if (preg_match('/#(\d+)/', $txName, $matches)) {
-                            $matchedNumber = $matches[1];
-                        } elseif (preg_match('/Check\s+(\d+)/i', $txName, $matches)) {
-                            $matchedNumber = $matches[1];
-                        }
-
-                        if ($matchedNumber) {
-                            \Log::info("Extracted check/reference number: {$matchedNumber}");
-                            
-                            // Find active check/payment matching the check number or reference/unique ID (excluding already finalized statuses)
-                            $payment = Payment::whereNotIn('status', ['paid', 'void', 'voided', 'failed'])
-                                ->where(function($q) use ($matchedNumber) {
-                                    $q->where('check_number', $matchedNumber)
-                                      ->orWhere('unique_check_id', 'like', "%{$matchedNumber}%")
-                                      ->orWhere('id', $matchedNumber);
-                                })
-                                ->first();
-
-                            if ($payment) {
-                                \Log::info("Found matching payment ID: {$payment->id}, current status: {$payment->status}");
-                                $payment->update(['status' => 'paid']);
-                                $payment->logs()->create([
-                                    'status' => 'paid',
-                                    'note' => "Payment processed automatically via Plaid webhook. Match: '{$txName}'",
-                                    'device_info' => 'Plaid Webhook'
-                                ]);
-                                \Log::info("Payment ID {$payment->id} status updated to 'paid'.");
-                            } else {
-                                \Log::warning("No active payment found matching number/ID: {$matchedNumber}. Search parameters: status not in [paid, void, voided, failed], matchedNumber = {$matchedNumber}");
-                            }
-                        } else {
-                            \Log::info("Could not extract check/reference number from transaction name: '{$txName}'");
+                    // Fallback matching by exact amount if check number wasn't found
+                    if (!$payment && $txAmount > 0) {
+                        $payment = Payment::whereNotIn('status', ['paid', 'void', 'voided', 'failed'])
+                            ->where('amount', $txAmount)
+                            ->first();
+                        if ($payment) {
+                            \Log::info("Matched payment ID {$payment->id} by amount: {$txAmount}");
                         }
                     }
-                } catch (\Throwable $txEx) {
-                    \Log::error("Error matching payments during webhook sync: " . $txEx->getMessage());
+
+                    if ($payment) {
+                        \Log::info("Found matching payment ID: {$payment->id}, current status: {$payment->status}");
+                        $payment->update(['status' => 'paid']);
+                        $payment->logs()->create([
+                            'status' => 'paid',
+                            'note' => "Payment processed automatically via Plaid webhook. Match: '{$txName}'",
+                            'device_info' => 'Plaid Webhook'
+                        ]);
+                        \Log::info("Payment ID {$payment->id} status updated to 'paid'.");
+                    } else {
+                        if ($matchedNumber) {
+                            \Log::warning("No active payment found matching number/ID: {$matchedNumber}.");
+                        } else {
+                            \Log::info("Could not match transaction: '{$txName}' (Amount: {$txAmount}) with any pending payment.");
+                        }
+                    }
                 }
+            } catch (\Throwable $txEx) {
+                \Log::error("Error matching payments during webhook sync: " . $txEx->getMessage());
             }
         }
     }
@@ -451,12 +463,19 @@ class PlaidService
      */
     public function createSandboxTransaction($accessToken, $accountId, $amount, $description, $date = null)
     {
+        \Log::info("PlaidService: Creating Sandbox Transaction...", [
+            'account_id' => $accountId,
+            'amount' => $amount,
+            'description' => $description
+        ]);
+
         $response = Http::post("{$this->baseUrl}/sandbox/transactions/create", [
             'client_id' => $this->clientId,
             'secret' => $this->secret,
             'access_token' => $accessToken,
             'transactions' => [
                 [
+                    'account_id' => $accountId,
                     'amount' => (float) $amount,
                     'description' => $description,
                     'date_posted' => $date ?? date('Y-m-d'),
@@ -466,8 +485,11 @@ class PlaidService
         ]);
 
         if ($response->failed()) {
+            \Log::error("Plaid Create Sandbox Transaction Error: " . $response->body());
             throw new Exception('Plaid Create Sandbox Transaction Error: ' . ($response->json('error_message') ?? $response->body()));
         }
+
+        \Log::info("Plaid Create Sandbox Transaction Success: " . $response->body());
 
         return $response->json();
     }

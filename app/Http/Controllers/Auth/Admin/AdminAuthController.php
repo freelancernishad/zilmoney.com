@@ -138,29 +138,21 @@ public function register(AdminRegisterRequest $request)
      * @return \Illuminate\Http\JsonResponse
      */
     public function logout(Request $request)
-{
-    try {
-        $token = JWTAuth::getToken();
-        if (!$token) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Token not provided.'
-            ], 401);
+    {
+        try {
+            $token = JWTAuth::getToken();
+            if ($token) {
+                JWTAuth::invalidate($token);
+            }
+        } catch (JWTException $e) {
+            Log::warning('Admin token invalidation warning on logout: ' . $e->getMessage());
         }
-
-        JWTAuth::invalidate($token);
 
         return response()->json([
             'success' => true,
             'message' => 'Logged out successfully.'
         ], 200);
-    } catch (JWTException $e) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Failed to logout, token invalidation failed: ' . $e->getMessage()
-        ], 500);
     }
-}
      /**
      * Change the password of the authenticated admin.
      *

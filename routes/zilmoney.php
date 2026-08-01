@@ -37,6 +37,7 @@ Route::middleware([\App\Http\Middleware\AuthenticateUser::class])->group(functio
 
     // Banking
     Route::post('accounts/validate-routing', [AccountController::class, 'validateRouting']);
+    Route::post('accounts/{account}/sync-balance', [AccountController::class, 'syncBalance']);
     Route::apiResource('accounts', AccountController::class);
 
     // Account Signatures
