@@ -106,6 +106,7 @@ Route::middleware([\App\Http\Middleware\AuthenticateUser::class])->group(functio
     Route::post('plaid/sandbox/create-transaction', [PlaidController::class, 'createSandboxTransaction']);
     Route::post('plaid/sandbox/fire-webhook', [PlaidController::class, 'fireSandboxWebhook']);
     Route::post('plaid/sandbox/transactions', [PlaidController::class, 'getTransactions']);
+    Route::get('plaid/sandbox/logs', [PlaidController::class, 'getSandboxLogs']);
 
     // Hosted UI
     Route::get('connect-bank', [PlaidController::class, 'showLinkPage']);

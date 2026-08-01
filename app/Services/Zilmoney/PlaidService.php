@@ -308,8 +308,8 @@ class PlaidService
                         if ($matchedNumber) {
                             \Log::info("Extracted check/reference number: {$matchedNumber}");
                             
-                            // Find pending check/payment matching the check number or reference/unique ID
-                            $payment = Payment::whereIn('status', ['pending', 'PENDING'])
+                            // Find active check/payment matching the check number or reference/unique ID (excluding already finalized statuses)
+                            $payment = Payment::whereNotIn('status', ['paid', 'void', 'voided', 'failed'])
                                 ->where(function($q) use ($matchedNumber) {
                                     $q->where('check_number', $matchedNumber)
                                       ->orWhere('unique_check_id', 'like', "%{$matchedNumber}%")
@@ -327,8 +327,10 @@ class PlaidService
                                 ]);
                                 \Log::info("Payment ID {$payment->id} status updated to 'paid'.");
                             } else {
-                                \Log::warning("No pending payment found matching number: {$matchedNumber}");
+                                \Log::warning("No active payment found matching number/ID: {$matchedNumber}. Search parameters: status not in [paid, void, voided, failed], matchedNumber = {$matchedNumber}");
                             }
+                        } else {
+                            \Log::info("Could not extract check/reference number from transaction name: '{$txName}'");
                         }
                     }
                 } catch (\Throwable $txEx) {

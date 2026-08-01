@@ -155,6 +155,26 @@
                 </button>
             </div>
 
+            <!-- 5. Step 4: Fetch Server Debug Logs -->
+            <div class="glass p-8 rounded-[2rem] border-white/5 space-y-6 relative overflow-hidden">
+                <div class="absolute top-6 right-8 px-3 py-1 rounded-full bg-yellow-500/10 text-yellow-400 border border-yellow-500/20 text-[10px] font-black tracking-widest uppercase">
+                    Step 4
+                </div>
+
+                <div class="space-y-1">
+                    <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-yellow-500"></span>
+                        Fetch Server Debug Logs
+                    </h3>
+                    <p class="text-xs text-slate-400">Fetch the latest Laravel system logs to debug webhook events and matching outcomes.</p>
+                </div>
+
+                <button onclick="fetchServerLogs()" id="btn-fetch-logs" class="w-full py-3.5 rounded-xl bg-yellow-600 hover:bg-yellow-700 text-white font-bold text-sm transition-all shadow-lg flex items-center justify-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                    Fetch Laravel Logs
+                </button>
+            </div>
+
         </div>
 
         <!-- Terminal Logging Window -->
@@ -386,6 +406,55 @@
         } finally {
             btn.disabled = false;
             btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 7.89H18v3" /></svg> Fetch Plaid Transactions`;
+        }
+    }
+
+    async function fetchServerLogs() {
+        const btn = document.getElementById('btn-fetch-logs');
+        btn.disabled = true;
+        btn.innerHTML = `Fetching Logs...`;
+
+        logToTerminal(`Fetching latest server logs from backend...`, "system");
+
+        try {
+            const response = await fetch('/api/zilmoney/plaid/sandbox/logs', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Accept': 'application/json'
+                }
+            });
+
+            const result = await response.json();
+
+            if (response.ok && result.success) {
+                logToTerminal(`--- Start of Backend Logs ---`, "success");
+                const logs = result.logs || [];
+                if (logs.length === 0) {
+                    logToTerminal("No recent log lines found.", "warn");
+                } else {
+                    logs.forEach(line => {
+                        // Color line based on contents
+                        if (line.includes('.ERROR') || line.includes('Error:') || line.includes('failed') || line.includes('NOT FOUND')) {
+                            logToTerminal(line, "error");
+                        } else if (line.includes('.WARNING') || line.includes('WARN')) {
+                            logToTerminal(line, "warn");
+                        } else if (line.includes('SUCCESS') || line.includes('Processed') || line.includes('updated to')) {
+                            logToTerminal(line, "success");
+                        } else {
+                            logToTerminal(line, "info");
+                        }
+                    });
+                }
+                logToTerminal(`--- End of Backend Logs ---`, "success");
+            } else {
+                logToTerminal(`Failed to fetch logs: ${result.message || 'Unknown error'}`, "error");
+            }
+        } catch (e) {
+            logToTerminal(`API Request Error: ${e.message}`, "error");
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg> Fetch Laravel Logs`;
         }
     }
 </script>

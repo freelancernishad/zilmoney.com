@@ -251,4 +251,37 @@ class PlaidController extends Controller
             return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
     }
+
+    public function getSandboxLogs()
+    {
+        $logPath = storage_path('logs/laravel.log');
+        if (!file_exists($logPath)) {
+            return response()->json(['success' => false, 'message' => 'Log file not found']);
+        }
+
+        try {
+            $lines = [];
+            $file = new \SplFileObject($logPath, 'r');
+            $file->seek(PHP_INT_MAX);
+            $totalLines = $file->key();
+            
+            $start = max(0, $totalLines - 150);
+            $file->seek($start);
+            
+            while (!$file->eof()) {
+                $line = trim($file->current());
+                if ($line !== '') {
+                    $lines[] = $line;
+                }
+                $file->next();
+            }
+
+            return response()->json([
+                'success' => true,
+                'logs' => array_slice($lines, -150)
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
 }

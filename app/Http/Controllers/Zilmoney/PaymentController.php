@@ -264,7 +264,7 @@ class PaymentController extends Controller
         $payment = $business->payments()->findOrFail($id);
 
         \DB::transaction(function () use ($payment) {
-            if (!in_array(strtolower($payment->status), ['void', 'failed'])) {
+            if (!in_array(strtolower($payment->status), ['void', 'voided', 'failed', 'paid', 'sent'])) {
                 $account = $payment->account;
                 if ($account) {
                     $account->increment('balance', $payment->amount);
@@ -292,7 +292,7 @@ class PaymentController extends Controller
         if ($validated['action'] === 'delete') {
             \DB::transaction(function () use ($payments) {
                 foreach ($payments as $payment) {
-                    if (!in_array(strtolower($payment->status), ['void', 'failed'])) {
+                    if (!in_array(strtolower($payment->status), ['void', 'voided', 'failed', 'paid', 'sent'])) {
                         $account = $payment->account;
                         if ($account) {
                             $account->increment('balance', $payment->amount);
