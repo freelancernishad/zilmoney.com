@@ -455,7 +455,6 @@ class PlaidService
             'access_token' => $accessToken,
             'transactions' => [
                 [
-                    'account_id' => $accountId,
                     'amount' => (float) $amount,
                     'description' => $description,
                     'date_posted' => $date ?? date('Y-m-d'),
@@ -476,38 +475,35 @@ class PlaidService
      */
     public function getSandboxTransactions($accessToken, $startDate = null, $endDate = null)
     {
-        // 1. Try modern /transactions/sync first
+        // 1. Use /transactions/get as the primary method because it is date-bound and doesn't require cursors
         try {
-            $response = Http::post("{$this->baseUrl}/transactions/sync", [
+            $response = Http::post("{$this->baseUrl}/transactions/get", [
                 'client_id' => $this->clientId,
                 'secret' => $this->secret,
                 'access_token' => $accessToken,
+                'start_date' => $startDate ?? date('Y-m-d', strtotime('-30 days')),
+                'end_date' => $endDate ?? date('Y-m-d', strtotime('+3 days')),
             ]);
 
             if ($response->successful()) {
-                $added = $response->json('added') ?? [];
-                if (!empty($added)) {
-                    return $added;
-                }
+                return $response->json('transactions') ?? [];
             }
         } catch (\Throwable $e) {
-            \Log::warning("Plaid transactions/sync failed, falling back to transactions/get: " . $e->getMessage());
+            \Log::warning("Plaid transactions/get failed, trying transactions/sync fallback: " . $e->getMessage());
         }
 
-        // 2. Fallback to /transactions/get with a wider date range (+3 days padding for timezone differences)
-        $response = Http::post("{$this->baseUrl}/transactions/get", [
+        // 2. Fallback to /transactions/sync
+        $response = Http::post("{$this->baseUrl}/transactions/sync", [
             'client_id' => $this->clientId,
             'secret' => $this->secret,
             'access_token' => $accessToken,
-            'start_date' => $startDate ?? date('Y-m-d', strtotime('-30 days')),
-            'end_date' => $endDate ?? date('Y-m-d', strtotime('+3 days')),
         ]);
 
         if ($response->failed()) {
             throw new Exception('Plaid Get Transactions Error: ' . ($response->json('error_message') ?? $response->body()));
         }
 
-        return $response->json('transactions') ?? [];
+        return $response->json('added') ?? [];
     }
 
     /**
