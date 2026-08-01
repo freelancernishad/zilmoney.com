@@ -158,9 +158,26 @@ class PlaidController extends Controller
                 $request->description
             );
 
+            // Simulate the webhook locally to trigger account syncing and balance updates
+            try {
+                $this->plaidService->processWebhook(
+                    $plaidItem,
+                    'TRANSACTIONS',
+                    'DEFAULT_UPDATE',
+                    [
+                        'webhook_type' => 'TRANSACTIONS',
+                        'webhook_code' => 'DEFAULT_UPDATE',
+                        'item_id' => $plaidItem->item_id,
+                        'new_transactions' => 1
+                    ]
+                );
+            } catch (\Throwable $ex) {
+                \Log::error("Plaid Sandbox Local Webhook Simulation Error during creation: " . $ex->getMessage());
+            }
+
             return response()->json([
                 'success' => true,
-                'message' => 'Sandbox transaction created successfully.',
+                'message' => 'Sandbox transaction created and synced successfully.',
                 'data' => $data
             ]);
         } catch (\Throwable $e) {
@@ -186,9 +203,26 @@ class PlaidController extends Controller
                 $request->webhook_code
             );
 
+            // Simulate the webhook locally to trigger account syncing and balance updates
+            try {
+                $this->plaidService->processWebhook(
+                    $plaidItem,
+                    'TRANSACTIONS',
+                    $request->webhook_code,
+                    [
+                        'webhook_type' => 'TRANSACTIONS',
+                        'webhook_code' => $request->webhook_code,
+                        'item_id' => $plaidItem->item_id,
+                        'new_transactions' => 1
+                    ]
+                );
+            } catch (\Throwable $ex) {
+                \Log::error("Plaid Sandbox Local Webhook Simulation Error during fire: " . $ex->getMessage());
+            }
+
             return response()->json([
                 'success' => true,
-                'message' => 'Sandbox webhook triggered successfully.',
+                'message' => 'Sandbox webhook triggered and synced successfully.',
                 'data' => $data
             ]);
         } catch (\Throwable $e) {

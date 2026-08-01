@@ -257,6 +257,7 @@
             if (response.ok && !result.isError) {
                 logToTerminal("Transaction created in Plaid Sandbox database successfully!", "success");
                 logToTerminal(`Plaid Response: ${JSON.stringify(result.data)}`, "success");
+                logToTerminal("Local database sync triggered. Please refresh this page to see the updated balance!", "system");
                 logToTerminal("Please proceed to Step 2 to fire the webhook and notify the system.", "system");
             } else {
                 const errMsg = result.error?.errMsg || result.Message || 'Unknown error';
@@ -303,8 +304,8 @@
 
             if (response.ok && !result.isError) {
                 logToTerminal(`Plaid webhook trigger requested successfully.`, "success");
-                logToTerminal(`Webhook: ${webhookCode} should be processed by your receiver endpoint shortly.`, "success");
-                logToTerminal(`Check your application server log (laravel.log) to see how the webhook was handled.`, "system");
+                logToTerminal(`Local database sync triggered. Please refresh this page to see the updated balance!`, "system");
+                logToTerminal(`Check your application server log (laravel.log) to see the webhook simulation logs.`, "system");
             } else {
                 const errMsg = result.error?.errMsg || result.Message || 'Unknown error';
                 logToTerminal(`Failed to fire webhook: ${errMsg}`, "error");
