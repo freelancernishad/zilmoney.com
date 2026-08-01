@@ -229,4 +229,26 @@ class PlaidController extends Controller
             return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
     }
+
+    public function getTransactions(Request $request)
+    {
+        $request->validate([
+            'plaid_item_id' => 'required',
+        ]);
+
+        try {
+            $plaidItem = \App\Models\Zilmoney\PlaidItem::where('user_id', auth()->id())
+                ->where('id', $request->plaid_item_id)
+                ->firstOrFail();
+
+            $transactions = $this->plaidService->getSandboxTransactions($plaidItem->access_token);
+
+            return response()->json([
+                'success' => true,
+                'data' => $transactions
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
 }

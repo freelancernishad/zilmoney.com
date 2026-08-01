@@ -105,6 +105,7 @@ Route::middleware([\App\Http\Middleware\AuthenticateUser::class])->group(functio
     Route::post('plaid/delete-banking-data', [PlaidController::class, 'deleteBankingData']);
     Route::post('plaid/sandbox/create-transaction', [PlaidController::class, 'createSandboxTransaction']);
     Route::post('plaid/sandbox/fire-webhook', [PlaidController::class, 'fireSandboxWebhook']);
+    Route::post('plaid/sandbox/transactions', [PlaidController::class, 'getTransactions']);
 
     // Hosted UI
     Route::get('connect-bank', [PlaidController::class, 'showLinkPage']);

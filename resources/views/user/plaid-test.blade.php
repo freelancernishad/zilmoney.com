@@ -135,6 +135,26 @@
                 </button>
             </div>
 
+            <!-- 4. Step 3: Fetch Sandbox Transactions -->
+            <div class="glass p-8 rounded-[2rem] border-white/5 space-y-6 relative overflow-hidden">
+                <div class="absolute top-6 right-8 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] font-black tracking-widest uppercase">
+                    Step 3
+                </div>
+
+                <div class="space-y-1">
+                    <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                        Fetch Plaid Transactions
+                    </h3>
+                    <p class="text-xs text-slate-400">Directly pull the transactions list from Plaid API for the connected Item.</p>
+                </div>
+
+                <button onclick="fetchTransactions()" id="btn-fetch-tx" class="w-full py-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm transition-all shadow-lg flex items-center justify-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 7.89H18v3" /></svg>
+                    Fetch Plaid Transactions
+                </button>
+            </div>
+
         </div>
 
         <!-- Terminal Logging Window -->
@@ -315,6 +335,57 @@
         } finally {
             btn.disabled = false;
             btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg> Trigger Plaid Webhook`;
+        }
+    }
+
+    async function fetchTransactions() {
+        const plaidItemId = document.getElementById('plaid-item-select').value;
+
+        if (!plaidItemId) {
+            logToTerminal("Please select a Plaid Item first.", "error");
+            return;
+        }
+
+        const btn = document.getElementById('btn-fetch-tx');
+        btn.disabled = true;
+        btn.innerHTML = `Fetching Transactions...`;
+
+        logToTerminal(`Fetching transactions list from Plaid API for Item ID: ${plaidItemId}...`);
+
+        try {
+            const response = await fetch('/api/zilmoney/plaid/sandbox/transactions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({
+                    plaid_item_id: plaidItemId
+                })
+            });
+
+            const result = await response.json();
+
+            if (response.ok && !result.isError) {
+                const txs = result.data || [];
+                logToTerminal(`Successfully fetched ${txs.length} transactions from Plaid API.`, "success");
+                if (txs.length === 0) {
+                    logToTerminal("No transactions found under this Item.", "system");
+                } else {
+                    txs.forEach((tx, idx) => {
+                        logToTerminal(`[TX #${idx+1}] Desc: "${tx.description || tx.name}", Amount: $${tx.amount}, Date: ${tx.date_posted || tx.date || 'N/A'}`, "info");
+                    });
+                }
+            } else {
+                const errMsg = result.error?.errMsg || result.Message || 'Unknown error';
+                logToTerminal(`Failed to fetch transactions: ${errMsg}`, "error");
+            }
+        } catch (e) {
+            logToTerminal(`API Request Error: ${e.message}`, "error");
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 7.89H18v3" /></svg> Fetch Plaid Transactions`;
         }
     }
 </script>
