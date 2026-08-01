@@ -455,6 +455,7 @@ class PlaidService
             'access_token' => $accessToken,
             'transactions' => [
                 [
+                    'account_id' => $accountId,
                     'amount' => (float) $amount,
                     'description' => $description,
                     'date_posted' => $date ?? date('Y-m-d'),
