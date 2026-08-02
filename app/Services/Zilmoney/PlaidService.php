@@ -39,7 +39,7 @@ class PlaidService
         $payload = [
             'client_id' => $this->clientId,
             'secret' => $this->secret,
-            'client_name' => 'Zilmoney',
+            'client_name' => 'Goldenmark Money',
             'language' => 'en',
             'country_codes' => ['US'],
             'user' => [
