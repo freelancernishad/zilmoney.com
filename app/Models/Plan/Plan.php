@@ -88,18 +88,23 @@ class Plan extends Model
         }
 
         return collect($this->features)->map(function ($item) {
-            $feature = PlanFeature::where('key', $item['key'])->first();
-
-            if (!$feature) {
-                // fallback: just return value or empty string
-                return $item['value'] ?? '';
+            if (is_string($item)) {
+                return ['label' => $item];
             }
 
-            // Pass all other keys except 'key' as replacement data
-            $data = $item;
-            unset($data['key']);
+            if (is_array($item)) {
+                if (isset($item['key'])) {
+                    $feature = PlanFeature::where('key', $item['key'])->first();
+                    if ($feature) {
+                        $data = $item;
+                        unset($data['key']);
+                        $item['label'] = $feature->render($data);
+                    }
+                }
+                return $item;
+            }
 
-            return $feature->render($data);
-        })->filter()->all();
+            return ['label' => (string) $item];
+        })->filter()->values()->all();
     }
 }
