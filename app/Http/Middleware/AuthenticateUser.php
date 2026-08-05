@@ -28,7 +28,10 @@ class AuthenticateUser
 
         // Check if the user is authenticated
         if (!Auth::guard('user')->check()) {
-            return response()->json([], 401);
+            return response()->json([
+                'error' => 'Unauthenticated. Please log in to your account.',
+                'message' => 'Unauthenticated. Please log in to your account.'
+            ], 401);
         }
 
         Auth::shouldUse('user');
