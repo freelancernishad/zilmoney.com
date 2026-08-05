@@ -31,31 +31,20 @@ class PlanSeeder extends Seeder
                 ],
                 [
                     'label' => 'Email Check',
-                    'price' => '$1.00',
-                    'tooltipText' => 'Email a One-Time printable, trackable check to recipient.'
+                    'price' => '$0.50',
+                    'tooltipText' => 'Email a One-Time printable, trackable check to recipient ($0.50 USD per email check).'
                 ],
                 [
                     'label' => 'Mail Check In One Click',
                     'subLabel' => '(USPS / Fedex)',
-                    'price' => '$1.25',
+                    'price' => '$0.50',
                     'isGreen' => true,
-                    'tooltipText' => 'Print and mail your check in one click on the same business day.'
-                ],
-                [
-                    'label' => 'Documents Mailing',
-                    'price' => '$1.00',
-                    'isGreen' => true,
-                    'tooltipText' => 'Mail any kind of document in one click via USPS and FedEx.'
+                    'tooltipText' => 'Print and mail your check in one click on the same business day ($0.50 USD).'
                 ],
                 [
                     'label' => 'Bank Accounts Allowed',
                     'value' => 1,
                     'tooltipText' => 'Add 1 US bank account.'
-                ],
-                [
-                    'label' => 'Users Access',
-                    'value' => 1,
-                    'tooltipText' => '1 User access.'
                 ],
                 [
                     'label' => 'Payees & Vendor Management',
@@ -91,31 +80,20 @@ class PlanSeeder extends Seeder
                 ],
                 [
                     'label' => 'Email Check',
-                    'price' => '$1.00',
-                    'tooltipText' => 'Email a One-Time printable, trackable check to recipient.'
+                    'price' => '$0.50',
+                    'tooltipText' => 'Email a One-Time printable, trackable check to recipient ($0.50 USD per email check).'
                 ],
                 [
                     'label' => 'Mail Check In One Click',
                     'subLabel' => '(USPS / Fedex)',
-                    'price' => '$1.25',
+                    'price' => '$0.50',
                     'isGreen' => true,
-                    'tooltipText' => 'Print and mail your check in one click on the same business day.'
-                ],
-                [
-                    'label' => 'Documents Mailing',
-                    'price' => '$1.00',
-                    'isGreen' => true,
-                    'tooltipText' => 'Mail any kind of document in one click via USPS and FedEx.'
+                    'tooltipText' => 'Print and mail your check in one click on the same business day ($0.50 USD).'
                 ],
                 [
                     'label' => 'Bank Accounts Allowed',
                     'value' => 3,
                     'tooltipText' => 'Add up to 3 US bank accounts.'
-                ],
-                [
-                    'label' => 'Users Access',
-                    'value' => 3,
-                    'tooltipText' => '3 Users allowed with multi-level role permission settings.'
                 ],
                 [
                     'label' => 'Payees & Vendor Management',
