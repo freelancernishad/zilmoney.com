@@ -113,7 +113,7 @@ class UserPlanController extends Controller
 
         // 2. Fetch all Debit Usages (from Payment Logs / Check Actions)
         $debits = \DB::table('company_payment_logs')
-            ->join('company_payments', 'company_payments.id', '=', 'company_payment_logs.payment_id')
+            ->join('company_payments', 'company_payments.id', '=', 'company_payment_logs.company_payment_id')
             ->where('company_payment_logs.initiated_by', $user->id)
             ->whereIn('company_payment_logs.note', [
                 'Check PDF printed / downloaded',
