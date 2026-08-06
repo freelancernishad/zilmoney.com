@@ -15,7 +15,7 @@ class PlanSeeder extends Seeder
         // Delete all existing plans
         Plan::query()->delete();
 
-        // Plan 1: Pay As You Go Plan (Default Auto-Active Plan)
+        // Plan 1: Pay As You Go Plan ($0.75 base rate, 1 Bank Account)
         Plan::create([
             'id' => 1,
             'name' => 'Pay As You Go Plan',
@@ -27,20 +27,20 @@ class PlanSeeder extends Seeder
             'features' => [
                 [
                     'label' => 'Check Printing',
-                    'price' => '$0.50',
-                    'tooltipText' => 'Print checks online instantly from any bank account on any printer ($0.50 USD per check).'
+                    'price' => '$0.75',
+                    'tooltipText' => 'Print checks online instantly from any bank account on any printer ($0.75 USD per check).'
                 ],
                 [
                     'label' => 'Email Check',
-                    'price' => '$0.50',
-                    'tooltipText' => 'Email a One-Time printable, trackable check to recipient ($0.50 USD per email check).'
+                    'price' => '$0.75',
+                    'tooltipText' => 'Email a One-Time printable, trackable check to recipient ($0.75 USD per email check).'
                 ],
                 [
                     'label' => 'Mail Check In One Click',
                     'subLabel' => '(USPS / Fedex)',
-                    'price' => '$0.50',
+                    'price' => '$0.75',
                     'isGreen' => true,
-                    'tooltipText' => 'Print and mail your check in one click on the same business day ($0.50 USD).'
+                    'tooltipText' => 'Print and mail your check in one click on the same business day ($0.75 USD).'
                 ],
                 [
                     'label' => 'Bank Accounts Allowed',
@@ -65,7 +65,7 @@ class PlanSeeder extends Seeder
             ],
         ]);
 
-        // Plan 2: Starter Plan ($10.00 / month)
+        // Plan 2: Starter Plan ($10.00 / month - 3 Bank Accounts)
         Plan::create([
             'id' => 2,
             'name' => 'Starter Plan',
@@ -94,8 +94,8 @@ class PlanSeeder extends Seeder
                 ],
                 [
                     'label' => 'Bank Accounts Allowed',
-                    'value' => 1,
-                    'tooltipText' => 'Add 1 US bank account.'
+                    'value' => 3,
+                    'tooltipText' => 'Add up to 3 US bank accounts.'
                 ],
                 [
                     'label' => 'Payees & Vendor Management',
@@ -115,7 +115,7 @@ class PlanSeeder extends Seeder
             ],
         ]);
 
-        // Plan 3: Professional Plan ($20.00 / month)
+        // Plan 3: Professional Plan ($20.00 / month - 5 Bank Accounts)
         Plan::create([
             'id' => 3,
             'name' => 'Professional Plan',
@@ -144,8 +144,8 @@ class PlanSeeder extends Seeder
                 ],
                 [
                     'label' => 'Bank Accounts Allowed',
-                    'value' => 3,
-                    'tooltipText' => 'Add up to 3 US bank accounts.'
+                    'value' => 5,
+                    'tooltipText' => 'Add up to 5 US bank accounts.'
                 ],
                 [
                     'label' => 'Payees & Vendor Management',
