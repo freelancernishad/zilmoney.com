@@ -20,7 +20,30 @@ class UserPlanController extends Controller
             ->latest('start_date')
             ->first();
 
-        return response()->json($active);
+        if (!$active) {
+            $payAsYouGoPlan = \App\Models\Plan\Plan::where('name', 'like', '%Pay As You Go%')->first()
+                ?? \App\Models\Plan\Plan::find(1);
+
+            $activeData = [
+                'id' => null,
+                'user_id' => $user->id,
+                'plan_id' => $payAsYouGoPlan ? $payAsYouGoPlan->id : 1,
+                'status' => 'active',
+                'is_default' => true,
+                'plan' => $payAsYouGoPlan,
+            ];
+        } else {
+            $activeData = $active->toArray();
+        }
+
+        $totalRechargeCredit = (float) $user->planSubscriptions()->where('status', 'active')->sum('final_amount');
+        if ($totalRechargeCredit == 0) {
+            $totalRechargeCredit = (float) $user->payments()->where('status', 'paid')->sum('amount');
+        }
+
+        $activeData['total_recharge_credit'] = $totalRechargeCredit;
+
+        return response()->json($activeData);
     }
 
     public function getSubscriptionHistory(Request $request)
