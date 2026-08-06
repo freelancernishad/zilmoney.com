@@ -149,13 +149,16 @@ class PlanSubscriptionController extends Controller
 
         try {
             if ($paymentType === 'single') {
+                $productName = 'Credit Recharge Top-up';
+                $productDesc = 'Account Credit Top-up ($' . number_format($discountedPrice, 2) . ' USD)';
+
                 $items = [[
                     'price_data' => [
                         'currency' => 'usd',
                         'unit_amount' => (int)($discountedPrice * 100),
                         'product_data' => [
-                            'name' => $plan->name,
-                            'description' => 'One-Time Purchase' . ($couponId ? " (Coupon Applied)" : ""),
+                            'name' => $productName,
+                            'description' => $productDesc,
                         ],
                     ],
                     'quantity' => 1,
