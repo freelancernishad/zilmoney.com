@@ -41,7 +41,8 @@ class UserPlanController extends Controller
             $totalRechargeCredit = (float) $user->payments()->where('status', 'paid')->sum('amount');
         }
 
-        $activeData['total_recharge_credit'] = $totalRechargeCredit;
+        $usedCredits = (float) ($user->used_credits ?? 0);
+        $activeData['total_recharge_credit'] = max(0, $totalRechargeCredit - $usedCredits);
 
         return response()->json($activeData);
     }
@@ -69,5 +70,87 @@ class UserPlanController extends Controller
         return response()->json($payments);
     }
 
+    public function getCreditsStatement(Request $request)
+    {
+        $user = $request->user();
 
+        // 1. Fetch all Credit Recharges (from Payments / Subscriptions)
+        $recharges = $user->payments()
+            ->where('status', 'paid')
+            ->orderBy('created_at', 'asc')
+            ->get()
+            ->map(function ($p) {
+                return [
+                    'id' => 'RECHARGE-' . str_pad($p->id, 5, '0', STR_PAD_LEFT),
+                    'date' => $p->created_at->format('m/d/Y H:i'),
+                    'raw_date' => $p->created_at->timestamp,
+                    'description' => 'Credit Recharge Payment (Via Stripe)',
+                    'type' => 'Credit',
+                    'amount' => (float) $p->amount,
+                    'status' => 'Success',
+                ];
+            });
+
+        // If no payments record yet, check active subscriptions
+        if ($recharges->isEmpty()) {
+            $subs = $user->planSubscriptions()
+                ->where('status', 'active')
+                ->orderBy('start_date', 'asc')
+                ->get()
+                ->map(function ($s) {
+                    return [
+                        'id' => 'SUB-' . str_pad($s->id, 5, '0', STR_PAD_LEFT),
+                        'date' => \Carbon\Carbon::parse($s->start_date)->format('m/d/Y H:i'),
+                        'raw_date' => \Carbon\Carbon::parse($s->start_date)->timestamp,
+                        'description' => 'Plan Purchase Credit: ' . ($s->plan->name ?? 'Subscription'),
+                        'type' => 'Credit',
+                        'amount' => (float) $s->final_amount,
+                        'status' => 'Success',
+                    ];
+                });
+            $recharges = collect($subs);
+        }
+
+        // 2. Fetch all Debit Usages (from Payment Logs / Check Actions)
+        $debits = \DB::table('company_payment_logs')
+            ->join('company_payments', 'company_payments.id', '=', 'company_payment_logs.payment_id')
+            ->where('company_payment_logs.initiated_by', $user->id)
+            ->whereIn('company_payment_logs.note', [
+                'Check PDF printed / downloaded',
+                'E-check sent via email',
+                'Mail check sent',
+            ])
+            ->orderBy('company_payment_logs.created_at', 'asc')
+            ->select('company_payment_logs.*', 'company_payments.check_number')
+            ->get()
+            ->map(function ($log) {
+                $serviceName = str_contains($log->note, 'printed') ? 'Check Print' : (str_contains($log->note, 'email') ? 'Email Check' : 'Mail Check');
+                return [
+                    'id' => 'USAGE-' . str_pad($log->id, 5, '0', STR_PAD_LEFT),
+                    'date' => \Carbon\Carbon::parse($log->created_at)->format('m/d/Y H:i'),
+                    'raw_date' => \Carbon\Carbon::parse($log->created_at)->timestamp,
+                    'description' => "{$serviceName} #CK-{$log->check_number}",
+                    'type' => 'Debit',
+                    'amount' => 0.50,
+                    'status' => 'Success',
+                ];
+            });
+
+        // 3. Merge and Sort chronologically
+        $all = collect($recharges)->concat($debits)->sortBy('raw_date')->values();
+
+        // 4. Calculate Running Balance
+        $runningBalance = 0.00;
+        $statement = $all->map(function ($item) use (&$runningBalance) {
+            if ($item['type'] === 'Credit') {
+                $runningBalance += $item['amount'];
+            } else {
+                $runningBalance -= $item['amount'];
+            }
+            $item['balance'] = max(0, $runningBalance);
+            return $item;
+        });
+
+        return response()->json($statement->reverse()->values());
+    }
 }

@@ -12,7 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            //
+            if (!Schema::hasColumn('users', 'used_credits')) {
+                $table->decimal('used_credits', 10, 2)->default(0.00)->after('stripe_id');
+            }
         });
     }
 
@@ -22,7 +24,9 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            //
+            if (Schema::hasColumn('users', 'used_credits')) {
+                $table->dropColumn('used_credits');
+            }
         });
     }
 };

@@ -360,6 +360,9 @@ class PaymentController extends Controller
             $payment->update(['status' => 'printed']);
         }
 
+        // Deduct service charge from user credit balance
+        $this->deductUserCreditForService($creditCheck['service_price']);
+
         $pdf = $checkService->generateCheckPdf($payment, $request->all());
 
         return $pdf->stream("check_{$payment->check_number}.pdf");
@@ -648,6 +651,9 @@ class PaymentController extends Controller
             // Update payment status to sent in DB so it shows under Mailed filter
             $payment->update(['status' => 'sent']);
 
+            // Deduct service charge from user credit balance
+            $this->deductUserCreditForService($creditCheck['service_price']);
+
             // Log activity
             $payment->logs()->create([
                 'status' => 'sent',
@@ -859,21 +865,36 @@ class PaymentController extends Controller
             $totalRechargeCredit = (float) $user->payments()->where('status', 'paid')->sum('amount');
         }
 
-        if ($totalRechargeCredit < $servicePrice) {
+        $usedCredits = (float) ($user->used_credits ?? 0);
+        $availableCredit = max(0, $totalRechargeCredit - $usedCredits);
+
+        if ($availableCredit < $servicePrice) {
             $formattedPrice = number_format($servicePrice, 2);
+            $formattedAvailable = number_format($availableCredit, 2);
             $planName = $activePlan->name ?? 'Current Plan';
             return [
                 'allowed' => false,
                 'response' => response()->json([
-                    'message' => "Insufficient credit balance. {$serviceName} requires \${$formattedPrice} USD on your {$planName}. Please recharge your credit balance to perform check printing, emailing or mailing.",
+                    'message' => "Insufficient credit balance. {$serviceName} requires \${$formattedPrice} USD on your {$planName}. Available balance: \${$formattedAvailable} USD. Please recharge your credit balance to perform check printing, emailing or mailing.",
                     'require_recharge' => true,
                     'service_cost' => $servicePrice,
-                    'current_credit' => $totalRechargeCredit,
+                    'current_credit' => $availableCredit,
                 ], 402)
             ];
         }
 
         return ['allowed' => true, 'service_price' => $servicePrice];
+    }
+
+    /**
+     * Deduct credit for performed check service.
+     */
+    private function deductUserCreditForService($servicePrice)
+    {
+        $user = auth()->user();
+        if ($user && $servicePrice > 0) {
+            $user->increment('used_credits', $servicePrice);
+        }
     }
 }
 

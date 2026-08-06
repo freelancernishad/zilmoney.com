@@ -13,6 +13,7 @@ Route::prefix('/user')->group(function () {
 
         Route::get('/plan/active', [UserPlanController::class, 'getActivePlan']);
         Route::get('/plan/history', [UserPlanController::class, 'getSubscriptionHistory']);
+        Route::get('/credits/statement', [UserPlanController::class, 'getCreditsStatement']);
 
 
         Route::post('/plans/purchase', [PlanSubscriptionController::class, 'PurchasePlan']);
