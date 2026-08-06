@@ -859,14 +859,7 @@ class PaymentController extends Controller
             }
         }
 
-        // Calculate available credit balance
-        $totalRechargeCredit = (float) $user->planSubscriptions()->where('status', 'active')->sum('final_amount');
-        if ($totalRechargeCredit == 0) {
-            $totalRechargeCredit = (float) $user->payments()->where('status', 'paid')->sum('amount');
-        }
-
-        $usedCredits = (float) ($user->used_credits ?? 0);
-        $availableCredit = max(0, $totalRechargeCredit - $usedCredits);
+        $availableCredit = (float) ($user->credit_balance ?? 0);
 
         if ($availableCredit < $servicePrice) {
             $formattedPrice = number_format($servicePrice, 2);
@@ -893,6 +886,7 @@ class PaymentController extends Controller
     {
         $user = auth()->user();
         if ($user && $servicePrice > 0) {
+            $user->decrement('credit_balance', $servicePrice);
             $user->increment('used_credits', $servicePrice);
         }
     }

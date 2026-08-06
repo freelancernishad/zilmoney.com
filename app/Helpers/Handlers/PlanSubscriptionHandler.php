@@ -74,7 +74,7 @@ class PlanSubscriptionHandler
             ]
         );
 
-        // Record payment
+        // Record payment & increment user credit_balance
         try {
             $subscription->payments()->create([
                 'user_id' => $userId,
@@ -87,6 +87,11 @@ class PlanSubscriptionHandler
                 'webhook_received_at' => now(),
                 'meta' => $session,
             ]);
+
+            $user = \App\Models\User::find($userId);
+            if ($user) {
+                $user->increment('credit_balance', $session->amount_total / 100);
+            }
         } catch (\Exception $e) {
             Log::error("Failed to record payment for subscription {$subscription->id}: " . $e->getMessage());
         }
