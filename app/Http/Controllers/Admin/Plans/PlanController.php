@@ -54,40 +54,10 @@ class PlanController extends Controller
             $data = $plan->toArray();
             $data['is_active'] = $activePlanId && $activePlanId == $plan->id;
             
-            // Calculate Proration Data for Frontend
+            // Pay-As-You-Go credit recharge mode
             $data['proration_credit'] = 0;
-            $data['pay_today'] = $plan->discounted_price; // Default
+            $data['pay_today'] = $plan->discounted_price;
             $data['is_downgrade_blocked'] = false;
-
-            if ($user) {
-                $activeSub = $user->planSubscriptions()
-                    ->where('status', 'active')
-                    ->latest('start_date')
-                    ->first();
-                
-                if ($activeSub && $activeSub->plan_id != $plan->id) {
-                     $startDate = \Carbon\Carbon::parse($activeSub->start_date);
-                     $endDate = \Carbon\Carbon::parse($activeSub->end_date);
-                     $totalDays = $startDate->diffInDays($endDate);
-                     if ($totalDays == 0) $totalDays = 1;
-                     
-                     $remainingDays = now()->diffInDays($endDate, false);
-                     
-                     if ($remainingDays > 0) {
-                         $amountPaid = $activeSub->final_amount;
-                         $dailyRate = $amountPaid / $totalDays;
-                         $unusedValue = round($dailyRate * $remainingDays, 2);
-                         
-                         $data['proration_credit'] = $unusedValue;
-                         $data['pay_today'] = max(0, $plan->discounted_price - $unusedValue);
-                         
-                         // Block downgrade if unused value exceeds new plan price
-                         if ($unusedValue > $plan->discounted_price) {
-                             $data['is_downgrade_blocked'] = true;
-                         }
-                     }
-                }
-            }
 
             return $data;
         });

@@ -31,8 +31,8 @@ class PlanSubscriptionController extends Controller
             })
             ->first();
 
-        // If user has an active subscription to the SAME plan, block it.
-        if ($existingSub && $existingSub->plan_id == $plan->id) {
+        // If user has an active subscription to the SAME plan and paymentType is recurring subscription, block it.
+        if ($paymentType === 'subscription' && $existingSub && $existingSub->plan_id == $plan->id) {
             return response()->json(['error' => 'You are already subscribed to this plan.'], 400);
         }
         
