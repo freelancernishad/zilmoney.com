@@ -53,7 +53,24 @@ class Payment extends Model
         'signature_image_url',
         'company_logo_url',
         'company_name',
+        'is_charged',
     ];
+
+    public function getIsChargedAttribute()
+    {
+        if (in_array(strtolower($this->status ?? ''), ['printed', 'sent', 'mailed', 'completed'])) {
+            return true;
+        }
+        return $this->logs()
+            ->where(function ($q) {
+                $q->whereIn('note', [
+                    'Check PDF printed / downloaded',
+                    'E-check sent via email',
+                    'Mail check sent',
+                ])->orWhere('note', 'LIKE', '%E-check email sent%');
+            })
+            ->exists();
+    }
 
     public static function generateEmailToken()
     {

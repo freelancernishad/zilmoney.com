@@ -340,13 +340,26 @@ class PaymentController extends Controller
         $business = auth()->user()->businessDetails;
         if (!$business) return response()->json(['message' => 'Business profile required'], 400);
 
-        // Check user credit balance for Check Printing
-        $creditCheck = $this->checkUserCreditForService('Check Printing');
-        if (!$creditCheck['allowed']) {
-            return $creditCheck['response'];
-        }
-
         $payment = $business->payments()->with(['business', 'payee', 'account'])->findOrFail($id);
+
+        // Check if this check payment has already been charged once (unlocked)
+        $alreadyCharged = $payment->logs()
+            ->where(function ($q) {
+                $q->whereIn('note', [
+                    'Check PDF printed / downloaded',
+                    'E-check sent via email',
+                    'Mail check sent',
+                ])->orWhere('note', 'LIKE', '%E-check email sent%');
+            })
+            ->exists();
+
+        $creditCheck = ['allowed' => true, 'service_price' => 0];
+        if (!$alreadyCharged) {
+            $creditCheck = $this->checkUserCreditForService('Check Printing');
+            if (!$creditCheck['allowed']) {
+                return $creditCheck['response'];
+            }
+        }
 
         // Audit Log for check printing compliance
         $payment->logs()->create([
@@ -360,8 +373,10 @@ class PaymentController extends Controller
             $payment->update(['status' => 'printed']);
         }
 
-        // Deduct service charge from user credit balance
-        $this->deductUserCreditForService($creditCheck['service_price']);
+        // Deduct service charge ONLY if not previously charged
+        if (!$alreadyCharged && isset($creditCheck['service_price'])) {
+            $this->deductUserCreditForService($creditCheck['service_price']);
+        }
 
         $pdf = $checkService->generateCheckPdf($payment, $request->all());
 
@@ -560,13 +575,26 @@ class PaymentController extends Controller
         $business = auth()->user()->businessDetails;
         if (!$business) return response()->json(['message' => 'Business profile required'], 400);
 
-        // Check user credit balance for Email Check
-        $creditCheck = $this->checkUserCreditForService('Email Check');
-        if (!$creditCheck['allowed']) {
-            return $creditCheck['response'];
-        }
-
         $payment = $business->payments()->with(['payee', 'account', 'comments', 'business'])->findOrFail($id);
+
+        // Check if this check payment has already been charged once (unlocked)
+        $alreadyCharged = $payment->logs()
+            ->where(function ($q) {
+                $q->whereIn('note', [
+                    'Check PDF printed / downloaded',
+                    'E-check sent via email',
+                    'Mail check sent',
+                ])->orWhere('note', 'LIKE', '%E-check email sent%');
+            })
+            ->exists();
+
+        $creditCheck = ['allowed' => true, 'service_price' => 0];
+        if (!$alreadyCharged) {
+            $creditCheck = $this->checkUserCreditForService('Email Check');
+            if (!$creditCheck['allowed']) {
+                return $creditCheck['response'];
+            }
+        }
 
         $payeeEmail = $request->input('email') 
             ?? $payment->payee->email 
@@ -651,8 +679,10 @@ class PaymentController extends Controller
             // Update payment status to sent in DB so it shows under Mailed filter
             $payment->update(['status' => 'sent']);
 
-            // Deduct service charge from user credit balance
-            $this->deductUserCreditForService($creditCheck['service_price']);
+            // Deduct service charge ONLY if not previously charged
+            if (!$alreadyCharged && isset($creditCheck['service_price'])) {
+                $this->deductUserCreditForService($creditCheck['service_price']);
+            }
 
             // Log activity
             $payment->logs()->create([

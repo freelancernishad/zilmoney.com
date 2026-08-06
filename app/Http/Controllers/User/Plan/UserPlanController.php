@@ -36,11 +36,10 @@ class UserPlanController extends Controller
             $activeData = $active->toArray();
         }
 
-        $dbBalance = (float) ($user->credit_balance ?? 0);
         $paymentsSum = (float) $user->payments()->whereIn('status', ['paid', 'Success', 'completed', 'succeeded'])->sum('amount');
         $subsSum = (float) $user->planSubscriptions()->where('status', 'active')->sum('final_amount');
         
-        $totalRecharged = max($dbBalance, $paymentsSum, $subsSum);
+        $totalRecharged = max($paymentsSum, $subsSum);
         $usedCredits = (float) ($user->used_credits ?? 0);
         $netCredit = max(0, $totalRecharged - $usedCredits);
 

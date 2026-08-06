@@ -74,27 +74,7 @@ class PlanSubscriptionHandler
             ]
         );
 
-        // Record payment & increment user credit_balance
-        try {
-            $subscription->payments()->create([
-                'user_id' => $userId,
-                'amount' => $session->amount_total / 100,
-                'currency' => $session->currency,
-                'payment_method' => 'stripe',
-                'transaction_id' => $session->payment_intent,
-                'status' => 'succeeded',
-                'webhook_status' => 'checkout.session.completed',
-                'webhook_received_at' => now(),
-                'meta' => $session,
-            ]);
-
-            $user = \App\Models\User::find($userId);
-            if ($user) {
-                $user->increment('credit_balance', $session->amount_total / 100);
-            }
-        } catch (\Exception $e) {
-            Log::error("Failed to record payment for subscription {$subscription->id}: " . $e->getMessage());
-        }
+        // Note: Payment creation and logging is handled by CheckStripePaymentStatus listener to avoid duplicate entries
 
         Log::info("Plan subscription created/updated for user {$userId}, subscription ID: {$subscription->id}");
     }

@@ -141,9 +141,9 @@ class CheckStripePaymentStatus
             }
         }
 
-        // Amounts: Try to get actual amount from event payload (already in dollars if from our event)
-        $finalAmount = ($event->payload['amount_total'] ?? $event->payload['amount'] ?? 0);
-        if ($finalAmount > 1000) $finalAmount = $finalAmount / 100; // If it's in cents, convert
+        // Amounts: Stripe amount_total is in cents, always convert to dollars
+        $rawAmount = ($event->payload['amount_total'] ?? $event->payload['amount'] ?? 0);
+        $finalAmount = $rawAmount > 0 ? ($rawAmount / 100) : 0;
 
         // If amount from payload is 0 or missing, fallback to plan price
         if ($finalAmount <= 0) {
@@ -174,27 +174,7 @@ class CheckStripePaymentStatus
             ]
         );
 
-        if ($finalAmount > 0) {
-            $user->increment('credit_balance', $finalAmount);
 
-            try {
-                $sub->payments()->create([
-                    'user_id' => $user->id,
-                    'amount' => $finalAmount,
-                    'currency' => strtolower($event->payload['currency'] ?? 'usd'),
-                    'payment_method' => 'card',
-                    'transaction_id' => $event->payload['payment_intent'] ?? $sessionId ?? ('tx_' . time()),
-                    'status' => 'paid',
-                    'webhook_status' => 'checkout.session.completed',
-                    'webhook_received_at' => now(),
-                    'meta' => json_encode($event->payload),
-                ]);
-            } catch (\Exception $ex) {
-                Log::error("Failed to record payment in CheckStripePaymentStatus: " . $ex->getMessage());
-            }
-
-            Log::info("Incremented credit_balance by \${$finalAmount} for user {$user->id}");
-        }
         $oldSubscriptions = \App\Models\Plan\PlanSubscription::where('user_id', $user->id)
             ->where('id', '!=', $sub->id) // Exclude the new one
             ->where('status', 'active')

@@ -32,7 +32,7 @@ class StripeWebhookService
 
         // Route to StripeWebhookRouter for PlanSubscriptionHandler
         try {
-            \App\Helpers\StripeWebhookRouter::route($event);
+            \App\Helpers\StripeWebhookRouter::dispatch($event->type, $event->data->object);
         } catch (\Exception $ex) {
             Log::error("StripeWebhookRouter error: " . $ex->getMessage());
         }
