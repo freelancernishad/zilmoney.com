@@ -876,7 +876,11 @@ class PaymentController extends Controller
         }
 
         $activeSub = $user->planSubscriptions()->where('status', 'active')->latest('start_date')->first();
-        $activePlan = $activeSub ? $activeSub->plan : \App\Models\Plan\Plan::find(1);
+        $activePlan = $activeSub 
+            ? $activeSub->plan 
+            : (\App\Models\Plan\Plan::where('name', 'like', '%Pay As You Go%')->first() 
+               ?? \App\Models\Plan\Plan::find(1) 
+               ?? \App\Models\Plan\Plan::first());
 
         // Determine price for service based on user plan
         $servicePrice = 0.75; // Default for Pay As You Go

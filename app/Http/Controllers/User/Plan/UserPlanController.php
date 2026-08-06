@@ -22,12 +22,13 @@ class UserPlanController extends Controller
 
         if (!$active) {
             $payAsYouGoPlan = \App\Models\Plan\Plan::where('name', 'like', '%Pay As You Go%')->first()
-                ?? \App\Models\Plan\Plan::find(1);
+                ?? \App\Models\Plan\Plan::find(1)
+                ?? \App\Models\Plan\Plan::first();
 
             $activeData = [
                 'id' => null,
                 'user_id' => $user->id,
-                'plan_id' => $payAsYouGoPlan ? $payAsYouGoPlan->id : 1,
+                'plan_id' => $payAsYouGoPlan ? $payAsYouGoPlan->id : null,
                 'status' => 'active',
                 'is_default' => true,
                 'plan' => $payAsYouGoPlan,
