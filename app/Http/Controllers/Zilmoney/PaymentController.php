@@ -895,14 +895,28 @@ class PaymentController extends Controller
             $formattedPrice = number_format($servicePrice, 2);
             $formattedAvailable = number_format($availableCredit, 2);
             $planName = $activePlan->name ?? 'Current Plan';
-            return [
-                'allowed' => false,
-                'response' => response()->json([
+            $rechargeUrl = env('FRONTEND_URL', 'http://localhost:3000') . '/dashboard/more/recharge';
+
+            if (request()->wantsJson() || request()->ajax()) {
+                $res = response()->json([
                     'message' => "Insufficient credit balance. {$serviceName} requires \${$formattedPrice} USD on your {$planName}. Available balance: \${$formattedAvailable} USD. Please recharge your credit balance to perform check printing, emailing or mailing.",
                     'require_recharge' => true,
                     'service_cost' => $servicePrice,
                     'current_credit' => $availableCredit,
-                ], 402)
+                ], 402);
+            } else {
+                $res = response(view('zilmoney.errors.insufficient_credit', [
+                    'serviceName' => $serviceName,
+                    'servicePrice' => $formattedPrice,
+                    'availableCredit' => $formattedAvailable,
+                    'planName' => $planName,
+                    'rechargeUrl' => $rechargeUrl,
+                ]), 402);
+            }
+
+            return [
+                'allowed' => false,
+                'response' => $res
             ];
         }
 
