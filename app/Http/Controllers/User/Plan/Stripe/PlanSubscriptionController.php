@@ -40,6 +40,11 @@ class PlanSubscriptionController extends Controller
         // The old one will be canceled in the webhook listener upon successful payment.
 
         $discountedPrice = $plan->discounted_price;
+        if ($request->filled('amount') && (float)$request->amount > 0) {
+            $discountedPrice = (float) $request->amount;
+        } elseif ($request->filled('custom_amount') && (float)$request->custom_amount > 0) {
+            $discountedPrice = (float) $request->custom_amount;
+        }
         $couponId = null;
         $extraParams = [];
 
