@@ -340,6 +340,12 @@ class PaymentController extends Controller
         $business = auth()->user()->businessDetails;
         if (!$business) return response()->json(['message' => 'Business profile required'], 400);
 
+        // Check user credit balance for Check Printing
+        $creditCheck = $this->checkUserCreditForService('Check Printing');
+        if (!$creditCheck['allowed']) {
+            return $creditCheck['response'];
+        }
+
         $payment = $business->payments()->with(['business', 'payee', 'account'])->findOrFail($id);
 
         // Audit Log for check printing compliance
@@ -363,6 +369,12 @@ class PaymentController extends Controller
     {
         $business = auth()->user()->businessDetails;
         if (!$business) return response()->json(['message' => 'Business profile required'], 400);
+
+        // Check user credit balance for Check Printing
+        $creditCheck = $this->checkUserCreditForService('Check Printing');
+        if (!$creditCheck['allowed']) {
+            return $creditCheck['response'];
+        }
 
         $validated = $request->validate([
             'account_id' => 'required|exists:accounts,id',
@@ -544,6 +556,12 @@ class PaymentController extends Controller
     {
         $business = auth()->user()->businessDetails;
         if (!$business) return response()->json(['message' => 'Business profile required'], 400);
+
+        // Check user credit balance for Email Check
+        $creditCheck = $this->checkUserCreditForService('Email Check');
+        if (!$creditCheck['allowed']) {
+            return $creditCheck['response'];
+        }
 
         $payment = $business->payments()->with(['payee', 'account', 'comments', 'business'])->findOrFail($id);
 
@@ -806,6 +824,56 @@ class PaymentController extends Controller
                 'starting_check_number' => (string) $startingNumber,
             ]
         ]);
+    }
+
+    /**
+     * Check whether the user has sufficient credit balance for a check service (Print, Email, Mail).
+     */
+    private function checkUserCreditForService($serviceName = 'Check Printing')
+    {
+        $user = auth()->user();
+        if (!$user) {
+            return [
+                'allowed' => false,
+                'response' => response()->json(['message' => 'Unauthenticated. Please log in.'], 401)
+            ];
+        }
+
+        $activeSub = $user->planSubscriptions()->where('status', 'active')->latest('start_date')->first();
+        $activePlan = $activeSub ? $activeSub->plan : \App\Models\Plan\Plan::find(1);
+
+        // Determine price for service based on user plan
+        $servicePrice = 0.75; // Default for Pay As You Go
+        if ($activePlan && is_array($activePlan->features)) {
+            foreach ($activePlan->features as $feature) {
+                if (($feature['label'] ?? '') === $serviceName && isset($feature['price'])) {
+                    $servicePrice = (float) str_replace(['$', ' '], '', $feature['price']);
+                    break;
+                }
+            }
+        }
+
+        // Calculate available credit balance
+        $totalRechargeCredit = (float) $user->planSubscriptions()->where('status', 'active')->sum('final_amount');
+        if ($totalRechargeCredit == 0) {
+            $totalRechargeCredit = (float) $user->payments()->where('status', 'paid')->sum('amount');
+        }
+
+        if ($totalRechargeCredit < $servicePrice) {
+            $formattedPrice = number_format($servicePrice, 2);
+            $planName = $activePlan->name ?? 'Current Plan';
+            return [
+                'allowed' => false,
+                'response' => response()->json([
+                    'message' => "Insufficient credit balance. {$serviceName} requires \${$formattedPrice} USD on your {$planName}. Please recharge your credit balance to perform check printing, emailing or mailing.",
+                    'require_recharge' => true,
+                    'service_cost' => $servicePrice,
+                    'current_credit' => $totalRechargeCredit,
+                ], 402)
+            ];
+        }
+
+        return ['allowed' => true, 'service_price' => $servicePrice];
     }
 }
 

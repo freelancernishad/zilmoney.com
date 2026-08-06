@@ -52,6 +52,29 @@ class AccountController extends Controller
         $business = Auth::user()->businessDetails;
         if (!$business) return response()->json(['message' => 'Business profile required'], 400);
 
+        // Check Bank Account Creation Limit from User Active Plan
+        $user = Auth::user();
+        $activeSub = $user->planSubscriptions()->where('status', 'active')->latest('start_date')->first();
+        $activePlan = $activeSub ? $activeSub->plan : \App\Models\Plan\Plan::find(1);
+
+        $maxAllowed = 1;
+        if ($activePlan && is_array($activePlan->features)) {
+            foreach ($activePlan->features as $feature) {
+                if (($feature['label'] ?? '') === 'Bank Accounts Allowed') {
+                    $maxAllowed = (int) ($feature['value'] ?? 1);
+                    break;
+                }
+            }
+        }
+
+        $currentAccountsCount = $business->accounts()->count();
+        if ($currentAccountsCount >= $maxAllowed) {
+            $planName = $activePlan->name ?? 'Current Plan';
+            return response()->json([
+                'message' => "Bank account creation limit reached ({$maxAllowed} allowed on your {$planName}). Please upgrade your plan to add more bank accounts."
+            ], 403);
+        }
+
         $validated = $request->validate([
             'account_holder_name' => 'required|string',
             'account_nick_name' => 'nullable|string',
