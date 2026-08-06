@@ -46,7 +46,7 @@ class PlaidService
                 'client_user_id' => (string) $userId,
                 'email_address' => \App\Models\User::find($userId)?->email ?? 'no-email@example.com',
             ],
-            'products' => $accessToken ? [] : ['transactions', 'auth'], // Products cannot be set in update mode
+            'products' => $accessToken ? [] : [/* 'transactions', */ 'auth'], // Products cannot be set in update mode
             'webhook' => ($this->getWebhookUrl()) . '?webhook_user_id=' . $userId . '&webhook_company_id=' . $companyId,
             'hosted_link' => [
                 // 'delivery_method' => 'email', // Disabled: Requires Plaid dashboard config. We will redirect manually.
