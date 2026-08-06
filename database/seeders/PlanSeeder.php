@@ -65,14 +65,14 @@ class PlanSeeder extends Seeder
             ],
         ]);
 
-        // Plan 2: Starter Plan ($10.00 / month - 3 Bank Accounts)
+        // Plan 2: Starter Plan ($15.00 / month - 3 Bank Accounts)
         Plan::create([
             'id' => 2,
             'name' => 'Starter Plan',
             'duration' => '1 month',
-            'original_price' => 10.00,
-            'discounted_price' => 10.00,
-            'monthly_price' => 10.00,
+            'original_price' => 15.00,
+            'discounted_price' => 15.00,
+            'monthly_price' => 15.00,
             'discount_percentage' => 0,
             'features' => [
                 [
@@ -115,14 +115,14 @@ class PlanSeeder extends Seeder
             ],
         ]);
 
-        // Plan 3: Professional Plan ($20.00 / month - 5 Bank Accounts)
+        // Plan 3: Professional Plan ($25.00 / month - 5 Bank Accounts)
         Plan::create([
             'id' => 3,
             'name' => 'Professional Plan',
             'duration' => '1 month',
-            'original_price' => 20.00,
-            'discounted_price' => 20.00,
-            'monthly_price' => 20.00,
+            'original_price' => 25.00,
+            'discounted_price' => 25.00,
+            'monthly_price' => 25.00,
             'discount_percentage' => 0,
             'features' => [
                 [
