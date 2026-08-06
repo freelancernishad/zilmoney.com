@@ -30,6 +30,13 @@ class StripeWebhookService
             return response()->json(['error' => 'Invalid signature'], 400);
         }
 
+        // Route to StripeWebhookRouter for PlanSubscriptionHandler
+        try {
+            \App\Helpers\StripeWebhookRouter::route($event);
+        } catch (\Exception $ex) {
+            Log::error("StripeWebhookRouter error: " . $ex->getMessage());
+        }
+
         // Handle the event
         switch ($event->type) {
             case 'checkout.session.completed':

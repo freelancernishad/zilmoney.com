@@ -72,6 +72,8 @@ class PlanSubscription extends Model
         if (empty($this->plan_features) || !is_array($this->plan_features)) return [];
 
         return collect($this->plan_features)->map(function ($item) {
+            if (!is_array($item)) return '';
+            if (!isset($item['key'])) return $item['label'] ?? $item['value'] ?? '';
             $feature = PlanFeature::where('key', $item['key'])->first();
             if (!$feature) return $item['value'] ?? '';
             $data = $item;

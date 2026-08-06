@@ -143,8 +143,11 @@ class PlanSubscriptionController extends Controller
         }
 
         $metadata = [
-            'plan_id' => $plan->id,
-            'coupon_id' => $couponId,
+            'user_id' => (string) Auth::id(),
+            'plan_id' => (string) $plan->id,
+            'coupon_id' => (string) ($couponId ?? ''),
+            'payment_type' => 'plan_subscription',
+            'mode' => $paymentType === 'single' ? 'payment' : 'subscription',
         ];
 
         try {

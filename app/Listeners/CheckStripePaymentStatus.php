@@ -174,9 +174,27 @@ class CheckStripePaymentStatus
             ]
         );
 
+        if ($finalAmount > 0) {
+            $user->increment('credit_balance', $finalAmount);
 
+            try {
+                $sub->payments()->create([
+                    'user_id' => $user->id,
+                    'amount' => $finalAmount,
+                    'currency' => strtolower($event->payload['currency'] ?? 'usd'),
+                    'payment_method' => 'card',
+                    'transaction_id' => $event->payload['payment_intent'] ?? $sessionId ?? ('tx_' . time()),
+                    'status' => 'paid',
+                    'webhook_status' => 'checkout.session.completed',
+                    'webhook_received_at' => now(),
+                    'meta' => json_encode($event->payload),
+                ]);
+            } catch (\Exception $ex) {
+                Log::error("Failed to record payment in CheckStripePaymentStatus: " . $ex->getMessage());
+            }
 
-        // Logic to cancel OLD active subscriptions (Upgrade/Switch path)
+            Log::info("Incremented credit_balance by \${$finalAmount} for user {$user->id}");
+        }
         $oldSubscriptions = \App\Models\Plan\PlanSubscription::where('user_id', $user->id)
             ->where('id', '!=', $sub->id) // Exclude the new one
             ->where('status', 'active')
