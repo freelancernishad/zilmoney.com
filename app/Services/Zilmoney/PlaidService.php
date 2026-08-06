@@ -36,6 +36,20 @@ class PlaidService
     {
         \Log::info("createLinkToken: Called with User ID: $userId, Company ID: $companyId" . ($accessToken ? ", Access Token: (Provided)" : ""));
 
+        $configuredProductsRaw = SystemSetting::getValue('plaid_products');
+        $configuredProducts = [];
+        if ($configuredProductsRaw) {
+            $decoded = json_decode($configuredProductsRaw, true);
+            if (is_array($decoded)) {
+                $configuredProducts = $decoded;
+            } else {
+                $configuredProducts = array_filter(array_map('trim', explode(',', $configuredProductsRaw)));
+            }
+        }
+        if (empty($configuredProducts)) {
+            $configuredProducts = ['auth'];
+        }
+
         $payload = [
             'client_id' => $this->clientId,
             'secret' => $this->secret,
@@ -46,7 +60,7 @@ class PlaidService
                 'client_user_id' => (string) $userId,
                 'email_address' => \App\Models\User::find($userId)?->email ?? 'no-email@example.com',
             ],
-            'products' => $accessToken ? [] : [/* 'transactions', */ 'auth'], // Products cannot be set in update mode
+            'products' => $accessToken ? [] : array_values($configuredProducts), // Products cannot be set in update mode
             'webhook' => ($this->getWebhookUrl()) . '?webhook_user_id=' . $userId . '&webhook_company_id=' . $companyId,
             'hosted_link' => [
                 // 'delivery_method' => 'email', // Disabled: Requires Plaid dashboard config. We will redirect manually.

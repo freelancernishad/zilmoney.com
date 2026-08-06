@@ -414,6 +414,32 @@
                                     placeholder="https://your-domain.com/api/zilmoney/plaid/webhook">
                                 <p class="text-xs text-slate-500 mt-1">Required for Hosted Link. Use ngrok for local dev.</p>
                             </div>
+                            <div>
+                                <label class="block text-sm font-medium text-slate-400 mb-2">Enabled Plaid Products / Services</label>
+                                <p class="text-xs text-slate-500 mb-3">Select products enabled in your Plaid Dashboard overview.</p>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 p-4 rounded-xl bg-white/5 border border-white/10">
+                                    <label class="flex items-center gap-3 text-sm text-white cursor-pointer hover:text-indigo-400 transition-colors">
+                                        <input type="checkbox" name="plaid_products_check" value="auth" checked class="w-4 h-4 rounded bg-slate-800 border-slate-700 text-indigo-600 focus:ring-indigo-500">
+                                        <span><strong>Auth</strong> (Bank Account Connection)</span>
+                                    </label>
+                                    <label class="flex items-center gap-3 text-sm text-white cursor-pointer hover:text-indigo-400 transition-colors">
+                                        <input type="checkbox" name="plaid_products_check" value="transactions" class="w-4 h-4 rounded bg-slate-800 border-slate-700 text-indigo-600 focus:ring-indigo-500">
+                                        <span><strong>Transactions</strong> (Transaction History)</span>
+                                    </label>
+                                    <label class="flex items-center gap-3 text-sm text-white cursor-pointer hover:text-indigo-400 transition-colors">
+                                        <input type="checkbox" name="plaid_products_check" value="identity" class="w-4 h-4 rounded bg-slate-800 border-slate-700 text-indigo-600 focus:ring-indigo-500">
+                                        <span><strong>Identity</strong> (Account Owner Info)</span>
+                                    </label>
+                                    <label class="flex items-center gap-3 text-sm text-white cursor-pointer hover:text-indigo-400 transition-colors">
+                                        <input type="checkbox" name="plaid_products_check" value="balance" class="w-4 h-4 rounded bg-slate-800 border-slate-700 text-indigo-600 focus:ring-indigo-500">
+                                        <span><strong>Balance</strong> (Real-Time Balance Check)</span>
+                                    </label>
+                                    <label class="flex items-center gap-3 text-sm text-white cursor-pointer hover:text-indigo-400 transition-colors">
+                                        <input type="checkbox" name="plaid_products_check" value="assets" class="w-4 h-4 rounded bg-slate-800 border-slate-700 text-indigo-600 focus:ring-indigo-500">
+                                        <span><strong>Assets</strong> (Asset Statements)</span>
+                                    </label>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -489,13 +515,16 @@
                 const settings = [];
                 
                 formData.forEach((value, key) => {
-                     // Checkboxes with same name workaround:
-                     // If we have a hidden input with value 0 and checkbox with same name,
-                     // FormData includes both. The logic to handle this is usually backend or meticulous frontend.
-                     // Here we just push exactly what form data gives, and backend should handle "last one wins" or similar.
-                    if (key !== '_token' && value !== '' && value !== null) {
+                    if (key !== '_token' && key !== 'plaid_products_check' && value !== '' && value !== null) {
                         settings.push({ key: key, value: value });
                     }
+                });
+
+                // Package selected Plaid products
+                const checkedPlaidProducts = Array.from(document.querySelectorAll('input[name="plaid_products_check"]:checked')).map(cb => cb.value);
+                settings.push({
+                    key: 'plaid_products',
+                    value: JSON.stringify(checkedPlaidProducts)
                 });
 
                 try {
@@ -553,6 +582,24 @@
                         } else {
                             input.value = value;
                         }
+                    }
+                }
+
+                // Populate plaid_products checkboxes
+                if (settings.plaid_products) {
+                    try {
+                        let products = JSON.parse(settings.plaid_products);
+                        if (typeof products === 'string') products = JSON.parse(products);
+                        if (Array.isArray(products)) {
+                            document.querySelectorAll('input[name="plaid_products_check"]').forEach(cb => {
+                                cb.checked = products.includes(cb.value);
+                            });
+                        }
+                    } catch (e) {
+                        const products = settings.plaid_products.split(',').map(s => s.trim());
+                        document.querySelectorAll('input[name="plaid_products_check"]').forEach(cb => {
+                            cb.checked = products.includes(cb.value);
+                        });
                     }
                 }
 
