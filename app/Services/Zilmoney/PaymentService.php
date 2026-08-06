@@ -21,12 +21,7 @@ class PaymentService
                 throw new Exception("Account not found.");
             }
 
-            // 1. Balance Validation
-            if ($account->balance < $data['amount']) {
-                throw new Exception("Insufficient funds. Available: {$account->balance}");
-            }
-
-            // 2. Check Number Logic (Auto-increment to next unique check number)
+            // 1. Check Number Logic (Auto-increment to next unique check number)
             $checkNumber = (!empty($data['check_number']) && is_numeric($data['check_number']))
                 ? (int)$data['check_number']
                 : $this->getNextCheckNumber($account);

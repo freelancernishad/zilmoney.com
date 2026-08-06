@@ -228,25 +228,6 @@ class PaymentController extends Controller
 
         try {
             \DB::transaction(function () use ($payment, $validated) {
-                $account = $payment->account;
-
-                if (isset($validated['amount']) && $validated['amount'] != $payment->amount) {
-                    $account->increment('balance', $payment->amount);
-                    if ($account->fresh()->balance < $validated['amount']) {
-                        throw new \Exception("Insufficient funds on account.");
-                    }
-                    $account->decrement('balance', $validated['amount']);
-                }
-
-                if (isset($validated['status']) && in_array(strtolower($validated['status']), ['void', 'failed']) && !in_array(strtolower($payment->status), ['void', 'failed'])) {
-                    $account->increment('balance', $payment->amount);
-                } elseif (isset($validated['status']) && !in_array(strtolower($validated['status']), ['void', 'failed']) && in_array(strtolower($payment->status), ['void', 'failed'])) {
-                    if ($account->balance < $payment->amount) {
-                        throw new \Exception("Insufficient funds to reactivate payment.");
-                    }
-                    $account->decrement('balance', $payment->amount);
-                }
-
                 $payment->update($validated);
             });
 
