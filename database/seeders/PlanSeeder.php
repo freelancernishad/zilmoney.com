@@ -65,32 +65,32 @@ class PlanSeeder extends Seeder
             ],
         ]);
 
-        // Plan 2: Starter Plan ($15.00 / month - 3 Bank Accounts)
+        // Plan 2: Starter Plan ($10.00 / month - $0.60 rate, 3 Bank Accounts)
         Plan::create([
             'id' => 2,
             'name' => 'Starter Plan',
             'duration' => '1 month',
-            'original_price' => 15.00,
-            'discounted_price' => 15.00,
-            'monthly_price' => 15.00,
+            'original_price' => 10.00,
+            'discounted_price' => 10.00,
+            'monthly_price' => 10.00,
             'discount_percentage' => 0,
             'features' => [
                 [
                     'label' => 'Check Printing',
-                    'price' => '$0.50',
-                    'tooltipText' => 'Print checks online instantly from any bank account on any printer ($0.50 USD per check).'
+                    'price' => '$0.60',
+                    'tooltipText' => 'Print checks online instantly from any bank account on any printer ($0.60 USD per check).'
                 ],
                 [
                     'label' => 'Email Check',
-                    'price' => '$0.50',
-                    'tooltipText' => 'Email a One-Time printable, trackable check to recipient ($0.50 USD per email check).'
+                    'price' => '$0.60',
+                    'tooltipText' => 'Email a One-Time printable, trackable check to recipient ($0.60 USD per email check).'
                 ],
                 [
                     'label' => 'Mail Check In One Click',
                     'subLabel' => '(USPS / Fedex)',
-                    'price' => '$0.50',
+                    'price' => '$0.60',
                     'isGreen' => true,
-                    'tooltipText' => 'Print and mail your check in one click on the same business day ($0.50 USD).'
+                    'tooltipText' => 'Print and mail your check in one click on the same business day ($0.60 USD).'
                 ],
                 [
                     'label' => 'Bank Accounts Allowed',
@@ -115,14 +115,14 @@ class PlanSeeder extends Seeder
             ],
         ]);
 
-        // Plan 3: Professional Plan ($25.00 / month - 5 Bank Accounts)
+        // Plan 3: Professional Plan ($20.00 / month - $0.50 rate, 5 Bank Accounts)
         Plan::create([
             'id' => 3,
             'name' => 'Professional Plan',
             'duration' => '1 month',
-            'original_price' => 25.00,
-            'discounted_price' => 25.00,
-            'monthly_price' => 25.00,
+            'original_price' => 20.00,
+            'discounted_price' => 20.00,
+            'monthly_price' => 20.00,
             'discount_percentage' => 0,
             'features' => [
                 [
