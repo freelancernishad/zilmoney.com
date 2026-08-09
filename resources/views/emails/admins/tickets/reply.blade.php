@@ -3,187 +3,238 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>New Reply on Ticket</title>
+    <title>New User Reply on Ticket - GoldenMark Money Admin</title>
     <style>
         body {
-            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-            background-color: #f4f4f7;
-            color: #51545e;
             margin: 0;
             padding: 0;
-            -webkit-text-size-adjust: none;
-            width: 100% !important;
+            background-color: #f8fafc;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            color: #334155;
+            -webkit-text-size-adjust: 100%;
         }
-        .email-wrapper {
-            width: 100%;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f4f7;
+        table {
+            border-collapse: collapse;
         }
-        .email-content {
-            width: 100%;
-            margin: 0;
-            padding: 0;
+        .email-container {
             max-width: 600px;
-            margin: 0 auto;
-        }
-        .email-masthead {
-            padding: 25px 0;
-            text-align: center;
-            background-color: #ef4444; /* Red-500 for Admin Alerts */
-            color: white;
-            border-top-left-radius: 8px;
-            border-top-right-radius: 8px;
-        }
-        .email-masthead_name {
-            font-size: 24px;
-            font-weight: bold;
-            color: #ffffff;
-            text-decoration: none;
-            text-shadow: 0 1px 0 rgba(0,0,0,0.1);
-        }
-        .email-body {
-            width: 100%;
-            margin: 0;
-            padding: 0;
+            margin: 30px auto;
             background-color: #ffffff;
-            border-bottom: 1px solid #eaeaec;
-            border-left: 1px solid #eaeaec;
-            border-right: 1px solid #eaeaec;
+            border-radius: 20px;
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.03);
         }
-        .email-body_inner {
-            width: 570px;
-            margin: 0 auto;
-            padding: 35px;
+        .header-top-bar {
+            height: 5px;
+            background: linear-gradient(90deg, #f59e0b 0%, #ea580c 100%);
         }
-        .button {
-            background-color: #ef4444;
-            border-top: 10px solid #ef4444;
-            border-right: 18px solid #ef4444;
-            border-bottom: 10px solid #ef4444;
-            border-left: 18px solid #ef4444;
-            display: inline-block;
-            color: #FFF;
+        .brand-header {
+            padding: 32px 36px 20px 36px;
+            background: #ffffff;
+            text-align: center;
+        }
+        .brand-logo-text {
+            font-size: 24px;
+            font-weight: 900;
+            color: #0f172a;
+            letter-spacing: -0.5px;
             text-decoration: none;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08);
-            font-weight: bold;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
         }
-        h1 {
+        .brand-badge {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 4px 14px;
+            background-color: #fef2f2;
+            color: #b91c1c;
+            border: 1px solid #fecaca;
+            border-radius: 9999px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .content-body {
+            padding: 10px 36px 36px 36px;
+        }
+        .hero-title {
             font-size: 22px;
-            font-weight: bold;
-            margin-top: 0;
-            text-align: left;
-            color: #333333;
+            font-weight: 800;
+            color: #0f172a;
+            margin: 0 0 12px 0;
+            text-align: center;
         }
-        p {
-            margin-top: 0;
-            color: #51545e;
-            font-size: 16px;
-            line-height: 1.625em;
+        .hero-subtitle {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #475569;
+            margin: 0 0 24px 0;
+            text-align: left;
+        }
+        .ticket-card {
+            background-color: #f8fafc;
+            border-radius: 16px;
+            border: 1px solid #e2e8f0;
+            padding: 20px 24px;
+            margin: 20px 0;
+        }
+        .ticket-table {
+            width: 100%;
+        }
+        .ticket-table td {
+            padding: 6px 0;
+            font-size: 14px;
+            color: #475569;
+        }
+        .ticket-table .label {
+            font-weight: 600;
+            color: #64748b;
+            width: 35%;
+        }
+        .ticket-table .value {
+            text-align: right;
+            font-weight: 700;
+            color: #0f172a;
+        }
+        .badge-pill {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 9999px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: capitalize;
+        }
+        .badge-amber {
+            background-color: #fef3c7;
+            color: #b45309;
+            border: 1px solid #fde68a;
         }
         .reply-box {
-            background-color: #f9fafb;
-            border-left: 4px solid #ef4444;
-            padding: 15px;
-            margin: 20px 0;
-            border-radius: 4px;
-            color: #374151;
-            font-style: italic;
-        }
-        .ticket_details {
-            margin-top: 25px;
-            margin-bottom: 25px;
-            background-color: #f4f4f7;
+            background-color: #ffffff;
+            border-left: 4px solid #f59e0b;
+            border-top: 1px solid #e2e8f0;
+            border-right: 1px solid #e2e8f0;
+            border-bottom: 1px solid #e2e8f0;
+            border-radius: 12px;
             padding: 20px;
-            border-radius: 8px;
-            border: 1px solid #eaeaec;
+            margin: 24px 0;
         }
-        .ticket_details table {
-            width: 100%;
+        .reply-box-header {
+            font-size: 12px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #b45309;
+            margin-bottom: 10px;
         }
-        .ticket_details td {
-            padding: 5px 0;
+        .reply-box-content {
+            font-size: 14.5px;
+            line-height: 1.7;
+            color: #1e293b;
+            white-space: pre-line;
+        }
+        .btn-wrapper {
+            text-align: center;
+            margin: 30px 0 10px 0;
+        }
+        .btn-primary {
+            display: inline-block;
+            background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%);
+            color: #ffffff !important;
             font-size: 15px;
-            color: #51545e;
-        }
-        .ticket_details .label {
-            font-weight: bold;
-            width: 30%;
-        }
-        .ticket_details .value {
-            text-align: right;
-            font-family: monospace;
-            font-size: 16px;
-            color: #333;
+            font-weight: 700;
+            text-decoration: none;
+            padding: 14px 34px;
+            border-radius: 12px;
+            box-shadow: 0 4px 14px rgba(245, 158, 11, 0.35);
         }
         .footer {
-            width: 570px;
-            margin: 0 auto;
-            padding: 25px;
+            background-color: #f8fafc;
+            border-top: 1px solid #e2e8f0;
+            padding: 24px 36px;
             text-align: center;
-        }
-        .footer p {
-            color: #aeaeae;
             font-size: 12px;
+            color: #64748b;
+            line-height: 1.6;
         }
     </style>
 </head>
 <body>
-    <div class="email-wrapper">
-        <div class="email-content">
-            <!-- Masthead -->
-            <div class="email-masthead">
-                <a href="{{ config('app.url') }}" class="email-masthead_name">
-                    {{ config('app.name') }} Admin
-                </a>
-            </div>
+    <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #f8fafc; padding: 20px 10px;">
+        <tr>
+            <td align="center">
+                <div class="email-container">
+                    <!-- Top Accent Bar -->
+                    <div class="header-top-bar"></div>
 
-            <!-- Body -->
-            <div class="email-body">
-                <div class="email-body_inner">
-                    <h1>New Reply on Ticket #{{ $ticket_id }}</h1>
-                    <p>Hello Admin,</p>
-                    <p>User <strong>{{ $user_name }}</strong> has replied to a support ticket.</p>
-                    
-                    <div class="reply-box">
-                        "{{ \Illuminate\Support\Str::limit($reply_content, 200) }}"
-                    </div>
-                    
-                    <div class="ticket_details">
-                        <table>
-                            <tr>
-                                <td class="label">Ticket ID</td>
-                                <td class="value">#{{ $ticket_id }}</td>
-                            </tr>
-                            <tr>
-                                <td class="label">User</td>
-                                <td class="value">{{ $user_name }}</td>
-                            </tr>
-                            <tr>
-                                <td class="label">Subject</td>
-                                <td class="value">{{ $ticket_subject }}</td>
-                            </tr>
-                            <tr>
-                                <td class="label">Status</td>
-                                <td class="value" style="text-transform: capitalize;">{{ $ticket_status }}</td>
-                            </tr>
-                        </table>
+                    <!-- Brand Header -->
+                    <div class="brand-header">
+                        <div class="brand-logo-text">
+                            <span style="color: #0f172a;">GoldenMark</span>
+                            <span style="color: #f59e0b;">Money</span>
+                        </div>
+                        <div>
+                            <span class="brand-badge">User Reply Alert</span>
+                        </div>
                     </div>
 
-                    <p>Click the button below to view the full conversation and respond.</p>
-                    
-                    <div style="text-align: center; margin-top: 30px; margin-bottom: 20px;">
-                        <a href="{{ url('/admin/support/tickets/' . $ticket_id) }}" class="button">Manage Ticket</a>
+                    <!-- Content Body -->
+                    <div class="content-body">
+                        <h1 class="hero-title">New User Reply on Ticket #{{ $ticket_id }}</h1>
+                        <p class="hero-subtitle">
+                            Hello Admin,<br><br>
+                            User <strong>{{ $user_name }}</strong> has added a new response to their ticket:
+                        </p>
+
+                        <!-- Ticket Summary Strip -->
+                        <div class="ticket-card">
+                            <table class="ticket-table" border="0" cellspacing="0" cellpadding="0">
+                                <tr>
+                                    <td class="label">Ticket Reference:</td>
+                                    <td class="value"><span style="font-family: monospace; color: #d97706;">#{{ $ticket_id }}</span></td>
+                                </tr>
+                                <tr>
+                                    <td class="label">User:</td>
+                                    <td class="value">{{ $user_name }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="label">Subject:</td>
+                                    <td class="value">{{ $ticket_subject }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="label">Status:</td>
+                                    <td class="value">
+                                        <span class="badge-pill badge-amber">{{ $ticket_status }}</span>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+
+                        <!-- Response Quote Card -->
+                        <div class="reply-box">
+                            <div class="reply-box-header">User Message:</div>
+                            <div class="reply-box-content">{{ $reply_content }}</div>
+                        </div>
+
+                        <!-- Manage Action Button -->
+                        <div class="btn-wrapper">
+                            <a href="{{ url('/admin/support/tickets/' . $ticket_id) }}" class="btn-primary">Manage Ticket in Admin</a>
+                        </div>
+                    </div>
+
+                    <!-- Footer -->
+                    <div class="footer">
+                        <p style="margin: 0 0 6px 0; font-weight: 700; color: #0f172a;">GoldenMark Money System Alert</p>
+                        <p style="margin: 0; font-size: 11px; color: #94a3b8;">
+                            &copy; {{ date('Y') }} GoldenMark Money®. All rights reserved.
+                        </p>
                     </div>
                 </div>
-            </div>
-
-            <!-- Footer -->
-            <div class="footer">
-                <p>&copy; {{ date('Y') }} {{ config('app.name') }}. All rights reserved.</p>
-            </div>
-        </div>
-    </div>
+            </td>
+        </tr>
+    </table>
 </body>
 </html>

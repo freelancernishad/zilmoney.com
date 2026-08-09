@@ -1,94 +1,279 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GoldenMark Money: E-check Payment</title>
+    <title>E-check Payment Received - GoldenMark Money</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #f8fafc;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            color: #334155;
+            -webkit-text-size-adjust: 100%;
+        }
+        table {
+            border-collapse: collapse;
+        }
+        .email-container {
+            max-width: 600px;
+            margin: 30px auto;
+            background-color: #ffffff;
+            border-radius: 20px;
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.03);
+        }
+        .header-top-bar {
+            height: 5px;
+            background: linear-gradient(90deg, #f59e0b 0%, #ea580c 100%);
+        }
+        .brand-header {
+            padding: 32px 36px 20px 36px;
+            background: #ffffff;
+            text-align: center;
+        }
+        .brand-logo-text {
+            font-size: 24px;
+            font-weight: 900;
+            color: #0f172a;
+            letter-spacing: -0.5px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .brand-badge {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 4px 14px;
+            background-color: #fef3c7;
+            color: #b45309;
+            border: 1px solid #fde68a;
+            border-radius: 9999px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .content-body {
+            padding: 10px 36px 36px 36px;
+        }
+        .hero-title {
+            font-size: 22px;
+            font-weight: 800;
+            color: #0f172a;
+            margin: 0 0 12px 0;
+            text-align: center;
+        }
+        .hero-subtitle {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #475569;
+            margin: 0 0 24px 0;
+            text-align: left;
+        }
+        .amount-card {
+            background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+            border: 1px solid #fde68a;
+            border-radius: 16px;
+            padding: 24px;
+            text-align: center;
+            margin: 24px 0;
+        }
+        .amount-label {
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #b45309;
+            margin-bottom: 6px;
+        }
+        .amount-value {
+            font-size: 36px;
+            font-weight: 900;
+            color: #0f172a;
+            letter-spacing: -1px;
+        }
+        .details-card {
+            background-color: #f8fafc;
+            border-radius: 16px;
+            border: 1px solid #e2e8f0;
+            padding: 20px 24px;
+            margin: 24px 0;
+        }
+        .details-header {
+            font-size: 13px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #64748b;
+            margin-bottom: 16px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .details-table {
+            width: 100%;
+        }
+        .details-table td {
+            padding: 8px 0;
+            font-size: 14px;
+            color: #475569;
+        }
+        .details-table .label {
+            font-weight: 600;
+            color: #64748b;
+            width: 40%;
+        }
+        .details-table .value {
+            text-align: right;
+            font-weight: 700;
+            color: #0f172a;
+        }
+        .btn-wrapper {
+            text-align: center;
+            margin: 28px 0 16px 0;
+        }
+        .btn-primary {
+            display: inline-block;
+            background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%);
+            color: #ffffff !important;
+            font-size: 15px;
+            font-weight: 700;
+            text-decoration: none;
+            padding: 14px 34px;
+            border-radius: 12px;
+            box-shadow: 0 4px 14px rgba(245, 158, 11, 0.35);
+        }
+        .secondary-link {
+            text-align: center;
+            margin: 12px 0 0 0;
+            font-size: 13px;
+        }
+        .secondary-link a {
+            color: #d97706;
+            font-weight: 600;
+            text-decoration: underline;
+        }
+        .footer {
+            background-color: #f8fafc;
+            border-top: 1px solid #e2e8f0;
+            padding: 24px 36px;
+            text-align: center;
+            font-size: 12px;
+            color: #64748b;
+            line-height: 1.6;
+        }
+        .footer-links a {
+            color: #d97706;
+            text-decoration: none;
+            font-weight: 600;
+            margin: 0 6px;
+        }
+        .footer-links a:hover {
+            text-decoration: underline;
+        }
+    </style>
 </head>
-<body style="margin: 0; padding: 40px 10px; background-color: #eaf7ed; font-family: 'Segoe UI', Arial, sans-serif; color: #333333; line-height: 1.6;">
+<body>
+    <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #f8fafc; padding: 20px 10px;">
+        <tr>
+            <td align="center">
+                <div class="email-container">
+                    <!-- Top Accent Bar -->
+                    <div class="header-top-bar"></div>
 
-    <div style="max-width: 620px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.06);">
-        
-        <!-- Email Body Content -->
-        <div style="padding: 40px 35px 30px 35px;">
-            
-            <p style="font-size: 16px; margin-top: 0; margin-bottom: 20px;">
-                Dear <strong style="color: #1a73e8;">{{ $payeeName }}</strong>
-            </p>
+                    <!-- Brand Header -->
+                    <div class="brand-header">
+                        <div class="brand-logo-text">
+                            <span style="color: #0f172a;">GoldenMark</span>
+                            <span style="color: #f59e0b;">Money</span>
+                        </div>
+                        <div>
+                            <span class="brand-badge">E-Check Payment</span>
+                        </div>
+                    </div>
 
-            <p style="font-size: 14px; color: #4a5568; margin-bottom: 25px;">
-                A check payment from <strong>{{ $payorName }}</strong> has been issued to you. You can securely view and print your check using the button below.
-            </p>
+                    <!-- Content Body -->
+                    <div class="content-body">
+                        <h1 class="hero-title">You've Received an E-Check!</h1>
+                        <p class="hero-subtitle">
+                            Dear <strong>{{ $payeeName }}</strong>,<br><br>
+                            A check payment from <strong>{{ $payorName }}</strong> has been issued to you. You can securely view and print your check using the button below.
+                        </p>
 
-            <!-- Green Print Button -->
-            <div style="margin-bottom: 30px;">
-                <a href="{{ $printUrl }}" target="_blank" style="background-color: #00c067; color: #ffffff; font-size: 14px; font-weight: bold; text-decoration: none; padding: 12px 28px; border-radius: 8px; display: inline-block; box-shadow: 0 2px 4px rgba(0,192,103,0.3);">
-                    Print Your Check
-                </a>
-            </div>
+                        <!-- Amount Display Banner -->
+                        <div class="amount-card">
+                            <div class="amount-label">Payment Amount</div>
+                            <div class="amount-value">${{ number_format($amount, 2) }}</div>
+                        </div>
 
-            <!-- Payment Details List -->
-            <div style="margin-bottom: 30px;">
-                <h3 style="font-size: 15px; font-weight: bold; color: #1a202c; margin-top: 0; margin-bottom: 12px;">Payment Details:</h3>
-                
-                <ul style="padding-left: 20px; margin: 0; font-size: 13.5px; color: #2d3748; line-height: 1.9;">
-                    <li style="margin-bottom: 4px;"><strong>Payor:</strong> {{ $payorName }}</li>
-                    <li style="margin-bottom: 4px;"><strong>Amount:</strong> ${{ number_format($amount, 2) }}</li>
-                    <li style="margin-bottom: 4px;"><strong>Check Number:</strong> {{ $checkNumber }}</li>
-                    <li style="margin-bottom: 4px;"><strong>Check Memo:</strong> {{ $memo ?? '' }}</li>
-                    <li style="margin-bottom: 4px;"><strong>Mailing Type:</strong> Email</li>
-                    <li style="margin-bottom: 4px;"><strong>Date Processed:</strong> {{ $dateProcessed }}</li>
-                    <li style="margin-bottom: 4px;"><strong>Comment:</strong> {{ $comment ?? '' }}</li>
-                </ul>
-            </div>
+                        <!-- Print Check Action Button -->
+                        <div class="btn-wrapper">
+                            <a href="{{ $printUrl }}" target="_blank" class="btn-primary">Print Your Check</a>
+                        </div>
 
-            <!-- Tracking & Info -->
-            <p style="font-size: 13.5px; color: #4a5568; margin-bottom: 15px;">
-                You can track the status of your check using the following link: 
-                <a href="{{ $trackUrl }}" target="_blank" style="color: #1a73e8; font-weight: bold; text-decoration: underline;">Track Check Status</a>.
-            </p>
+                        <!-- Check Details Table -->
+                        <div class="details-card">
+                            <div class="details-header">Payment Summary</div>
+                            <table class="details-table" border="0" cellspacing="0" cellpadding="0">
+                                <tr>
+                                    <td class="label">Payor:</td>
+                                    <td class="value">{{ $payorName }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="label">Check Number:</td>
+                                    <td class="value"><span style="font-family: monospace;">{{ $checkNumber }}</span></td>
+                                </tr>
+                                @if(!empty($memo))
+                                <tr>
+                                    <td class="label">Check Memo:</td>
+                                    <td class="value">{{ $memo }}</td>
+                                </tr>
+                                @endif
+                                <tr>
+                                    <td class="label">Mailing Type:</td>
+                                    <td class="value">Email (E-Check)</td>
+                                </tr>
+                                <tr>
+                                    <td class="label">Date Processed:</td>
+                                    <td class="value">{{ $dateProcessed }}</td>
+                                </tr>
+                                @if(!empty($comment))
+                                <tr>
+                                    <td class="label">Comment:</td>
+                                    <td class="value">{{ $comment }}</td>
+                                </tr>
+                                @endif
+                            </table>
+                        </div>
 
-            <p style="font-size: 13.5px; color: #4a5568; margin-bottom: 25px;">
-                If you have any questions or need assistance, please contact us at 
-                <a href="mailto:support@goldenmark.money" style="color: #1a73e8; font-weight: bold; text-decoration: underline;">support@goldenmark.money</a>.
-            </p>
+                        <div class="secondary-link">
+                            Track status: <a href="{{ $trackUrl }}" target="_blank">Track Check Status</a> &bull; 
+                            <a href="{{ $loginUrl }}" target="_blank">Login to Account</a>
+                        </div>
+                    </div>
 
-            <!-- Login Section -->
-            <p style="font-size: 13.5px; color: #4a5568; margin-bottom: 30px;">
-                Log in to your account to easily view your payment history and manage your payments:
-                <a href="{{ $loginUrl }}" target="_blank" style="background-color: #1a73e8; color: #ffffff; font-size: 13px; font-weight: bold; text-decoration: none; padding: 8px 18px; border-radius: 6px; display: inline-block; margin-left: 8px; vertical-align: middle;">
-                    Login Here
-                </a>
-            </p>
-
-            <!-- Sign Off -->
-            <div style="font-size: 13px; color: #718096; border-top: 1px solid #edf2f7; pt: 20px; padding-top: 20px;">
-                Best regards,<br>
-                <strong style="color: #4a5568;">The GoldenMark Money Team</strong><br>
-                1-833 711 4030
-            </div>
-
-        </div>
-
-        <!-- Light Mint Footer Band -->
-        <div style="background-color: #c6f6d5; text-align: center; padding: 16px; font-size: 13px; color: #0284c7; font-weight: bold;">
-            For further queries contact: support@goldenmark.money<br>
-            Or 1-833 711 4030
-        </div>
-
-        <!-- Branding Logo Footer -->
-        <div style="padding: 20px; text-align: center; background-color: #ffffff;">
-            <div style="display: inline-flex; align-items: center; justify-content: center; gap: 20px;">
-                <span style="font-size: 20px; font-weight: 900; color: #1a73e8; font-family: sans-serif;">
-                    GoldenMark Money
-                </span>
-                <span style="font-size: 16px; font-weight: 700; color: #2b6cb0; font-family: sans-serif; font-style: italic;">
-                    CheckWRITER
-                </span>
-            </div>
-        </div>
-
-    </div>
-
+                    <!-- Footer -->
+                    <div class="footer">
+                        <p style="margin: 0 0 10px 0; font-weight: 700; color: #0f172a;">GoldenMark Money®</p>
+                        <p style="margin: 0 0 10px 0; color: #64748b;">
+                            74-09 37th Avenue Suite 203B, Jackson Heights, NY 11372<br>
+                            Tel: 833 711 4030 &bull; Email: support@goldenmark.money
+                        </p>
+                        <div class="footer-links" style="margin-bottom: 12px;">
+                            <a href="{{ config('app.url') }}/privacy-policy">Privacy Policy</a> &bull;
+                            <a href="{{ config('app.url') }}/terms">Terms of Service</a> &bull;
+                            <a href="{{ config('app.url') }}/contact">Support</a>
+                        </div>
+                        <p style="margin: 0; font-size: 11px; color: #94a3b8;">
+                            &copy; {{ date('Y') }} GoldenMark Money®. All rights reserved. Powered by ZSI.ai.
+                        </p>
+                    </div>
+                </div>
+            </td>
+        </tr>
+    </table>
 </body>
 </html>
