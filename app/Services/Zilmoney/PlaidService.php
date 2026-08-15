@@ -168,12 +168,14 @@ class PlaidService
             // Find matching numbers if available
             $accountNumber = null;
             $routingNumber = null;
+            $isTokenized = false;
             
             if ($isAuth) {
                 foreach ($numbers as $numberObj) {
                     if ($numberObj['account_id'] === $accountId) {
                         $accountNumber = $numberObj['account'];
                         $routingNumber = $numberObj['routing'];
+                        $isTokenized = (bool) ($numberObj['is_tokenized_account_number'] ?? false);
                         break;
                     }
                 }
@@ -195,22 +197,48 @@ class PlaidService
                 ];
             }
 
+            // Find existing account first to preserve manual verification data
+            $existingAccount = null;
+            if ($accountId) {
+                $existingAccount = Account::where('plaid_account_id', $accountId)->first();
+            }
+            if (!$existingAccount && $businessId && $accountNumber && $routingNumber) {
+                $existingAccount = Account::where([
+                    'company_id' => $businessId,
+                    'account_number' => $accountNumber,
+                    'routing_number' => $routingNumber,
+                ])->first();
+            }
+
+            $updateData = [
+                'company_id' => $businessId, // Ensure company_id is set
+                'plaid_item_id' => $plaidItem->id,
+                'plaid_account_id' => $accountId, // specific to this connection
+                'account_holder_name' => $accountData['name'], // Note: Plaid 'name' is usually account name (e.g. "Checking"), not holder name.
+                'account_nick_name' => $accountData['name'], // Map name to nick_name as requested
+                'official_name' => $accountData['official_name'] ?? null,
+                'type' => $accountData['subtype'] ?? $accountData['type'],
+                'mask' => $accountData['mask'] ?? null,
+                'balance' => $accountData['balances']['available'] ?? $accountData['balances']['current'] ?? 0,
+                'status' => 'active', // Ensure active status
+            ];
+
+            if ($existingAccount && $existingAccount->verification_status === 'verified') {
+                // If already manually verified, keep the verified details and do not overwrite
+                $updateData['account_number'] = $existingAccount->account_number;
+                $updateData['routing_number'] = $existingAccount->routing_number;
+                $updateData['is_tokenized'] = false;
+                $updateData['verification_status'] = 'verified';
+            } else {
+                $updateData['account_number'] = $accountNumber ?? $accountData['mask'] ?? null;
+                $updateData['routing_number'] = $routingNumber ?? '000000000';
+                $updateData['is_tokenized'] = $isTokenized;
+                $updateData['verification_status'] = $isTokenized ? 'pending' : 'verified';
+            }
+
             $account = Account::updateOrCreate(
-                $matchAttributes,
-                [
-                    'company_id' => $businessId, // Ensure company_id is set
-                    'plaid_item_id' => $plaidItem->id,
-                    'plaid_account_id' => $accountId, // specific to this connection
-                    'account_holder_name' => $accountData['name'], // Note: Plaid 'name' is usually account name (e.g. "Checking"), not holder name.
-                    'account_nick_name' => $accountData['name'], // Map name to nick_name as requested
-                    'official_name' => $accountData['official_name'] ?? null,
-                    'account_number' => $accountNumber ?? $accountData['mask'] ?? null, // Fallback to mask
-                    'routing_number' => $routingNumber ?? '000000000',
-                    'type' => $accountData['subtype'] ?? $accountData['type'],
-                    'mask' => $accountData['mask'] ?? null,
-                    'balance' => $accountData['balances']['available'] ?? $accountData['balances']['current'] ?? 0,
-                    'status' => 'active', // Ensure active status
-                ]
+                $existingAccount ? ['id' => $existingAccount->id] : $matchAttributes,
+                $updateData
             );
             
             $validAccountIds[] = $account->id;

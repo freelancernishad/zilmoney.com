@@ -20,6 +20,8 @@ class Account extends Model
         'plaid_item_id',
         'plaid_account_id',
         'mask',
+        'is_tokenized',
+        'verification_status',
         'official_name',
         'email',
         'phone_number',

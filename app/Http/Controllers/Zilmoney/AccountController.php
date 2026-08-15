@@ -93,6 +93,14 @@ class AccountController extends Controller
             'ach_auth_form' => 'nullable|array',
         ]);
 
+        $validationService = new \App\Services\Zilmoney\AccountValidationService();
+        $validationResult = $validationService->validate($validated['routing_number'], $validated['account_number']);
+        if (!$validationResult['success']) {
+            return response()->json([
+                'message' => 'Bank Account Validation Failed: ' . $validationResult['message']
+            ], 422);
+        }
+
         $account = $business->accounts()->create($validated);
 
         return response()->json($account, 201);
@@ -122,6 +130,19 @@ class AccountController extends Controller
             'next_check_starting_number' => 'nullable|integer',
             'ach_auth_form' => 'nullable|array',
         ]);
+
+        if (isset($validated['routing_number']) || isset($validated['account_number'])) {
+            $routing = $validated['routing_number'] ?? $account->routing_number;
+            $accountNo = $validated['account_number'] ?? $account->account_number;
+            
+            $validationService = new \App\Services\Zilmoney\AccountValidationService();
+            $validationResult = $validationService->validate($routing, $accountNo);
+            if (!$validationResult['success']) {
+                return response()->json([
+                    'message' => 'Bank Account Validation Failed: ' . $validationResult['message']
+                ], 422);
+            }
+        }
 
         $account->update($validated);
 
@@ -158,6 +179,62 @@ class AccountController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Account balance synced with Plaid successfully.',
+            'account' => $account
+        ]);
+    }
+
+    public function apiValidateAccount(Request $request)
+    {
+        $validated = $request->validate([
+            'routing_number' => 'required|string',
+            'account_number' => 'required|string',
+        ]);
+
+        $validationService = new \App\Services\Zilmoney\AccountValidationService();
+        $result = $validationService->validate($validated['routing_number'], $validated['account_number']);
+
+        return response()->json($result);
+    }
+
+    public function manualVerifyOverride(Request $request, $id)
+    {
+        $business = Auth::user()->businessDetails;
+        if (!$business) return response()->json(['message' => 'Business profile required'], 400);
+
+        $account = $business->accounts()->findOrFail($id);
+
+        if (!$account->is_tokenized) {
+            return response()->json(['message' => 'This account does not require tokenization override.'], 400);
+        }
+
+        $validated = $request->validate([
+            'routing_number' => 'required|string|size:9',
+            'prefix' => 'required|string',
+            'confirm_prefix' => 'required|string|same:prefix',
+        ]);
+
+        $validationService = new \App\Services\Zilmoney\AccountValidationService();
+        if (!$validationService->validateRoutingChecksum($validated['routing_number'])) {
+            return response()->json(['message' => 'Invalid routing number format.'], 422);
+        }
+
+        $plaidMask = $account->mask;
+        if (!$plaidMask) {
+            return response()->json(['message' => 'Connected bank account is missing mask information.'], 400);
+        }
+
+        $fullAccountNumber = $validated['prefix'] . $plaidMask;
+
+        $account->update([
+            'routing_number' => $validated['routing_number'],
+            'account_number' => $fullAccountNumber,
+            'is_tokenized' => false,
+            'verification_status' => 'verified'
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Bank account successfully verified and updated.',
             'account' => $account
         ]);
     }
