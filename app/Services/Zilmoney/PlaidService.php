@@ -30,11 +30,33 @@ class PlaidService
     }
 
     /**
+     * Dynamically set baseUrl based on access/public/link token.
+     */
+    protected function setEnvironmentForToken($token)
+    {
+        if (empty($token) || !is_string($token)) {
+            return;
+        }
+
+        if (strpos($token, 'sandbox') !== false) {
+            $this->baseUrl = 'https://sandbox.plaid.com';
+        } elseif (strpos($token, 'development') !== false) {
+            $this->baseUrl = 'https://development.plaid.com';
+        } elseif (strpos($token, 'production') !== false) {
+            $this->baseUrl = 'https://production.plaid.com';
+        }
+    }
+
+    /**
      * Create a Link Token for the frontend.
      */
     public function createLinkToken($userId, $companyId = null, $redirectUri = null, $accessToken = null)
     {
         \Log::info("createLinkToken: Called with User ID: $userId, Company ID: $companyId" . ($accessToken ? ", Access Token: (Provided)" : ""));
+
+        if ($accessToken) {
+            $this->setEnvironmentForToken($accessToken);
+        }
 
         $configuredProductsRaw = SystemSetting::getValue('plaid_products');
         $configuredProducts = [];
@@ -98,6 +120,7 @@ class PlaidService
      */
     public function exchangeTokenAndSave($publicToken, $userId, $businessId = null)
     {
+        $this->setEnvironmentForToken($publicToken);
         $response = Http::post("{$this->baseUrl}/item/public_token/exchange", [
             'client_id' => $this->clientId,
             'secret' => $this->secret,
@@ -133,6 +156,7 @@ class PlaidService
      */
     public function syncAccounts(PlaidItem $plaidItem, $businessId = null)
     {
+        $this->setEnvironmentForToken($plaidItem->access_token);
         // Try to get auth data (numbers) first
         $response = Http::post("{$this->baseUrl}/auth/get", [
             'client_id' => $this->clientId,
@@ -257,6 +281,17 @@ class PlaidService
     public function processWebhook(?PlaidItem $plaidItem = null, $type, $code, $payload)
     {
         \Log::info("PlaidService: Processing Webhook Type=$type, Code=$code");
+
+        if (isset($payload['environment'])) {
+            $environment = $payload['environment'];
+            $this->baseUrl = match ($environment) {
+                'production' => 'https://production.plaid.com',
+                'development' => 'https://development.plaid.com',
+                default => 'https://sandbox.plaid.com',
+            };
+        } elseif ($plaidItem) {
+            $this->setEnvironmentForToken($plaidItem->access_token);
+        }
 
         // Handle Hosted Link 'SESSION_FINISHED' (No PlaidItem yet)
         if ($type === 'LINK' && $code === 'SESSION_FINISHED') {
@@ -398,6 +433,7 @@ class PlaidService
     {
         \Log::info("Fetching metadata for Link Token: $linkToken");
         try {
+            $this->setEnvironmentForToken($linkToken);
             $response = Http::post("{$this->baseUrl}/link/token/get", [
                 'client_id' => $this->clientId,
                 'secret' => $this->secret,
@@ -419,6 +455,7 @@ class PlaidService
     }
     public function resetSandboxLogin($accessToken)
     {
+        $this->setEnvironmentForToken($accessToken);
         $response = Http::post("{$this->baseUrl}/sandbox/item/reset_login", [
             'client_id' => $this->clientId,
             'secret' => $this->secret,
@@ -437,6 +474,7 @@ class PlaidService
      */
     public function removeItem($accessToken)
     {
+        $this->setEnvironmentForToken($accessToken);
         $response = Http::post("{$this->baseUrl}/item/remove", [
             'client_id' => $this->clientId,
             'secret' => $this->secret,
@@ -505,6 +543,7 @@ class PlaidService
      */
     public function createSandboxTransaction($accessToken, $accountId, $amount, $description, $date = null)
     {
+        $this->setEnvironmentForToken($accessToken);
         \Log::info("PlaidService: Creating Sandbox Transaction...", [
             'account_id' => $accountId,
             'amount' => $amount,
@@ -541,6 +580,7 @@ class PlaidService
      */
     public function getSandboxTransactions($accessToken, $startDate = null, $endDate = null)
     {
+        $this->setEnvironmentForToken($accessToken);
         // 1. Use /transactions/get as the primary method because it is date-bound and doesn't require cursors
         try {
             $response = Http::post("{$this->baseUrl}/transactions/get", [
@@ -577,6 +617,7 @@ class PlaidService
      */
     public function fireSandboxWebhook($accessToken, $webhookType = 'TRANSACTIONS', $webhookCode = 'DEFAULT_UPDATE')
     {
+        $this->setEnvironmentForToken($accessToken);
         $response = Http::post("{$this->baseUrl}/sandbox/item/fire_webhook", [
             'client_id' => $this->clientId,
             'secret' => $this->secret,
