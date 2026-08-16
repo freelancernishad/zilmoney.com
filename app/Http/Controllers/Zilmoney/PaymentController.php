@@ -652,8 +652,8 @@ class PaymentController extends Controller
         $trackUrl = "{$frontendUrl}/dashboard/payments";
         $loginUrl = "{$frontendUrl}/login";
 
-        $subjectPayee = "Zil Money: {$payorName} has sent you an E-check";
-        $subjectOwner = "Zil Money: Payment Confirmation - E-check sent to {$payeeName}";
+        $subjectPayee = "GoldenMark Money: {$payorName} has sent you an E-check";
+        $subjectOwner = "GoldenMark Money: Payment Confirmation - E-check sent to {$payeeName}";
 
         try {
             // 1. Send Primary E-check email to Payee
