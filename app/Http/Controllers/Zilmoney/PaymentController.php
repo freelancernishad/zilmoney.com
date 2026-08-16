@@ -312,7 +312,7 @@ class PaymentController extends Controller
         } elseif ($validated['action'] === 'print') {
             $unchargedPayments = [];
             foreach ($payments as $payment) {
-                $alreadyCharged = $payment->logs()
+                $alreadyCharged = $payment->is_charged || in_array(strtolower($payment->status), ['printed', 'sent', 'mailed', 'completed']) || $payment->logs()
                     ->where(function ($q) {
                         $q->whereIn('note', [
                             'Check PDF printed / downloaded',
