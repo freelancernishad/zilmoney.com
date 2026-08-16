@@ -227,9 +227,9 @@
                             Tel: 833 711 4030 &bull; Email: support@goldenmark.money
                         </p>
                         <div class="footer-links" style="margin-bottom: 12px;">
-                            <a href="{{ config('app.url') }}/privacy-policy">Privacy Policy</a> &bull;
-                            <a href="{{ config('app.url') }}/terms">Terms of Service</a> &bull;
-                            <a href="{{ config('app.url') }}/contact">Support</a>
+                            <a href="{{ config('app.frontend_url') }}/privacy-policy">Privacy Policy</a> &bull;
+                            <a href="{{ config('app.frontend_url') }}/terms">Terms of Service</a> &bull;
+                            <a href="{{ config('app.frontend_url') }}/contact">Support</a>
                         </div>
                         <p style="margin: 0; font-size: 11px; color: #94a3b8;">
                             &copy; {{ date('Y') }} GoldenMark Money®. All rights reserved. Powered by ZSI.ai.
