@@ -310,7 +310,45 @@ class PaymentController extends Controller
             });
             return response()->json(['message' => 'Selected payments processed successfully']);
         } elseif ($validated['action'] === 'print') {
-            return response()->json(['message' => 'Printing processed']);
+            $unchargedPayments = [];
+            foreach ($payments as $payment) {
+                $alreadyCharged = $payment->logs()
+                    ->where(function ($q) {
+                        $q->whereIn('note', [
+                            'Check PDF printed / downloaded',
+                            'E-check sent via email',
+                            'Mail check sent',
+                        ])->orWhere('note', 'LIKE', '%E-check email sent%');
+                    })
+                    ->exists();
+                if (!$alreadyCharged) {
+                    $unchargedPayments[] = $payment;
+                }
+            }
+
+            if (count($unchargedPayments) > 0) {
+                $creditCheck = $this->checkUserCreditForService('Check Printing', count($unchargedPayments));
+                if (!$creditCheck['allowed']) {
+                    return $creditCheck['response'];
+                }
+
+                \DB::transaction(function () use ($unchargedPayments, $creditCheck) {
+                    foreach ($unchargedPayments as $payment) {
+                        $payment->logs()->create([
+                            'status' => $payment->status,
+                            'initiated_by' => auth()->id(),
+                            'note' => 'Check PDF printed / downloaded',
+                            'device_info' => request()->ip()
+                        ]);
+                        if ($payment->status === 'pending') {
+                            $payment->update(['status' => 'printed']);
+                        }
+                    }
+                    $this->deductUserCreditForService($creditCheck['total_cost'] ?? ($creditCheck['service_price'] * count($unchargedPayments)));
+                });
+            }
+
+            return response()->json(['message' => 'Printing processed and charges applied successfully']);
         }
 
         return response()->json(['message' => 'Invalid bulk action'], 400);
@@ -846,7 +884,7 @@ class PaymentController extends Controller
     /**
      * Check whether the user has sufficient credit balance for a check service (Print, Email, Mail).
      */
-    private function checkUserCreditForService($serviceName = 'Check Printing')
+    private function checkUserCreditForService($serviceName = 'Check Printing', $itemCount = 1)
     {
         $user = auth()->user();
         if (!$user) {
@@ -874,25 +912,26 @@ class PaymentController extends Controller
             }
         }
 
+        $totalCost = $servicePrice * max(1, (int)$itemCount);
         $availableCredit = (float) ($user->credit_balance ?? 0);
 
-        if ($availableCredit < $servicePrice) {
-            $formattedPrice = number_format($servicePrice, 2);
+        if ($availableCredit < $totalCost) {
+            $formattedTotalCost = number_format($totalCost, 2);
             $formattedAvailable = number_format($availableCredit, 2);
             $planName = $activePlan->name ?? 'Current Plan';
             $rechargeUrl = env('FRONTEND_URL', 'http://localhost:3000') . '/dashboard/more/recharge';
 
             if (request()->wantsJson() || request()->ajax()) {
                 $res = response()->json([
-                    'message' => "Insufficient credit balance. {$serviceName} requires \${$formattedPrice} USD on your {$planName}. Available balance: \${$formattedAvailable} USD. Please recharge your credit balance to perform check printing, emailing or mailing.",
+                    'message' => "Insufficient credit balance. {$serviceName} requires \${$formattedTotalCost} USD on your {$planName}. Available balance: \${$formattedAvailable} USD. Please recharge your credit balance to perform check printing, emailing or mailing.",
                     'require_recharge' => true,
-                    'service_cost' => $servicePrice,
+                    'service_cost' => $totalCost,
                     'current_credit' => $availableCredit,
                 ], 402);
             } else {
                 $res = response(view('zilmoney.errors.insufficient_credit', [
                     'serviceName' => $serviceName,
-                    'servicePrice' => $formattedPrice,
+                    'servicePrice' => $formattedTotalCost,
                     'availableCredit' => $formattedAvailable,
                     'planName' => $planName,
                     'rechargeUrl' => $rechargeUrl,
@@ -905,7 +944,7 @@ class PaymentController extends Controller
             ];
         }
 
-        return ['allowed' => true, 'service_price' => $servicePrice];
+        return ['allowed' => true, 'service_price' => $servicePrice, 'total_cost' => $totalCost];
     }
 
     /**
