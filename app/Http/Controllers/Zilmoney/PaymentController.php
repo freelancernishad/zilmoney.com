@@ -649,8 +649,8 @@ class PaymentController extends Controller
 
         $frontendUrl = env('FRONTEND_URL', 'http://localhost:3000');
         $printUrl = "{$frontendUrl}/outside/emailchecks/disclaimer/{$tokenCode}";
-        $trackUrl = url("/dashboard/payments");
-        $loginUrl = url("/login");
+        $trackUrl = "{$frontendUrl}/dashboard/payments";
+        $loginUrl = "{$frontendUrl}/login";
 
         $subjectPayee = "Zil Money: {$payorName} has sent you an E-check";
         $subjectOwner = "Zil Money: Payment Confirmation - E-check sent to {$payeeName}";
