@@ -596,6 +596,10 @@ class PaymentController extends Controller
 
         $payment = $business->payments()->with(['payee', 'account', 'comments', 'business'])->findOrFail($id);
 
+        if (strtolower($payment->status) === 'blank' || !$payment->payee) {
+            return response()->json(['message' => 'Blank checks (No Payee) cannot be emailed. They are intended for printing only.'], 422);
+        }
+
         // Check if this check payment has already been charged once (unlocked)
         $alreadyCharged = $payment->logs()
             ->where(function ($q) {
