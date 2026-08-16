@@ -42,7 +42,7 @@ class PaymentService
                 $sigImageUrl = $activeSig ? $activeSig->image_url : null;
             }
 
-            $issueDate = array_key_exists('issue_date', $data) ? $data['issue_date'] : date('Y-m-d');
+            $issueDate = array_key_exists('issue_date', $data) ? $data['issue_date'] : null;
 
             $addr = $business->physical_address;
             $addrStr = null;
