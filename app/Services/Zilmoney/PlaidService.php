@@ -205,6 +205,18 @@ class PlaidService
                 }
             }
 
+            $mask = $accountData['mask'] ?? null;
+            if (!$isTokenized) {
+                if (empty($accountNumber) || empty($routingNumber) || $routingNumber === '000000000') {
+                    $isTokenized = true;
+                } elseif (!empty($mask) && strlen($accountNumber) > 4 && substr($accountNumber, -strlen($mask)) !== $mask) {
+                    // Plaid returned a Tokenized Virtual Account Number (TAN) where the last digits don't match the bank mask
+                    $isTokenized = true;
+                } elseif (!empty($mask) && ($accountNumber === $mask || strlen($accountNumber) <= 4)) {
+                    $isTokenized = true;
+                }
+            }
+
             // Define unique constraints for deduplication
             // If we have real numbers, use them to find existing account.
             // Otherwise, fall back to plaid_account_id (which is unique per Item only).
@@ -242,7 +254,7 @@ class PlaidService
                 'account_nick_name' => $accountData['name'], // Map name to nick_name as requested
                 'official_name' => $accountData['official_name'] ?? null,
                 'type' => $accountData['subtype'] ?? $accountData['type'],
-                'mask' => $accountData['mask'] ?? null,
+                'mask' => $mask,
                 'balance' => $accountData['balances']['available'] ?? $accountData['balances']['current'] ?? 0,
                 'status' => 'active', // Ensure active status
             ];
@@ -254,7 +266,7 @@ class PlaidService
                 $updateData['is_tokenized'] = false;
                 $updateData['verification_status'] = 'verified';
             } else {
-                $updateData['account_number'] = $accountNumber ?? $accountData['mask'] ?? null;
+                $updateData['account_number'] = $accountNumber ?? $mask ?? null;
                 $updateData['routing_number'] = $routingNumber ?? '000000000';
                 $updateData['is_tokenized'] = $isTokenized;
                 $updateData['verification_status'] = $isTokenized ? 'pending' : 'verified';
