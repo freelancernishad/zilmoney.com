@@ -702,10 +702,38 @@ class PlaidService
                 $instData = $instResponse->json('institution');
                 $instName = $instData['name'] ?? null;
                 $logoRaw = $instData['logo'] ?? null;
+                $instUrl = $instData['url'] ?? null;
 
                 $logoUrl = null;
                 if ($logoRaw) {
                     $logoUrl = str_starts_with($logoRaw, 'data:') ? $logoRaw : "data:image/png;base64,{$logoRaw}";
+                } else {
+                    // Smart Fallback Logo Resolution when Plaid returns logo = null:
+                    $domain = null;
+                    if ($instUrl) {
+                        $parsedHost = parse_url($instUrl, PHP_URL_HOST);
+                        if ($parsedHost) {
+                            $domain = preg_replace('/^www\./i', '', strtolower($parsedHost));
+                        }
+                    }
+
+                    if (!$domain && $instName) {
+                        $nameLower = strtolower($instName);
+                        if (str_contains($nameLower, 'chase')) $domain = 'chase.com';
+                        elseif (str_contains($nameLower, 'america')) $domain = 'bankofamerica.com';
+                        elseif (str_contains($nameLower, 'wells fargo')) $domain = 'wellsfargo.com';
+                        elseif (str_contains($nameLower, 'citi')) $domain = 'citi.com';
+                        elseif (str_contains($nameLower, 'capital one')) $domain = 'capitalone.com';
+                        elseif (str_contains($nameLower, 'pnc')) $domain = 'pnc.com';
+                        elseif (str_contains($nameLower, 'td bank') || $nameLower === 'td') $domain = 'td.com';
+                        elseif (str_contains($nameLower, 'us bank')) $domain = 'usbank.com';
+                        elseif (str_contains($nameLower, 'schwab')) $domain = 'schwab.com';
+                        elseif (str_contains($nameLower, 'fidelity')) $domain = 'fidelity.com';
+                    }
+
+                    if ($domain) {
+                        $logoUrl = "https://www.google.com/s2/favicons?domain={$domain}&sz=128";
+                    }
                 }
 
                 $plaidItem->update([
