@@ -23,6 +23,8 @@ class AdminPlanStoreRequest extends FormRequest
             'features.*.key' => 'required|string|exists:plan_features,key',
             'features.*.value' => 'nullable|string',
             'features.*.amount' => 'nullable|string',
+            'is_active' => 'nullable|boolean',
+            'serial' => 'nullable|integer|min:0',
         ];
     }
 }

@@ -20,10 +20,14 @@ class Plan extends Model
         'monthly_price',
         'discount_percentage',
         'features',  // stored as JSON
+        'is_active',
+        'serial',
     ];
 
     protected $casts = [
         'features' => 'array',
+        'is_active' => 'boolean',
+        'serial' => 'integer',
     ];
 
     // Add this property to auto-append formatted_features to JSON output

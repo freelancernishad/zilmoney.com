@@ -175,6 +175,21 @@
                                     <input type="text" id="plan-name" required placeholder="e.g. Professional Monthly" class="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50 transition-all">
                                 </div>
                             </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-slate-400 mb-1.5 ml-1">Serial (Display Order)</label>
+                                <input type="number" id="plan-serial" value="0" min="0" placeholder="0" class="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50 transition-all">
+                                <p class="mt-1 text-[10px] text-slate-500 ml-1">Lower numbers appear first (e.g. 1, 2, 3)</p>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-slate-400 mb-1.5 ml-1">Status</label>
+                                <select id="plan-is-active" class="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all appearance-none cursor-pointer">
+                                    <option value="1" class="bg-slate-900 text-white">Active (Visible)</option>
+                                    <option value="0" class="bg-slate-900 text-white">Inactive (Hidden)</option>
+                                </select>
+                                <p class="mt-1 text-[10px] text-slate-500 ml-1">Active plans are shown to users</p>
+                            </div>
                             
                             <div>
                                 <label class="block text-sm font-medium text-slate-400 mb-1.5 ml-1">Duration</label>
@@ -314,6 +329,8 @@ Accept: application/json</pre>
         function updatePlanDocBody() {
             const data = {
                 name: document.getElementById('plan-name').value,
+                serial: parseInt(document.getElementById('plan-serial').value) || 0,
+                is_active: document.getElementById('plan-is-active').value === '1',
                 duration: document.getElementById('plan-duration').value,
                 monthly_price: parseFloat(document.getElementById('plan-monthly-price').value) || 0,
                 discount_percentage: parseFloat(document.getElementById('plan-discount').value) || 0,
@@ -330,8 +347,12 @@ Accept: application/json</pre>
         }
 
         function setupPlanDocListeners() {
-            ['plan-name', 'plan-duration', 'plan-monthly-price', 'plan-discount'].forEach(id => {
-                document.getElementById(id).addEventListener('input', updatePlanDocBody);
+            ['plan-name', 'plan-serial', 'plan-is-active', 'plan-duration', 'plan-monthly-price', 'plan-discount'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.addEventListener('input', updatePlanDocBody);
+                    el.addEventListener('change', updatePlanDocBody);
+                }
             });
             // Re-setup listener for feature checkboxes after they are rendered
         }
@@ -390,12 +411,20 @@ Accept: application/json</pre>
             }
 
             grid.innerHTML = plans.map(plan => `
-                <div class="glass p-6 rounded-3xl flex flex-col group hover:border-indigo-500/30 transition-all">
+                <div class="glass p-6 rounded-3xl flex flex-col group hover:border-indigo-500/30 transition-all ${!plan.is_active ? 'opacity-65 border-red-500/20' : ''}">
                     <div class="flex items-start justify-between mb-2">
-                        <h3 class="text-xl font-bold text-white group-hover:text-indigo-300 transition-colors">${plan.name}</h3>
-                        <span class="px-2 py-1 rounded-lg bg-indigo-500/10 text-indigo-400 text-[10px] font-bold uppercase tracking-wider">
-                            ${plan.duration}
-                        </span>
+                        <div>
+                            <h3 class="text-xl font-bold text-white group-hover:text-indigo-300 transition-colors">${plan.name}</h3>
+                            <span class="text-[11px] font-semibold text-slate-400">SL: #${plan.serial ?? 0}</span>
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            <span class="px-2 py-1 rounded-lg ${plan.is_active ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'} text-[10px] font-bold uppercase tracking-wider">
+                                ${plan.is_active ? 'Active' : 'Inactive'}
+                            </span>
+                            <span class="px-2 py-1 rounded-lg bg-indigo-500/10 text-indigo-400 text-[10px] font-bold uppercase tracking-wider">
+                                ${plan.duration}
+                            </span>
+                        </div>
                     </div>
                     
                     <div class="mb-6">
@@ -494,6 +523,8 @@ Accept: application/json</pre>
             document.getElementById('plan-modal-title').innerText = 'Create New Plan';
             document.getElementById('plan-id').value = '';
             document.getElementById('plan-form').reset();
+            document.getElementById('plan-serial').value = '0';
+            document.getElementById('plan-is-active').value = '1';
             
             // Uncheck all features and hide fields
             document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
@@ -519,6 +550,8 @@ Accept: application/json</pre>
             document.getElementById('plan-modal-title').innerText = 'Edit Plan';
             document.getElementById('plan-id').value = plan.id;
             document.getElementById('plan-name').value = plan.name;
+            document.getElementById('plan-serial').value = plan.serial ?? 0;
+            document.getElementById('plan-is-active').value = (plan.is_active === false || plan.is_active === 0) ? '0' : '1';
             
             // Normalize duration string to match select options (e.g., "1 month", "3 months")
             const durationNum = parseInt(plan.duration.match(/\d+/)[0]);
@@ -528,13 +561,6 @@ Accept: application/json</pre>
             document.getElementById('plan-monthly-price').value = plan.monthly_price;
             document.getElementById('plan-discount').value = plan.discount_percentage;
 
-            // Pre-fill features
-            // Note: Since backend return attributes we might need the raw features JSON
-            // If the API returns 'features' array (cast to array in model)
-            // But wait, the controller 'show' returns plan with features hidden/appended.
-            // I need to make sure 'show' returns the raw features too if I want to edit.
-            // Let's assume the API returns the plan object as stored.
-            
             // Re-fetch individual plan to get 'features' if it was hidden in index
             const response = await fetch(`/api/admin/plans/${id}`, {
                 headers: { 'Authorization': 'Bearer ' + getCookie('admin_token'), 'Accept': 'application/json' }
@@ -574,6 +600,8 @@ Accept: application/json</pre>
         async function savePlan() {
             const id = document.getElementById('plan-id').value;
             const name = document.getElementById('plan-name').value;
+            const serial = parseInt(document.getElementById('plan-serial').value) || 0;
+            const is_active = document.getElementById('plan-is-active').value === '1';
             const duration = document.getElementById('plan-duration').value;
             const original_price = document.getElementById('plan-original-price').value;
             const monthly_price = document.getElementById('plan-monthly-price').value;
@@ -605,6 +633,8 @@ Accept: application/json</pre>
 
             const data = {
                 name,
+                serial,
+                is_active,
                 duration,
                 original_price,
                 monthly_price,
