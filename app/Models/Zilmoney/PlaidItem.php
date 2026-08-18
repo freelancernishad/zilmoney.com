@@ -12,6 +12,7 @@ class PlaidItem extends Model
         'item_id',
         'institution_id',
         'institution_name',
+        'institution_logo',
         'status',
     ];
 

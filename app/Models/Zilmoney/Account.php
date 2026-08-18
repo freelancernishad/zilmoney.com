@@ -23,6 +23,8 @@ class Account extends Model
         'is_tokenized',
         'verification_status',
         'official_name',
+        'institution_name',
+        'institution_logo',
         'email',
         'phone_number',
         'address_line1',

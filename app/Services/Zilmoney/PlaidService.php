@@ -145,6 +145,9 @@ class PlaidService
             ]
         );
 
+        // Fetch & store bank institution name and logo
+        $this->syncInstitutionDetails($plaidItem);
+
         // Sync initial data (Accounts, etc.)
         $this->syncAccounts($plaidItem, $businessId); // Sync immediately
 
@@ -157,6 +160,12 @@ class PlaidService
     public function syncAccounts(PlaidItem $plaidItem, $businessId = null)
     {
         $this->setEnvironmentForToken($plaidItem->access_token);
+
+        // Ensure institution name and logo are synced
+        if (!$plaidItem->institution_name || !$plaidItem->institution_logo) {
+            $this->syncInstitutionDetails($plaidItem);
+            $plaidItem->refresh();
+        }
         // Try to get auth data (numbers) first
         $response = Http::post("{$this->baseUrl}/auth/get", [
             'client_id' => $this->clientId,
@@ -253,6 +262,8 @@ class PlaidService
                 'account_holder_name' => $accountData['name'], // Note: Plaid 'name' is usually account name (e.g. "Checking"), not holder name.
                 'account_nick_name' => $accountData['name'], // Map name to nick_name as requested
                 'official_name' => $accountData['official_name'] ?? null,
+                'institution_name' => $plaidItem->institution_name ?? $accountData['name'],
+                'institution_logo' => $plaidItem->institution_logo,
                 'type' => $accountData['subtype'] ?? $accountData['type'],
                 'mask' => $mask,
                 'balance' => $accountData['balances']['available'] ?? $accountData['balances']['current'] ?? 0,
@@ -650,5 +661,75 @@ class PlaidService
         return SystemSetting::getValue('plaid_webhook_url') 
             ?? config('services.plaid.webhook_url') 
             ?? url('/api/zilmoney/plaid/webhook');
+    }
+
+    /**
+     * Fetch & Sync Institution Name and Logo from Plaid API.
+     */
+    public function syncInstitutionDetails(PlaidItem $plaidItem, ?string $institutionId = null)
+    {
+        try {
+            $this->setEnvironmentForToken($plaidItem->access_token);
+            $instId = $institutionId ?? $plaidItem->institution_id;
+
+            if (!$instId) {
+                $itemResponse = Http::post("{$this->baseUrl}/item/get", [
+                    'client_id' => $this->clientId,
+                    'secret' => $this->secret,
+                    'access_token' => $plaidItem->access_token,
+                ]);
+
+                if ($itemResponse->successful()) {
+                    $instId = $itemResponse->json('item.institution_id');
+                }
+            }
+
+            if (!$instId) {
+                return null;
+            }
+
+            $instResponse = Http::post("{$this->baseUrl}/institutions/get_by_id", [
+                'client_id' => $this->clientId,
+                'secret' => $this->secret,
+                'institution_id' => $instId,
+                'country_codes' => ['US'],
+                'options' => [
+                    'include_optional_metadata' => true
+                ]
+            ]);
+
+            if ($instResponse->successful()) {
+                $instData = $instResponse->json('institution');
+                $instName = $instData['name'] ?? null;
+                $logoRaw = $instData['logo'] ?? null;
+
+                $logoUrl = null;
+                if ($logoRaw) {
+                    $logoUrl = str_starts_with($logoRaw, 'data:') ? $logoRaw : "data:image/png;base64,{$logoRaw}";
+                }
+
+                $plaidItem->update([
+                    'institution_id' => $instId,
+                    'institution_name' => $instName,
+                    'institution_logo' => $logoUrl,
+                ]);
+
+                // Update accounts linked to this item
+                Account::where('plaid_item_id', $plaidItem->id)->update([
+                    'institution_name' => $instName,
+                    'institution_logo' => $logoUrl,
+                ]);
+
+                return [
+                    'institution_id' => $instId,
+                    'institution_name' => $instName,
+                    'institution_logo' => $logoUrl,
+                ];
+            }
+        } catch (\Throwable $e) {
+            \Log::warning("Failed to fetch Plaid institution details for Item ID {$plaidItem->id}: " . $e->getMessage());
+        }
+
+        return null;
     }
 }
