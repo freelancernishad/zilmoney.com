@@ -69,7 +69,7 @@ class PlaidService
             }
         }
         if (empty($configuredProducts)) {
-            $configuredProducts = ['auth'];
+            $configuredProducts = ['auth', 'identity'];
         }
 
         $payload = [
@@ -193,6 +193,81 @@ class PlaidService
         $accounts = $data['accounts'];
         $numbers = $data['numbers']['ach'] ?? []; // Array of account numbers
 
+        // Try to fetch Identity data (Account Holder Name, Address, Email, Phone) from Plaid
+        $identityByAccount = [];
+        try {
+            $idResponse = Http::post("{$this->baseUrl}/identity/get", [
+                'client_id' => $this->clientId,
+                'secret' => $this->secret,
+                'access_token' => $plaidItem->access_token,
+            ]);
+
+            if ($idResponse->successful()) {
+                $idAccounts = $idResponse->json('accounts') ?? [];
+                foreach ($idAccounts as $idAcc) {
+                    $accId = $idAcc['account_id'] ?? null;
+                    $owners = $idAcc['owners'] ?? [];
+                    if ($accId && !empty($owners)) {
+                        $primaryOwner = $owners[0] ?? [];
+                        
+                        $ownerName = $primaryOwner['names'][0] ?? null;
+                        
+                        $addressObj = null;
+                        if (!empty($primaryOwner['addresses'])) {
+                            foreach ($primaryOwner['addresses'] as $addr) {
+                                if (!empty($addr['primary'])) {
+                                    $addressObj = $addr['data'] ?? null;
+                                    break;
+                                }
+                            }
+                            if (!$addressObj && isset($primaryOwner['addresses'][0]['data'])) {
+                                $addressObj = $primaryOwner['addresses'][0]['data'];
+                            }
+                        }
+
+                        $emailVal = null;
+                        if (!empty($primaryOwner['emails'])) {
+                            foreach ($primaryOwner['emails'] as $em) {
+                                if (!empty($em['primary'])) {
+                                    $emailVal = $em['data'] ?? null;
+                                    break;
+                                }
+                            }
+                            if (!$emailVal && isset($primaryOwner['emails'][0]['data'])) {
+                                $emailVal = $primaryOwner['emails'][0]['data'];
+                            }
+                        }
+
+                        $phoneVal = null;
+                        if (!empty($primaryOwner['phone_numbers'])) {
+                            foreach ($primaryOwner['phone_numbers'] as $ph) {
+                                if (!empty($ph['primary'])) {
+                                    $phoneVal = $ph['data'] ?? null;
+                                    break;
+                                }
+                            }
+                            if (!$phoneVal && isset($primaryOwner['phone_numbers'][0]['data'])) {
+                                $phoneVal = $primaryOwner['phone_numbers'][0]['data'];
+                            }
+                        }
+
+                        $identityByAccount[$accId] = [
+                            'account_holder_name' => $ownerName,
+                            'address_line1' => $addressObj['street'] ?? null,
+                            'city' => $addressObj['city'] ?? null,
+                            'state' => $addressObj['region'] ?? null,
+                            'postal_code' => $addressObj['postal_code'] ?? null,
+                            'country' => $addressObj['country'] ?? null,
+                            'email' => $emailVal,
+                            'phone_number' => $phoneVal,
+                        ];
+                    }
+                }
+            }
+        } catch (\Throwable $idEx) {
+            \Log::warning("Plaid Identity fetch warning: " . $idEx->getMessage());
+        }
+
         $validAccountIds = [];
 
         foreach ($accounts as $accountData) {
@@ -255,12 +330,15 @@ class PlaidService
                 ])->first();
             }
 
+            $ownerIdentity = $identityByAccount[$accountId] ?? [];
+            $holderName = $ownerIdentity['account_holder_name'] ?? $accountData['name'];
+
             $updateData = [
                 'company_id' => $businessId, // Ensure company_id is set
                 'plaid_item_id' => $plaidItem->id,
                 'plaid_account_id' => $accountId, // specific to this connection
-                'account_holder_name' => $accountData['name'], // Note: Plaid 'name' is usually account name (e.g. "Checking"), not holder name.
-                'account_nick_name' => $accountData['name'], // Map name to nick_name as requested
+                'account_holder_name' => $holderName, // Bank account holder's real legal name from Plaid Identity
+                'account_nick_name' => $accountData['name'], // Map account name (e.g. "Checking") to nick_name
                 'official_name' => $accountData['official_name'] ?? null,
                 'institution_name' => $plaidItem->institution_name ?? $accountData['name'],
                 'institution_logo' => $plaidItem->institution_logo,
@@ -269,6 +347,28 @@ class PlaidService
                 'balance' => $accountData['balances']['available'] ?? $accountData['balances']['current'] ?? 0,
                 'status' => 'active', // Ensure active status
             ];
+
+            if (!empty($ownerIdentity['address_line1'])) {
+                $updateData['address_line1'] = $ownerIdentity['address_line1'];
+            }
+            if (!empty($ownerIdentity['city'])) {
+                $updateData['city'] = $ownerIdentity['city'];
+            }
+            if (!empty($ownerIdentity['state'])) {
+                $updateData['state'] = $ownerIdentity['state'];
+            }
+            if (!empty($ownerIdentity['postal_code'])) {
+                $updateData['postal_code'] = $ownerIdentity['postal_code'];
+            }
+            if (!empty($ownerIdentity['country'])) {
+                $updateData['country'] = $ownerIdentity['country'];
+            }
+            if (!empty($ownerIdentity['email'])) {
+                $updateData['email'] = $ownerIdentity['email'];
+            }
+            if (!empty($ownerIdentity['phone_number'])) {
+                $updateData['phone_number'] = $ownerIdentity['phone_number'];
+            }
 
             if ($existingAccount && $existingAccount->verification_status === 'verified') {
                 // If already manually verified, keep the verified details and do not overwrite
