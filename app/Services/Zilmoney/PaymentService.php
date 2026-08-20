@@ -57,6 +57,20 @@ class PaymentService
                 $addrStr = $addr;
             }
 
+            // Derive Company/Payer Name & Address: Account info first, Business info as fallback
+            $accountHolderName = trim($account->account_holder_name ?? '');
+            $companyName = !empty($accountHolderName) ? $accountHolderName : ($business->legal_business_name ?? $business->dba);
+
+            $accountAddrParts = array_filter([
+                $account->address_line1 ?? '',
+                $account->address_line2 ?? '',
+                $account->city ?? '',
+                isset($account->state) ? $account->state . " " . ($account->postal_code ?? '') : ($account->postal_code ?? ''),
+                $account->country ?? ''
+            ]);
+            $accountAddrStr = !empty($accountAddrParts) ? implode(', ', $accountAddrParts) : null;
+            $companyAddress = !empty($accountAddrStr) ? $accountAddrStr : $addrStr;
+
             $processWithoutData = $data['process_without'] ?? ($data['delivery_proof']['process_without'] ?? []);
 
             $deliveryProof = array_merge([
@@ -89,8 +103,8 @@ class PaymentService
                 'memo' => $data['memo'] ?? null,
                 'signature_image' => $sigImage,
                 'signature_image_url' => $sigImageUrl,
-                'company_name' => $business->legal_business_name ?? $business->dba,
-                'company_address' => $addrStr,
+                'company_name' => $companyName,
+                'company_address' => $companyAddress,
                 'company_logo_url' => get_file_url($business->verification_photo_id),
                 'bank_name' => $account->bank_name,
                 'bank_routing_number' => $account->routing_number,

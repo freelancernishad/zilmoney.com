@@ -211,6 +211,19 @@ class AccountController extends Controller
             'routing_number' => 'required|string|size:9',
             'prefix' => 'required|string',
             'confirm_prefix' => 'required|string|same:prefix',
+            'account_holder_name' => 'nullable|string',
+            'account_nick_name' => 'nullable|string',
+            'address_line1' => 'nullable|string',
+            'address_line2' => 'nullable|string',
+            'city' => 'nullable|string',
+            'state' => 'nullable|string',
+            'postal_code' => 'nullable|string',
+            'country' => 'nullable|string',
+            'institution_name' => 'nullable|string',
+            'bank_address_line1' => 'nullable|string',
+            'bank_city' => 'nullable|string',
+            'bank_state' => 'nullable|string',
+            'bank_postal_code' => 'nullable|string',
         ]);
 
         $validationService = new \App\Services\Zilmoney\AccountValidationService();
@@ -225,12 +238,54 @@ class AccountController extends Controller
 
         $fullAccountNumber = $validated['prefix'] . $plaidMask;
 
-        $account->update([
+        $updateData = [
             'routing_number' => $validated['routing_number'],
             'account_number' => $fullAccountNumber,
             'is_tokenized' => false,
-            'verification_status' => 'verified'
-        ]);
+            'verification_status' => 'verified',
+        ];
+
+        if (array_key_exists('account_holder_name', $validated) && !empty($validated['account_holder_name'])) {
+            $updateData['account_holder_name'] = $validated['account_holder_name'];
+        }
+        if (array_key_exists('account_nick_name', $validated) && !empty($validated['account_nick_name'])) {
+            $updateData['account_nick_name'] = $validated['account_nick_name'];
+        }
+        if (array_key_exists('address_line1', $validated)) {
+            $updateData['address_line1'] = $validated['address_line1'];
+        }
+        if (array_key_exists('address_line2', $validated)) {
+            $updateData['address_line2'] = $validated['address_line2'];
+        }
+        if (array_key_exists('city', $validated)) {
+            $updateData['city'] = $validated['city'];
+        }
+        if (array_key_exists('state', $validated)) {
+            $updateData['state'] = $validated['state'];
+        }
+        if (array_key_exists('postal_code', $validated)) {
+            $updateData['postal_code'] = $validated['postal_code'];
+        }
+        if (array_key_exists('country', $validated)) {
+            $updateData['country'] = $validated['country'];
+        }
+        if (array_key_exists('institution_name', $validated) && !empty($validated['institution_name'])) {
+            $updateData['institution_name'] = $validated['institution_name'];
+        }
+        if (array_key_exists('bank_address_line1', $validated)) {
+            $updateData['bank_address_line1'] = $validated['bank_address_line1'];
+        }
+        if (array_key_exists('bank_city', $validated)) {
+            $updateData['bank_city'] = $validated['bank_city'];
+        }
+        if (array_key_exists('bank_state', $validated)) {
+            $updateData['bank_state'] = $validated['bank_state'];
+        }
+        if (array_key_exists('bank_postal_code', $validated)) {
+            $updateData['bank_postal_code'] = $validated['bank_postal_code'];
+        }
+
+        $account->update($updateData);
 
         return response()->json([
             'success' => true,

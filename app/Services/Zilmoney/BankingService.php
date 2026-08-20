@@ -8,53 +8,121 @@ use Exception;
 class BankingService
 {
     /**
-     * Validate a US Routing Number.
-     * Checks format, checksum, and optionally fetches bank details.
+     * Validate a US Routing Number via ABA Checksum algorithm & Plaid Production API.
+     * Pure API call logic only. Zero hardcoded data.
      */
     public function validateRoutingNumber($routingNumber)
     {
-        // 1. Basic Format Validation
+        // 1. Basic Format Validation (Must be 9 digits)
         if (!preg_match('/^\d{9}$/', $routingNumber)) {
             throw new Exception("Routing number must be exactly 9 digits.");
         }
 
-        // 2. Checksum Validation (ABA Routing Number Check Digit)
+        // 2. Checksum Validation (Official ABA Routing Check Digit Algorithm)
         if (!$this->isValidABAChecksum($routingNumber)) {
              throw new Exception("Invalid routing number checksum.");
         }
 
-        // 3. External Lookup (Optional - using free open public API)
-        // Note: Using routingnumbers.info as an example. 
-        // In production, you might want a paid/more robust provider or local DB.
+        // 3. Plaid Production / Sandbox API Institution Search
         try {
-            $response = Http::get("https://www.routingnumbers.info/api/data.json", [
-                'rn' => $routingNumber,
-            ]);
-
-            if ($response->successful() && $response->json('code') === 200) {
+            $plaidDetails = $this->lookupPlaidInstitution($routingNumber);
+            if ($plaidDetails && !empty($plaidDetails['bank_name'])) {
                 return [
                     'valid' => true,
-                    'bank_name' => $response->json('customer_name'),
-                    'location' => $response->json('address') . ', ' . $response->json('city') . ', ' . $response->json('state'),
-                    'message' => 'Valid routing number.',
+                    'bank_name' => $plaidDetails['bank_name'],
+                    'location' => '',
+                    'address_line1' => '',
+                    'city' => '',
+                    'state' => '',
+                    'postal_code' => '',
+                    'message' => 'Bank details fetched dynamically via Plaid API.',
                 ];
             }
         } catch (Exception $e) {
-            // Fallback if API fails, but checksum passed
-            \Log::warning("Routing number lookup failed: " . $e->getMessage());
+            \Log::info("Plaid dynamic routing lookup notice: " . $e->getMessage());
         }
 
+        // 4. Fallback for Valid ABA Checksum
         return [
             'valid' => true,
-            'bank_name' => 'Unknown Bank (Checksum Valid)',
-            'location' => null,
-            'message' => 'Routing number is valid, but bank details could not be fetched.',
+            'bank_name' => '',
+            'location' => '',
+            'address_line1' => '',
+            'city' => '',
+            'state' => '',
+            'postal_code' => '',
+            'message' => 'ABA Routing Number checksum is valid.',
         ];
     }
 
     /**
-     * Validate ABA Routing Number Checksum
-     * Formula: 3(d1 + d4 + d7) + 7(d2 + d5 + d8) + (d3 + d6 + d9) mod 10 = 0
+     * Dynamically query Plaid API (/institutions/get) with include_auth_metadata for institution matching routing number
+     */
+    private function lookupPlaidInstitution($routingNumber)
+    {
+        try {
+            $clientId = \App\Models\SystemSetting::getValue('plaid_client_id') ?? config('services.plaid.client_id');
+            $secret = \App\Models\SystemSetting::getValue('plaid_secret') ?? config('services.plaid.secret');
+            $env = \App\Models\SystemSetting::getValue('plaid_environment') ?? config('services.plaid.environment', 'sandbox');
+
+            if (empty($clientId) || empty($secret)) {
+                return null;
+            }
+
+            $baseUrl = match ($env) {
+                'production' => 'https://production.plaid.com',
+                'development' => 'https://development.plaid.com',
+                default => 'https://sandbox.plaid.com',
+            };
+
+            $offset = 0;
+            while ($offset < 500) {
+                $response = Http::post($baseUrl . '/institutions/get', [
+                    'client_id' => $clientId,
+                    'secret' => $secret,
+                    'count' => 100,
+                    'offset' => $offset,
+                    'country_codes' => ['US'],
+                    'options' => [
+                        'include_auth_metadata' => true,
+                    ]
+                ]);
+
+                if (!$response->successful()) {
+                    \Log::warning("Plaid API Warning: " . $response->body());
+                    break;
+                }
+
+                $institutions = $response->json('institutions') ?? [];
+                if (empty($institutions)) {
+                    break;
+                }
+
+                foreach ($institutions as $inst) {
+                    $routings = $inst['routing_numbers'] ?? [];
+                    if (in_array($routingNumber, $routings)) {
+                        return [
+                            'bank_name' => $inst['name'],
+                            'address_line1' => '',
+                            'city' => '',
+                            'state' => '',
+                            'postal_code' => '',
+                        ];
+                    }
+                }
+
+                $offset += 100;
+            }
+        } catch (Exception $e) {
+            \Log::warning("Plaid lookup exception: " . $e->getMessage());
+        }
+
+        return null;
+    }
+
+    /**
+     * Validate ABA Routing Number Checksum Digit
+     * Formula: 3(d1 + d4 + d7) + 7(d2 + d5 + d8) + 1(d3 + d6 + d9) mod 10 = 0
      */
     private function isValidABAChecksum($routingNumber)
     {
