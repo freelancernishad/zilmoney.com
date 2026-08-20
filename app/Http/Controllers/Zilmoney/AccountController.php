@@ -203,8 +203,8 @@ class AccountController extends Controller
 
         $account = $business->accounts()->findOrFail($id);
 
-        if (!$account->is_tokenized) {
-            return response()->json(['message' => 'This account does not require tokenization override.'], 400);
+        if (!$account->is_tokenized && $account->verification_status === 'verified') {
+            return response()->json(['message' => 'This account is already verified.'], 400);
         }
 
         $validated = $request->validate([
@@ -218,7 +218,7 @@ class AccountController extends Controller
             return response()->json(['message' => 'Invalid routing number format.'], 422);
         }
 
-        $plaidMask = $account->mask;
+        $plaidMask = $account->mask ?? substr($account->account_number ?? '0000', -4);
         if (!$plaidMask) {
             return response()->json(['message' => 'Connected bank account is missing mask information.'], 400);
         }

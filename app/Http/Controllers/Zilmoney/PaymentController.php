@@ -120,8 +120,13 @@ class PaymentController extends Controller
             'process_without' => 'nullable|array',
         ]);
 
-        if (!$business->accounts()->where('id', $validated['account_id'])->exists()) {
+        $account = $business->accounts()->where('id', $validated['account_id'])->first();
+        if (!$account) {
             return response()->json(['message' => 'Invalid account'], 403);
+        }
+
+        if ($account->verification_status === 'pending' || ($account->is_tokenized && $account->verification_status !== 'verified')) {
+            return response()->json(['message' => 'This bank account requires verification before payments can be created.'], 422);
         }
 
         try {
