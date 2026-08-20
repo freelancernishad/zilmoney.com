@@ -158,6 +158,24 @@ class UserPlanController extends Controller
             return $item;
         });
 
-        return response()->json($statement->reverse()->values());
+        $reversed = $statement->reverse()->values();
+
+        if ($request->has('page') || $request->has('per_page')) {
+            $perPage = max(1, (int) $request->input('per_page', 10));
+            $page = max(1, (int) $request->input('page', 1));
+            $total = $reversed->count();
+            $offset = ($page - 1) * $perPage;
+            $items = $reversed->slice($offset, $perPage)->values();
+
+            return response()->json([
+                'data' => $items,
+                'total' => $total,
+                'current_page' => $page,
+                'last_page' => (int) ceil($total / $perPage),
+                'per_page' => $perPage,
+            ]);
+        }
+
+        return response()->json($reversed);
     }
 }
