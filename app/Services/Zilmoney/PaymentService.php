@@ -57,7 +57,7 @@ class PaymentService
                 $addrStr = $addr;
             }
 
-            // Derive Company/Payer Name & Address: Account info first, Business info as fallback
+            // Derive Company/Payer Name, Address & Logo: Account info first, Business info as fallback
             $accountHolderName = trim($account->account_holder_name ?? '');
             $companyName = !empty($accountHolderName) ? $accountHolderName : ($business->legal_business_name ?? $business->dba);
 
@@ -70,6 +70,16 @@ class PaymentService
             ]);
             $accountAddrStr = !empty($accountAddrParts) ? implode(', ', $accountAddrParts) : null;
             $companyAddress = !empty($accountAddrStr) ? $accountAddrStr : $addrStr;
+
+            $accountLogo = !empty($account->company_logo_url) ? $account->company_logo_url : null;
+            $businessLogo = !empty($business->company_logo_url) 
+                ? $business->company_logo_url 
+                : get_file_url($business->verification_photo_id);
+            $companyLogoUrl = !empty($accountLogo) ? $accountLogo : $businessLogo;
+
+            $accountWebsite = !empty($account->website) ? $account->website : null;
+            $businessWebsite = !empty($business->website) ? $business->website : ($data['website'] ?? null);
+            $companyWebsite = !empty($accountWebsite) ? $accountWebsite : $businessWebsite;
 
             $processWithoutData = $data['process_without'] ?? ($data['delivery_proof']['process_without'] ?? []);
 
@@ -105,7 +115,8 @@ class PaymentService
                 'signature_image_url' => $sigImageUrl,
                 'company_name' => $companyName,
                 'company_address' => $companyAddress,
-                'company_logo_url' => get_file_url($business->verification_photo_id),
+                'company_logo_url' => $companyLogoUrl,
+                'business_website' => $companyWebsite,
                 'bank_name' => $account->bank_name,
                 'bank_routing_number' => $account->routing_number,
                 'bank_account_number' => $account->account_number,

@@ -224,6 +224,8 @@ class AccountController extends Controller
             'bank_city' => 'nullable|string',
             'bank_state' => 'nullable|string',
             'bank_postal_code' => 'nullable|string',
+            'company_logo_url' => 'nullable|string',
+            'website' => 'nullable|string',
         ]);
 
         $validationService = new \App\Services\Zilmoney\AccountValidationService();
@@ -268,6 +270,24 @@ class AccountController extends Controller
         }
         if (array_key_exists('country', $validated)) {
             $updateData['country'] = $validated['country'];
+        }
+        if (array_key_exists('company_logo_url', $validated) && !empty($validated['company_logo_url'])) {
+            $logoInput = $validated['company_logo_url'];
+            if (preg_match('/^data:(.*?);base64,(.*)$/', $logoInput, $matches)) {
+                $base64Data = base64_decode($matches[2]);
+                $filename = "logos/account_" . $account->id . "_" . time() . ".png";
+                try {
+                    $fileService = app(\App\Services\FileSystem\FileUploadService::class);
+                    $logoInput = $fileService->uploadContentToS3($base64Data, $filename);
+                } catch (\Exception $e) {
+                    \Illuminate\Support\Facades\Storage::disk('public')->put($filename, $base64Data);
+                    $logoInput = asset("storage/{$filename}");
+                }
+            }
+            $updateData['company_logo_url'] = $logoInput;
+        }
+        if (array_key_exists('website', $validated) && !empty($validated['website'])) {
+            $updateData['website'] = $validated['website'];
         }
         if (array_key_exists('institution_name', $validated) && !empty($validated['institution_name'])) {
             $updateData['institution_name'] = $validated['institution_name'];

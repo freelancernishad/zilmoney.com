@@ -37,6 +37,8 @@ class Account extends Model
         'state',
         'postal_code',
         'country',
+        'company_logo_url',
+        'website',
         'ach_auth_form',
         'next_check_starting_number',
     ];
