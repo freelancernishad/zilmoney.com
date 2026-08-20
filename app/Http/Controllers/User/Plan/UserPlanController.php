@@ -2,10 +2,9 @@
 
 namespace App\Http\Controllers\User\Plan;
 
-
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class UserPlanController extends Controller
 {
@@ -160,22 +159,40 @@ class UserPlanController extends Controller
 
         $reversed = $statement->reverse()->values();
 
-        if ($request->has('page') || $request->has('per_page')) {
-            $perPage = max(1, (int) $request->input('per_page', 10));
-            $page = max(1, (int) $request->input('page', 1));
-            $total = $reversed->count();
-            $offset = ($page - 1) * $perPage;
-            $items = $reversed->slice($offset, $perPage)->values();
-
-            return response()->json([
-                'data' => $items,
-                'total' => $total,
-                'current_page' => $page,
-                'last_page' => (int) ceil($total / $perPage),
-                'per_page' => $perPage,
-            ]);
+        // Server-side Search Filter
+        if ($request->filled('search')) {
+            $search = strtolower($request->input('search'));
+            $reversed = $reversed->filter(function ($item) use ($search) {
+                return str_contains(strtolower($item['description'] ?? ''), $search) ||
+                       str_contains(strtolower($item['id'] ?? ''), $search);
+            })->values();
         }
 
-        return response()->json($reversed);
+        // Server-side Type Filter (Credit / Debit)
+        if ($request->filled('type') && in_array(strtolower($request->type), ['credit', 'debit'])) {
+            $targetType = ucfirst(strtolower($request->type));
+            $reversed = $reversed->filter(function ($item) use ($targetType) {
+                return $item['type'] === $targetType;
+            })->values();
+        }
+
+        $perPage = max(1, (int) $request->input('per_page', 10));
+        $page = max(1, (int) $request->input('page', 1));
+        $total = $reversed->count();
+        $offset = ($page - 1) * $perPage;
+        $items = $reversed->slice($offset, $perPage)->values();
+
+        $paginator = new LengthAwarePaginator(
+            $items,
+            $total,
+            $perPage,
+            $page,
+            [
+                'path' => LengthAwarePaginator::resolveCurrentPath(),
+                'query' => $request->query(),
+            ]
+        );
+
+        return response()->json($paginator);
     }
 }
