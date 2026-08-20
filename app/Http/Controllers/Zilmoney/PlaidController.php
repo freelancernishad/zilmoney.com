@@ -75,9 +75,14 @@ class PlaidController extends Controller
                 ]);
             }
 
-            $this->plaidService->exchangeTokenAndSave($request->public_token, auth()->id(), $business->id);
+            $plaidItem = $this->plaidService->exchangeTokenAndSave($request->public_token, auth()->id(), $business->id);
+            $latestAccount = $business->accounts()->where('plaid_item_id', $plaidItem->id)->latest()->first();
             
-            return response()->json(['message' => 'Bank linked successfully']);
+            return response()->json([
+                'message' => 'Bank linked successfully',
+                'account_id' => $latestAccount ? $latestAccount->id : null,
+                'account' => $latestAccount
+            ]);
         } catch (\Exception $e) {
             return response()->json(['message' => $e->getMessage()], 500);
         }
