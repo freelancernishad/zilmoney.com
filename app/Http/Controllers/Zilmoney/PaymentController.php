@@ -160,12 +160,6 @@ class PaymentController extends Controller
 
         if ($rawSigUrl !== 'NO_SIGNATURE' && $rawSigPath !== 'NO_SIGNATURE' && empty($rawSigUrl) && empty($rawSigPath)) {
             $activeSig = $payment->account ? ($payment->account->activeSignature ?? $payment->account->signatures()->latest()->first()) : null;
-            if (!$activeSig && $payment->business) {
-                $activeSig = \App\Models\Zilmoney\AccountSignature::whereIn('account_id', $payment->business->accounts()->pluck('id'))
-                    ->orderBy('is_primary', 'desc')
-                    ->latest()
-                    ->first();
-            }
             if ($activeSig) {
                 $payment->signature_image = $activeSig->path;
                 $payment->signature_image_url = $activeSig->image_url;
