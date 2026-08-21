@@ -93,11 +93,12 @@
     <div class="check-container">
         <!-- Payer -->
         <div class="absolute payer-info">
-            <div class="payer-name">{{ $payment->business->legal_business_name ?? $payment->business->business_name }}</div>
-            <div class="payer-address">
-                {{ $payment->business->address }}<br>
-                {{ $payment->business->city }}, {{ $payment->business->state }} {{ $payment->business->zip }}
-            </div>
+            @if(!empty($payment->company_name))
+            <div class="payer-name">{{ $payment->company_name }}</div>
+            @endif
+            @if(!empty($payment->company_address))
+            <div class="payer-address">{{ $payment->company_address }}</div>
+            @endif
         </div>
 
         <!-- Check Number -->
@@ -181,10 +182,11 @@
             </tbody>
         </table>
 
+        @if(!empty($payment->company_name))
         <div style="margin-top: 20px; font-size: 11px; color: #777;">
-            <strong>Issued by:</strong> {{ $payment->business->business_name }}<br>
-            If you have questions about this payment, please contact {{ $payment->business->email }}.
+            <strong>Issued by:</strong> {{ $payment->company_name }}
         </div>
+        @endif
     </div>
 
 </body>

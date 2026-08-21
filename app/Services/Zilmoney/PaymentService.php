@@ -57,9 +57,9 @@ class PaymentService
                 $addrStr = $addr;
             }
 
-            // Derive Company/Payer Name, Address & Logo: Account info first, Business info as fallback
+            // Derive Company/Payer Name, Address, Logo & Website: Collect strictly from Account level
             $accountHolderName = trim($account->account_holder_name ?? '');
-            $companyName = !empty($accountHolderName) ? $accountHolderName : ($business->legal_business_name ?? $business->dba);
+            $companyName = !empty($accountHolderName) ? $accountHolderName : null;
 
             $accountAddrParts = array_filter([
                 $account->address_line1 ?? '',
@@ -68,18 +68,11 @@ class PaymentService
                 isset($account->state) ? $account->state . " " . ($account->postal_code ?? '') : ($account->postal_code ?? ''),
                 $account->country ?? ''
             ]);
-            $accountAddrStr = !empty($accountAddrParts) ? implode(', ', $accountAddrParts) : null;
-            $companyAddress = !empty($accountAddrStr) ? $accountAddrStr : $addrStr;
+            $companyAddress = !empty($accountAddrParts) ? implode(', ', $accountAddrParts) : null;
 
-            $accountLogo = !empty($account->company_logo_url) ? $account->company_logo_url : null;
-            $businessLogo = !empty($business->company_logo_url) 
-                ? $business->company_logo_url 
-                : get_file_url($business->verification_photo_id);
-            $companyLogoUrl = !empty($accountLogo) ? $accountLogo : $businessLogo;
+            $companyLogoUrl = !empty($account->company_logo_url) ? $account->company_logo_url : null;
 
-            $accountWebsite = !empty($account->website) ? $account->website : null;
-            $businessWebsite = !empty($business->website) ? $business->website : ($data['website'] ?? null);
-            $companyWebsite = !empty($accountWebsite) ? $accountWebsite : $businessWebsite;
+            $companyWebsite = !empty($account->website) ? $account->website : null;
 
             $processWithoutData = $data['process_without'] ?? ($data['delivery_proof']['process_without'] ?? []);
 

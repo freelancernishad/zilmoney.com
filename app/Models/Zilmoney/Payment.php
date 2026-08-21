@@ -252,54 +252,23 @@ class Payment extends Model
         if (!empty($rawName)) {
             return $rawName;
         }
-        $biz = $this->business;
-        return $biz ? ($biz->legal_business_name ?? $biz->dba ?? null) : null;
+        return $this->account ? ($this->account->account_holder_name ?? null) : null;
     }
 
     public function getBusinessDetailAttribute()
     {
-        $rawName = $this->getRawOriginal('company_name');
+        $rawName = $this->getRawOriginal('company_name') ?: ($this->account?->account_holder_name ?? null);
         $rawAddr = $this->getRawOriginal('company_address');
 
-        if (!empty($rawName) || !empty($rawAddr)) {
-            return [
-                'id' => $this->company_id,
-                'company_name' => $rawName,
-                'legal_business_name' => $rawName,
-                'verification_photo_id' => null,
-                'company_logo_url' => $this->company_logo_url,
-                'address_line1' => $rawAddr,
-                'physical_address' => $rawAddr,
-            ];
-        }
-
-        $biz = $this->business;
-        if ($biz) {
-            $addr = $biz->physical_address;
-            $addrStr = null;
-            if (is_array($addr)) {
-                $parts = array_filter([
-                    $addr['address1'] ?? '',
-                    $addr['city'] ?? '',
-                    isset($addr['state']) ? $addr['state'] . " " . ($addr['zip'] ?? '') : ''
-                ]);
-                $addrStr = implode(', ', $parts);
-            } elseif (is_string($addr)) {
-                $addrStr = $addr;
-            }
-
-            return [
-                'id' => $biz->id,
-                'company_name' => $biz->legal_business_name ?? $biz->dba,
-                'legal_business_name' => $biz->legal_business_name,
-                'verification_photo_id' => $biz->verification_photo_id,
-                'address_line1' => $addrStr,
-                'physical_address' => $biz->physical_address,
-                'phone_number' => $biz->phone_number,
-                'email' => $biz->email,
-            ];
-        }
-        return null;
+        return [
+            'id' => $this->company_id,
+            'company_name' => $rawName,
+            'legal_business_name' => $rawName,
+            'verification_photo_id' => null,
+            'company_logo_url' => $this->company_logo_url ?: ($this->account?->company_logo_url ?? null),
+            'address_line1' => $rawAddr,
+            'physical_address' => $rawAddr,
+        ];
     }
 
     protected static function booted()

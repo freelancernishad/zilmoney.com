@@ -167,30 +167,25 @@ class PaymentController extends Controller
             }
         }
 
-        if (empty($payment->getRawOriginal('company_name')) && $payment->business) {
-            $payment->company_name = $payment->business->legal_business_name ?? $payment->business->dba;
+        if (empty($payment->getRawOriginal('company_name')) && $payment->account) {
+            $payment->company_name = $payment->account->account_holder_name;
             $dirty = true;
         }
 
-        if (empty($payment->getRawOriginal('company_address')) && $payment->business) {
-            $addr = $payment->business->physical_address;
-            $addrStr = null;
-            if (is_array($addr)) {
-                $parts = array_filter([
-                    $addr['address1'] ?? '',
-                    $addr['city'] ?? '',
-                    isset($addr['state']) ? $addr['state'] . " " . ($addr['zip'] ?? '') : ''
-                ]);
-                $addrStr = implode(', ', $parts);
-            } elseif (is_string($addr)) {
-                $addrStr = $addr;
-            }
-            $payment->company_address = $addrStr;
+        if (empty($payment->getRawOriginal('company_address')) && $payment->account) {
+            $accountAddrParts = array_filter([
+                $payment->account->address_line1 ?? '',
+                $payment->account->address_line2 ?? '',
+                $payment->account->city ?? '',
+                isset($payment->account->state) ? $payment->account->state . " " . ($payment->account->postal_code ?? '') : ($payment->account->postal_code ?? ''),
+                $payment->account->country ?? ''
+            ]);
+            $payment->company_address = !empty($accountAddrParts) ? implode(', ', $accountAddrParts) : null;
             $dirty = true;
         }
 
-        if (empty($payment->getRawOriginal('company_logo_url')) && $payment->business) {
-            $payment->company_logo_url = get_file_url($payment->business->verification_photo_id);
+        if (empty($payment->getRawOriginal('company_logo_url')) && $payment->account) {
+            $payment->company_logo_url = $payment->account->company_logo_url;
             $dirty = true;
         }
 
@@ -629,7 +624,7 @@ class PaymentController extends Controller
         $recipientPayeeEmail = $payeeEmail ?: $ownerEmail;
 
         $payeeName = $payment->payee->payee_name ?? $payment->payee->nick_name ?? 'Valued Customer';
-        $payorName = $payment->company_name ?? $business->legal_business_name ?? $business->dba ?? 'Demo Bank Account 1';
+        $payorName = $payment->company_name ?? $payment->account?->account_holder_name ?? '';
         $amount = $payment->amount;
         $checkNumber = $payment->check_number;
         $memo = $payment->memo ?? '';
@@ -817,7 +812,7 @@ class PaymentController extends Controller
         }
 
         $payeeName = $payment->payee->payee_name ?? $payment->payee->nick_name ?? 'Valued Customer';
-        $payorName = $payment->company_name ?? $payment->business?->legal_business_name ?? $payment->business?->dba ?? 'Demo Account';
+        $payorName = $payment->company_name ?? $payment->account?->account_holder_name ?? '';
 
         return response()->json([
             'id' => $payment->id,
@@ -829,8 +824,8 @@ class PaymentController extends Controller
             'status' => $payment->status,
             'signature_image_url' => $payment->signature_image_url,
             'company_name' => $payorName,
-            'company_address' => $payment->company_address ?? $payment->business?->address_line1 ?? '',
-            'company_logo_url' => $payment->company_logo_url ?? $payment->business?->company_logo_url ?? '',
+            'company_address' => $payment->company_address ?? '',
+            'company_logo_url' => $payment->company_logo_url ?? $payment->account?->company_logo_url ?? '',
             'bank_name' => $payment->bank_name ?? $payment->account?->bank_name ?? '',
             'bank_routing_number' => $payment->bank_routing_number ?? $payment->account?->routing_number ?? '',
             'bank_account_number' => $payment->bank_account_number ?? $payment->account?->account_number ?? '',
