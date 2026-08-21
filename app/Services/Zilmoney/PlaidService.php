@@ -68,6 +68,11 @@ class PlaidService
                 $configuredProducts = array_filter(array_map('trim', explode(',', $configuredProductsRaw)));
             }
         }
+        // Plaid does not accept 'balance' in the products array (it is automatically enabled with any valid product like auth/identity)
+        $configuredProducts = array_values(array_filter($configuredProducts, function ($p) {
+            return strtolower(trim($p)) !== 'balance';
+        }));
+
         if (empty($configuredProducts)) {
             $configuredProducts = ['auth', 'identity'];
         }
