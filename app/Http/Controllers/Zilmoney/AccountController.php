@@ -129,6 +129,13 @@ class AccountController extends Controller
             'country' => 'nullable|string',
             'next_check_starting_number' => 'nullable|integer',
             'ach_auth_form' => 'nullable|array',
+            'company_logo_url' => 'nullable|string',
+            'website' => 'nullable|string',
+            'institution_name' => 'nullable|string',
+            'bank_address_line1' => 'nullable|string',
+            'bank_city' => 'nullable|string',
+            'bank_state' => 'nullable|string',
+            'bank_postal_code' => 'nullable|string',
         ]);
 
         if (isset($validated['routing_number']) || isset($validated['account_number'])) {
@@ -142,6 +149,22 @@ class AccountController extends Controller
                     'message' => 'Bank Account Validation Failed: ' . $validationResult['message']
                 ], 422);
             }
+        }
+
+        if (array_key_exists('company_logo_url', $validated) && !empty($validated['company_logo_url'])) {
+            $logoInput = $validated['company_logo_url'];
+            if (preg_match('/^data:(.*?);base64,(.*)$/', $logoInput, $matches)) {
+                $base64Data = base64_decode($matches[2]);
+                $filename = "logos/account_" . $account->id . "_" . time() . ".png";
+                try {
+                    $fileService = app(\App\Services\FileSystem\FileUploadService::class);
+                    $logoInput = $fileService->uploadContentToS3($base64Data, $filename);
+                } catch (\Exception $e) {
+                    \Illuminate\Support\Facades\Storage::disk('public')->put($filename, $base64Data);
+                    $logoInput = asset("storage/{$filename}");
+                }
+            }
+            $validated['company_logo_url'] = $logoInput;
         }
 
         $account->update($validated);

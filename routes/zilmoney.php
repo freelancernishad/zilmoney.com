@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Zilmoney\DashboardController;
 use App\Http\Controllers\Zilmoney\AccountController;
 use App\Http\Controllers\Zilmoney\AccountSignatureController;
+use App\Http\Controllers\Zilmoney\CheckDesignController;
 use App\Http\Controllers\Zilmoney\PayeeController;
 use App\Http\Controllers\Zilmoney\PaymentController;
 use App\Http\Controllers\Zilmoney\PlaidController;
@@ -47,6 +48,13 @@ Route::middleware([\App\Http\Middleware\AuthenticateUser::class])->group(functio
     Route::post('accounts/signatures', [AccountSignatureController::class, 'store']);
     Route::put('accounts/signatures/{signature}/primary', [AccountSignatureController::class, 'setPrimary']);
     Route::delete('accounts/signatures/{signature}', [AccountSignatureController::class, 'destroy']);
+
+    // Check Designs
+    Route::get('accounts/{account}/check-designs', [CheckDesignController::class, 'index']);
+    Route::post('accounts/{account}/check-designs', [CheckDesignController::class, 'store']);
+    Route::put('accounts/{account}/check-designs/{checkDesign}/active', [CheckDesignController::class, 'setActive']);
+    Route::put('accounts/{account}/check-designs/{checkDesign}', [CheckDesignController::class, 'update']);
+    Route::delete('accounts/{account}/check-designs/{checkDesign}', [CheckDesignController::class, 'destroy']);
 
     // Payees
     Route::post('payees/upload-file', [PayeeController::class, 'uploadFile']);

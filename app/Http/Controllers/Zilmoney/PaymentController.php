@@ -25,7 +25,7 @@ class PaymentController extends Controller
         if ($request->boolean('compact')) {
             $query->select('id', 'company_id', 'account_id', 'check_number', 'amount', 'status', 'issue_date');
         } else {
-            $query->with(['payee', 'account.activeSignature', 'logs.initiator']);
+            $query->with(['payee', 'account.activeSignature', 'account.activeCheckDesign', 'logs.initiator']);
         }
 
         // Tab filters (Check, ACH, Wire, Virtual Card, Recurring)
@@ -150,7 +150,7 @@ class PaymentController extends Controller
         $business = auth()->user()->businessDetails;
         if (!$business) return response()->json(['message' => 'Business profile required'], 400);
 
-        $payment = $business->payments()->with(['payee', 'account', 'logs.initiator', 'comments.user', 'attachments', 'business'])->findOrFail($id);
+        $payment = $business->payments()->with(['payee', 'account.activeSignature', 'account.activeCheckDesign', 'logs.initiator', 'comments.user', 'attachments', 'business'])->findOrFail($id);
 
         // Auto-sync & backfill missing snapshot fields for legacy checks using raw DB columns
         $dirty = false;

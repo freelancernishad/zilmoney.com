@@ -70,4 +70,14 @@ class Account extends Model
     {
         return $this->hasOne(AccountSignature::class)->where('is_primary', true);
     }
+
+    public function checkDesigns()
+    {
+        return $this->hasMany(CheckDesign::class);
+    }
+
+    public function activeCheckDesign()
+    {
+        return $this->hasOne(CheckDesign::class)->where('is_active', true);
+    }
 }

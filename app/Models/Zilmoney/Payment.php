@@ -38,6 +38,7 @@ class Payment extends Model
         'bank_name',
         'bank_routing_number',
         'bank_account_number',
+        'check_design_config',
     ];
 
     protected $casts = [
@@ -45,6 +46,7 @@ class Payment extends Model
         'remittance_info' => 'array',
         'delivery_proof' => 'array',
         'process_without' => 'array',
+        'check_design_config' => 'array',
     ];
 
     protected $appends = [
@@ -276,6 +278,17 @@ class Payment extends Model
         static::creating(function ($payment) {
             if (empty($payment->unique_check_id)) {
                 $payment->unique_check_id = static::generateUniqueCheckId();
+            }
+            if (empty($payment->check_design_config) && $payment->account) {
+                $activeDesign = $payment->account->activeCheckDesign;
+                if ($activeDesign) {
+                    $payment->check_design_config = [
+                        'id' => $activeDesign->id,
+                        'name' => $activeDesign->name,
+                        'customBgUrl' => $activeDesign->custom_bg_url,
+                        'positions' => $activeDesign->positions,
+                    ];
+                }
             }
         });
 
