@@ -279,8 +279,38 @@ class Payment extends Model
             if (empty($payment->unique_check_id)) {
                 $payment->unique_check_id = static::generateUniqueCheckId();
             }
-            if (empty($payment->check_design_config) && $payment->account) {
-                $activeDesign = $payment->account->activeCheckDesign;
+
+            $account = $payment->account ?: $payment->account()->first();
+            if ($account) {
+                if (empty($payment->bank_routing_number)) {
+                    $payment->bank_routing_number = $account->routing_number;
+                }
+                if (empty($payment->bank_account_number)) {
+                    $payment->bank_account_number = $account->account_number;
+                }
+                if (empty($payment->bank_name)) {
+                    $payment->bank_name = $account->bank_name ?: $account->institution_name;
+                }
+                if (empty($payment->company_name)) {
+                    $payment->company_name = $account->account_holder_name;
+                }
+                if (empty($payment->company_logo_url)) {
+                    $payment->company_logo_url = $account->company_logo_url;
+                }
+                if (empty($payment->company_address)) {
+                    $accountAddrParts = array_filter([
+                        $account->address_line1 ?? '',
+                        $account->address_line2 ?? '',
+                        $account->city ?? '',
+                        isset($account->state) ? $account->state . " " . ($account->postal_code ?? '') : ($account->postal_code ?? ''),
+                        $account->country ?? ''
+                    ]);
+                    $payment->company_address = !empty($accountAddrParts) ? implode(', ', $accountAddrParts) : null;
+                }
+            }
+
+            if (empty($payment->check_design_config) && $account) {
+                $activeDesign = $account->activeCheckDesign;
                 if ($activeDesign) {
                     $payment->check_design_config = [
                         'id' => $activeDesign->id,

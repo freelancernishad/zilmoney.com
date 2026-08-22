@@ -189,8 +189,8 @@ class PaymentController extends Controller
             $dirty = true;
         }
 
-        if (empty($payment->getRawOriginal('bank_name')) && $payment->account) {
-            $payment->bank_name = $payment->account->bank_name;
+        if (empty($payment->getRawOriginal('bank_routing_number')) && $payment->account) {
+            $payment->bank_name = $payment->account->bank_name ?: $payment->account->institution_name;
             $payment->bank_routing_number = $payment->account->routing_number;
             $payment->bank_account_number = $payment->account->account_number;
             $dirty = true;
