@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('account_id')->constrained('accounts')->onDelete('cascade');
             $table->string('name');
-            $table->text('custom_bg_url')->nullable();
+            $table->longText('custom_bg_url')->nullable();
             $table->json('positions');
             $table->boolean('is_active')->default(false);
             $table->timestamps();
