@@ -823,6 +823,8 @@ class PaymentController extends Controller
             'company_name' => $payorName,
             'company_address' => $payment->company_address ?? '',
             'company_logo_url' => $payment->company_logo_url ?? '',
+            'website' => $payment->website ?? $payment->business_website ?? null,
+            'business_website' => $payment->business_website ?? $payment->website ?? null,
             'bank_name' => $payment->bank_name ?? $payment->account?->bank_name ?? '',
             'bank_routing_number' => $payment->bank_routing_number ?? $payment->account?->routing_number ?? '',
             'bank_account_number' => $payment->bank_account_number ?? $payment->account?->account_number ?? '',

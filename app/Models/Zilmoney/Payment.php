@@ -39,6 +39,8 @@ class Payment extends Model
         'bank_routing_number',
         'bank_account_number',
         'check_design_config',
+        'website',
+        'business_website',
     ];
 
     protected $casts = [
@@ -56,6 +58,8 @@ class Payment extends Model
         'company_logo_url',
         'company_name',
         'is_charged',
+        'website',
+        'business_website',
     ];
 
     public function getIsChargedAttribute()
@@ -243,6 +247,16 @@ class Payment extends Model
         return $this->getRawOriginal('company_logo_url') ?: null;
     }
 
+    public function getWebsiteAttribute()
+    {
+        return $this->getRawOriginal('website') ?: ($this->getRawOriginal('business_website') ?: null);
+    }
+
+    public function getBusinessWebsiteAttribute()
+    {
+        return $this->getRawOriginal('business_website') ?: ($this->getRawOriginal('website') ?: null);
+    }
+
     public function getCompanyNameAttribute()
     {
         $rawName = $this->getRawOriginal('company_name');
@@ -291,6 +305,12 @@ class Payment extends Model
                 }
                 if (empty($payment->company_logo_url)) {
                     $payment->company_logo_url = $account->company_logo_url;
+                }
+                if (empty($payment->website)) {
+                    $payment->website = $account->website;
+                }
+                if (empty($payment->business_website)) {
+                    $payment->business_website = $payment->website ?: $account->website;
                 }
                 if (empty($payment->company_address)) {
                     $accountAddrParts = array_filter([

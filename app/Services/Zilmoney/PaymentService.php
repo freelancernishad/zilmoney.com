@@ -109,6 +109,7 @@ class PaymentService
                 'company_name' => $companyName,
                 'company_address' => $companyAddress,
                 'company_logo_url' => $companyLogoUrl,
+                'website' => $companyWebsite,
                 'business_website' => $companyWebsite,
                 'bank_name' => $account->bank_name,
                 'bank_routing_number' => $account->routing_number,
