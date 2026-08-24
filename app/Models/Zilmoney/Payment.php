@@ -240,12 +240,7 @@ class Payment extends Model
 
     public function getCompanyLogoUrlAttribute()
     {
-        $rawLogo = $this->getRawOriginal('company_logo_url');
-        if (!empty($rawLogo)) {
-            return $rawLogo;
-        }
-        $biz = $this->business;
-        return $biz ? get_file_url($biz->verification_photo_id) : null;
+        return $this->getRawOriginal('company_logo_url') ?: null;
     }
 
     public function getCompanyNameAttribute()
@@ -267,7 +262,7 @@ class Payment extends Model
             'company_name' => $rawName,
             'legal_business_name' => $rawName,
             'verification_photo_id' => null,
-            'company_logo_url' => $this->company_logo_url ?: ($this->account?->company_logo_url ?? null),
+            'company_logo_url' => $this->getRawOriginal('company_logo_url') ?: null,
             'address_line1' => $rawAddr,
             'physical_address' => $rawAddr,
         ];

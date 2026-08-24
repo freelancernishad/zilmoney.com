@@ -184,10 +184,7 @@ class PaymentController extends Controller
             $dirty = true;
         }
 
-        if (empty($payment->getRawOriginal('company_logo_url')) && $payment->account) {
-            $payment->company_logo_url = $payment->account->company_logo_url;
-            $dirty = true;
-        }
+
 
         if (empty($payment->getRawOriginal('bank_routing_number')) && $payment->account) {
             $payment->bank_name = $payment->account->bank_name ?: $payment->account->institution_name;
@@ -825,7 +822,7 @@ class PaymentController extends Controller
             'signature_image_url' => $payment->signature_image_url,
             'company_name' => $payorName,
             'company_address' => $payment->company_address ?? '',
-            'company_logo_url' => $payment->company_logo_url ?? $payment->account?->company_logo_url ?? '',
+            'company_logo_url' => $payment->company_logo_url ?? '',
             'bank_name' => $payment->bank_name ?? $payment->account?->bank_name ?? '',
             'bank_routing_number' => $payment->bank_routing_number ?? $payment->account?->routing_number ?? '',
             'bank_account_number' => $payment->bank_account_number ?? $payment->account?->account_number ?? '',
