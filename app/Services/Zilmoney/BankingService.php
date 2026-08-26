@@ -27,9 +27,18 @@ class BankingService
         try {
             $plaidDetails = $this->lookupPlaidInstitution($routingNumber);
             if ($plaidDetails && !empty($plaidDetails['bank_name'])) {
+                \Log::info("Plaid Routing Lookup Success for Routing [{$routingNumber}]", [
+                    'bank_name' => $plaidDetails['bank_name'],
+                    'has_logo' => !empty($plaidDetails['logo']),
+                    'primary_color' => $plaidDetails['primary_color'] ?? null,
+                ]);
+
                 return [
                     'valid' => true,
                     'bank_name' => $plaidDetails['bank_name'],
+                    'logo' => $plaidDetails['logo'] ?? null,
+                    'primary_color' => $plaidDetails['primary_color'] ?? null,
+                    'website' => $plaidDetails['website'] ?? null,
                     'location' => '',
                     'address_line1' => '',
                     'city' => '',
@@ -39,13 +48,16 @@ class BankingService
                 ];
             }
         } catch (Exception $e) {
-            \Log::info("Plaid dynamic routing lookup notice: " . $e->getMessage());
+            \Log::error("Plaid dynamic routing lookup notice: " . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
         }
 
         // 4. Fallback for Valid ABA Checksum
         return [
             'valid' => true,
             'bank_name' => '',
+            'logo' => null,
+            'primary_color' => null,
+            'website' => null,
             'location' => '',
             'address_line1' => '',
             'city' => '',
@@ -56,9 +68,9 @@ class BankingService
     }
 
     /**
-     * Dynamically query Plaid API (/institutions/get) with include_auth_metadata for institution matching routing number
+     * Dynamically query Plaid API (/institutions/get) with include_auth_metadata & include_optional_metadata for institution matching routing number
      */
-    private function lookupPlaidInstitution($routingNumber)
+    public function lookupPlaidInstitution($routingNumber)
     {
         try {
             $clientId = \App\Models\SystemSetting::getValue('plaid_client_id') ?? config('services.plaid.client_id');
@@ -66,6 +78,7 @@ class BankingService
             $env = \App\Models\SystemSetting::getValue('plaid_environment') ?? config('services.plaid.environment', 'sandbox');
 
             if (empty($clientId) || empty($secret)) {
+                \Log::warning("Plaid credentials missing in SystemSetting/config.");
                 return null;
             }
 
@@ -74,6 +87,11 @@ class BankingService
                 'development' => 'https://development.plaid.com',
                 default => 'https://sandbox.plaid.com',
             };
+
+            \Log::info("Plaid API Request: Querying /institutions/get for routing [{$routingNumber}]", [
+                'environment' => $env,
+                'baseUrl' => $baseUrl,
+            ]);
 
             $offset = 0;
             while ($offset < 500) {
@@ -85,24 +103,49 @@ class BankingService
                     'country_codes' => ['US'],
                     'options' => [
                         'include_auth_metadata' => true,
+                        'include_optional_metadata' => true,
                     ]
                 ]);
 
+                \Log::info("Plaid API Response Status: " . $response->status(), [
+                    'offset' => $offset,
+                    'successful' => $response->successful(),
+                ]);
+
                 if (!$response->successful()) {
-                    \Log::warning("Plaid API Warning: " . $response->body());
+                    \Log::error("Plaid API Error Response for Routing [{$routingNumber}]: " . $response->body());
                     break;
                 }
 
                 $institutions = $response->json('institutions') ?? [];
                 if (empty($institutions)) {
+                    \Log::info("Plaid API returned no institutions at offset {$offset}.");
                     break;
                 }
 
                 foreach ($institutions as $inst) {
                     $routings = $inst['routing_numbers'] ?? [];
                     if (in_array($routingNumber, $routings)) {
+                        $name = $inst['name'] ?? null;
+                        $logoRaw = $inst['logo'] ?? null;
+                        $primaryColor = $inst['primary_color'] ?? null;
+                        $url = $inst['url'] ?? null;
+
+                        $instId = $inst['institution_id'] ?? null;
+                        $logoUrl = PlaidService::resolveFullBankLogo($name, $url, $logoRaw, $instId);
+
+                        \Log::info("Plaid Routing Match Found!", [
+                            'routing' => $routingNumber,
+                            'institution_id' => $inst['institution_id'] ?? null,
+                            'name' => $name,
+                            'logo_resolved' => !empty($logoUrl),
+                        ]);
+
                         return [
-                            'bank_name' => $inst['name'],
+                            'bank_name' => $name,
+                            'logo' => $logoUrl,
+                            'primary_color' => $primaryColor,
+                            'website' => $url,
                             'address_line1' => '',
                             'city' => '',
                             'state' => '',
@@ -114,7 +157,7 @@ class BankingService
                 $offset += 100;
             }
         } catch (Exception $e) {
-            \Log::warning("Plaid lookup exception: " . $e->getMessage());
+            \Log::error("Plaid lookup exception: " . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
         }
 
         return null;

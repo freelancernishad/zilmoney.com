@@ -805,41 +805,18 @@ class PlaidService
 
             if ($instResponse->successful()) {
                 $instData = $instResponse->json('institution');
+                \Log::info("Plaid Raw Institution Response for [{$instId}]:", [
+                    'name' => $instData['name'] ?? null,
+                    'logo_present' => !empty($instData['logo']),
+                    'logo_raw_length' => isset($instData['logo']) ? strlen($instData['logo']) : 0,
+                    'url' => $instData['url'] ?? null,
+                    'raw_institution' => $instData
+                ]);
                 $instName = $instData['name'] ?? null;
                 $logoRaw = $instData['logo'] ?? null;
                 $instUrl = $instData['url'] ?? null;
 
-                $logoUrl = null;
-                if ($logoRaw) {
-                    $logoUrl = str_starts_with($logoRaw, 'data:') ? $logoRaw : "data:image/png;base64,{$logoRaw}";
-                } else {
-                    // Smart Fallback Logo Resolution when Plaid returns logo = null:
-                    $domain = null;
-                    if ($instUrl) {
-                        $parsedHost = parse_url($instUrl, PHP_URL_HOST);
-                        if ($parsedHost) {
-                            $domain = preg_replace('/^www\./i', '', strtolower($parsedHost));
-                        }
-                    }
-
-                    if (!$domain && $instName) {
-                        $nameLower = strtolower($instName);
-                        if (str_contains($nameLower, 'chase')) $domain = 'chase.com';
-                        elseif (str_contains($nameLower, 'america')) $domain = 'bankofamerica.com';
-                        elseif (str_contains($nameLower, 'wells fargo')) $domain = 'wellsfargo.com';
-                        elseif (str_contains($nameLower, 'citi')) $domain = 'citi.com';
-                        elseif (str_contains($nameLower, 'capital one')) $domain = 'capitalone.com';
-                        elseif (str_contains($nameLower, 'pnc')) $domain = 'pnc.com';
-                        elseif (str_contains($nameLower, 'td bank') || $nameLower === 'td') $domain = 'td.com';
-                        elseif (str_contains($nameLower, 'us bank')) $domain = 'usbank.com';
-                        elseif (str_contains($nameLower, 'schwab')) $domain = 'schwab.com';
-                        elseif (str_contains($nameLower, 'fidelity')) $domain = 'fidelity.com';
-                    }
-
-                    if ($domain) {
-                        $logoUrl = "https://www.google.com/s2/favicons?domain={$domain}&sz=128";
-                    }
-                }
+                $logoUrl = self::resolveFullBankLogo($instName, $instUrl, $logoRaw, $instId);
 
                 $plaidItem->update([
                     'institution_id' => $instId,
@@ -861,6 +838,61 @@ class PlaidService
             }
         } catch (\Throwable $e) {
             \Log::warning("Failed to fetch Plaid institution details for Item ID {$plaidItem->id}: " . $e->getMessage());
+        }
+
+        return null;
+    }
+
+    /**
+     * Resolve High-Resolution Bank Logo (Local Brand SVG, Plaid Official CDN, or Favicon Fallback)
+     */
+    public static function resolveFullBankLogo(?string $instName, ?string $instUrl, ?string $logoRaw = null, ?string $instId = null): ?string
+    {
+        if ($logoRaw) {
+            return str_starts_with($logoRaw, 'data:') ? $logoRaw : "data:image/png;base64,{$logoRaw}";
+        }
+
+        // 1. JSON Config-Driven Mapping for ins_*.png files
+        $jsonPath = config_path('bank_logos.json');
+        if (file_exists($jsonPath)) {
+            $config = json_decode(file_get_contents($jsonPath), true);
+            $nameLower = strtolower($instName ?? '');
+
+            // Match by institution_id (e.g. ins_3 -> /images/bank-logos/ins_3.png)
+            if (!empty($instId) && isset($config['by_institution_id'][$instId])) {
+                return $config['by_institution_id'][$instId];
+            }
+
+            // Match by institution name
+            if (!empty($nameLower) && isset($config['by_name'])) {
+                foreach ($config['by_name'] as $key => $path) {
+                    if (str_contains($nameLower, $key)) {
+                        return $path;
+                    }
+                }
+            }
+        }
+
+        // 2. Direct instId local asset lookup fallback
+        if (!empty($instId) && file_exists(public_path("images/bank-logos/{$instId}.png"))) {
+            return "/images/bank-logos/{$instId}.png";
+        }
+
+        // 3. Plaid Official Static CDN Logo Pattern for other unlisted institutions
+        if (!empty($instId)) {
+            return "https://cdn.plaid.com/assets/link/logos/ins/{$instId}.png";
+        }
+
+        // 3. Favicon Fallback for unlisted institutions
+        $domain = null;
+        if ($instUrl) {
+            $parsedHost = parse_url($instUrl, PHP_URL_HOST);
+            if ($parsedHost) {
+                $domain = preg_replace('/^www\./i', '', strtolower($parsedHost));
+            }
+        }
+        if ($domain) {
+            return "https://www.google.com/s2/favicons?domain={$domain}&sz=256";
         }
 
         return null;

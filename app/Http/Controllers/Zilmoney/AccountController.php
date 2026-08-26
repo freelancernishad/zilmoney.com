@@ -190,6 +190,13 @@ class AccountController extends Controller
 
         $account = $business->accounts()->findOrFail($id);
 
+        \Log::info("Manual Sync Bank Data & Logo initiated for Account ID {$account->id}", [
+            'account_id' => $account->id,
+            'routing' => $account->routing_number,
+            'current_bank_name' => $account->institution_name,
+            'current_logo' => $account->institution_logo,
+        ]);
+
         if ($account->plaid_item_id) {
             $plaidItem = \App\Models\Zilmoney\PlaidItem::find($account->plaid_item_id);
             if ($plaidItem) {
@@ -199,9 +206,30 @@ class AccountController extends Controller
             }
         }
 
+        // Also perform routing lookup & logo resync
+        if (!empty($account->routing_number)) {
+            try {
+                $plaidDetails = $this->bankingService->lookupPlaidInstitution($account->routing_number);
+                if ($plaidDetails && !empty($plaidDetails['bank_name'])) {
+                    $account->update([
+                        'institution_name' => $plaidDetails['bank_name'],
+                        'institution_logo' => $plaidDetails['logo'] ?? $account->institution_logo,
+                    ]);
+                    $account = $account->fresh();
+                }
+            } catch (\Exception $e) {
+                \Log::error("Manual Sync Bank Data error for Account {$account->id}: " . $e->getMessage());
+            }
+        }
+
+        \Log::info("Manual Sync Bank Data & Logo COMPLETED for Account ID {$account->id}", [
+            'updated_bank_name' => $account->institution_name,
+            'updated_logo' => $account->institution_logo,
+        ]);
+
         return response()->json([
             'success' => true,
-            'message' => 'Account balance synced with Plaid successfully.',
+            'message' => "Bank details and logo synced successfully for {$account->institution_name}.",
             'account' => $account
         ]);
     }
@@ -334,6 +362,42 @@ class AccountController extends Controller
             'success' => true,
             'message' => 'Bank account successfully verified and updated.',
             'account' => $account
+        ]);
+    }
+
+    /**
+     * Resync logos and bank names for all accounts belonging to the current user's business
+     */
+    public function resyncLogos(Request $request)
+    {
+        $user = Auth::user();
+        $business = $user->businessDetails;
+        if (!$business) return response()->json(['message' => 'Business profile required'], 400);
+
+        $accounts = $business->accounts;
+        $updated = 0;
+
+        foreach ($accounts as $account) {
+            if (!empty($account->routing_number)) {
+                try {
+                    $plaidDetails = $this->bankingService->lookupPlaidInstitution($account->routing_number);
+                    if ($plaidDetails && !empty($plaidDetails['bank_name'])) {
+                        $account->update([
+                            'institution_name' => $account->institution_name ?: $plaidDetails['bank_name'],
+                            'institution_logo' => $plaidDetails['logo'] ?? $account->institution_logo,
+                        ]);
+                        $updated++;
+                    }
+                } catch (\Exception $e) {
+                    \Log::error("AccountController resyncLogos error for Account {$account->id}: " . $e->getMessage());
+                }
+            }
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => "Successfully resynced logos for {$updated} account(s).",
+            'updated_count' => $updated
         ]);
     }
 }

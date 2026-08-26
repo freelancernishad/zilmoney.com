@@ -38,6 +38,7 @@ Route::middleware([\App\Http\Middleware\AuthenticateUser::class])->group(functio
 
     // Banking
     Route::post('accounts/validate-routing', [AccountController::class, 'validateRouting']);
+    Route::post('accounts/resync-logos', [AccountController::class, 'resyncLogos']);
     Route::post('accounts/validate-account', [AccountController::class, 'apiValidateAccount']);
     Route::post('accounts/{account}/manual-verify', [AccountController::class, 'manualVerifyOverride']);
     Route::post('accounts/{account}/sync-balance', [AccountController::class, 'syncBalance']);
