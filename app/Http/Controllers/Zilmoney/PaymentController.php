@@ -215,6 +215,7 @@ class PaymentController extends Controller
             'check_number' => 'nullable|integer',
             'memo' => 'nullable|string|max:255',
             'status' => 'nullable|string|max:50',
+            'signature_image_url' => 'nullable|string',
         ]);
 
         try {
