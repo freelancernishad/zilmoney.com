@@ -43,6 +43,16 @@ class PlaidController extends Controller
                 if ($plaidItem) {
                     $accessToken = $plaidItem->access_token;
                 }
+            } else {
+                $institutionId = $request->input('institution_id');
+                if ($institutionId) {
+                    $plaidItem = \App\Models\Zilmoney\PlaidItem::where('user_id', auth()->id())
+                        ->where('institution_id', $institutionId)
+                        ->first();
+                    if ($plaidItem) {
+                        $accessToken = $plaidItem->access_token;
+                    }
+                }
             }
 
             $data = $this->plaidService->createLinkToken(auth()->id(), $companyId, $redirectUri, $accessToken);
@@ -61,6 +71,8 @@ class PlaidController extends Controller
     {
         $request->validate([
             'public_token' => 'required|string',
+            'account_ids' => 'nullable|array',
+            'account_ids.*' => 'string',
         ]);
 
         try {
@@ -75,13 +87,81 @@ class PlaidController extends Controller
                 ]);
             }
 
-            $plaidItem = $this->plaidService->exchangeTokenAndSave($request->public_token, auth()->id(), $business->id);
+            $selectedAccountIds = $request->input('account_ids');
+
+            $plaidItem = $this->plaidService->exchangeTokenAndSave(
+                $request->public_token, 
+                auth()->id(), 
+                $business->id, 
+                $selectedAccountIds
+            );
+
             $latestAccount = $business->accounts()->where('plaid_item_id', $plaidItem->id)->latest()->first();
             
             return response()->json([
                 'message' => 'Bank linked successfully',
+                'item_id' => $plaidItem->id,
                 'account_id' => $latestAccount ? $latestAccount->id : null,
                 'account' => $latestAccount
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 500);
+        }
+    }
+
+    public function fetchAvailableAccounts(Request $request)
+    {
+        $request->validate([
+            'public_token' => 'required|string',
+        ]);
+
+        try {
+            $business = auth()->user()->businessDetails;
+            if (!$business) {
+                $business = \App\Models\Zilmoney\BusinessDetail::create([
+                    'user_id' => auth()->id(),
+                    'legal_business_name' => auth()->user()->name ? (auth()->user()->name . "'s Business") : "My Business",
+                    'entity_type' => 'LLC',
+                    'country' => 'United States',
+                ]);
+            }
+
+            $result = $this->plaidService->fetchAccountsForSelection($request->public_token, auth()->id(), $business->id);
+
+            return response()->json($result);
+        } catch (\Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 500);
+        }
+    }
+
+    public function confirmSelectedAccounts(Request $request)
+    {
+        $request->validate([
+            'plaid_item_id' => 'required|integer',
+            'account_ids' => 'required|array',
+            'account_ids.*' => 'string',
+        ]);
+
+        try {
+            $business = auth()->user()->businessDetails;
+            if (!$business) {
+                return response()->json(['message' => 'Business details missing'], 400);
+            }
+
+            $plaidItem = \App\Models\Zilmoney\PlaidItem::where('user_id', auth()->id())
+                ->where('id', $request->plaid_item_id)
+                ->firstOrFail();
+
+            $this->plaidService->syncAccounts($plaidItem, $business->id, $request->account_ids);
+
+            $syncedAccounts = $business->accounts()
+                ->where('plaid_item_id', $plaidItem->id)
+                ->whereIn('plaid_account_id', $request->account_ids)
+                ->get();
+
+            return response()->json([
+                'message' => 'Selected accounts connected successfully',
+                'accounts' => $syncedAccounts
             ]);
         } catch (\Exception $e) {
             return response()->json(['message' => $e->getMessage()], 500);

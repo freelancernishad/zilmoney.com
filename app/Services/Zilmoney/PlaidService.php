@@ -123,7 +123,10 @@ class PlaidService
     /**
      * Exchange public token for access token and save item.
      */
-    public function exchangeTokenAndSave($publicToken, $userId, $businessId = null)
+    /**
+     * Exchange public token for access token and save item.
+     */
+    public function exchangeTokenAndSave($publicToken, $userId, $businessId = null, ?array $selectedAccountIds = null)
     {
         $this->setEnvironmentForToken($publicToken);
         $response = Http::post("{$this->baseUrl}/item/public_token/exchange", [
@@ -154,15 +157,87 @@ class PlaidService
         $this->syncInstitutionDetails($plaidItem);
 
         // Sync initial data (Accounts, etc.)
-        $this->syncAccounts($plaidItem, $businessId); // Sync immediately
+        $this->syncAccounts($plaidItem, $businessId, $selectedAccountIds); // Sync immediately
 
         return $plaidItem;
     }
 
     /**
+     * Exchange public token and get available accounts list without syncing all of them immediately.
+     */
+    public function fetchAccountsForSelection($publicToken, $userId, $businessId = null)
+    {
+        $this->setEnvironmentForToken($publicToken);
+        $response = Http::post("{$this->baseUrl}/item/public_token/exchange", [
+            'client_id' => $this->clientId,
+            'secret' => $this->secret,
+            'public_token' => $publicToken,
+        ]);
+
+        if ($response->failed()) {
+            throw new Exception('Plaid Exchange Error: ' . $response->json('error_message'));
+        }
+
+        $data = $response->json();
+        $accessToken = $data['access_token'];
+        $itemId = $data['item_id'];
+
+        $plaidItem = PlaidItem::updateOrCreate(
+            ['item_id' => $itemId],
+            [
+                'user_id' => $userId,
+                'access_token' => $accessToken,
+                'status' => 'active',
+            ]
+        );
+
+        $this->syncInstitutionDetails($plaidItem);
+
+        // Fetch accounts from Plaid
+        $accResponse = Http::post("{$this->baseUrl}/accounts/get", [
+            'client_id' => $this->clientId,
+            'secret' => $this->secret,
+            'access_token' => $accessToken,
+        ]);
+
+        if ($accResponse->failed()) {
+            throw new Exception('Plaid Fetch Accounts Error: ' . $accResponse->json('error_message'));
+        }
+
+        $plaidAccounts = $accResponse->json('accounts') ?? [];
+        
+        // Check existing accounts in local DB for this business
+        $existingPlaidAccountIds = Account::where('company_id', $businessId)
+            ->pluck('plaid_account_id')
+            ->filter()
+            ->toArray();
+
+        $accountList = [];
+        foreach ($plaidAccounts as $acc) {
+            $accId = $acc['account_id'];
+            $accountList[] = [
+                'plaid_account_id' => $accId,
+                'name' => $acc['name'] ?? null,
+                'official_name' => $acc['official_name'] ?? null,
+                'mask' => $acc['mask'] ?? null,
+                'type' => $acc['subtype'] ?? $acc['type'] ?? null,
+                'balance' => $acc['balances']['available'] ?? $acc['balances']['current'] ?? 0,
+                'already_connected' => in_array($accId, $existingPlaidAccountIds),
+            ];
+        }
+
+        return [
+            'plaid_item_id' => $plaidItem->id,
+            'institution_name' => $plaidItem->institution_name,
+            'institution_logo' => $plaidItem->institution_logo,
+            'accounts' => $accountList,
+        ];
+    }
+
+    /**
      * Sync accounts from Plaid to local DB.
      */
-    public function syncAccounts(PlaidItem $plaidItem, $businessId = null)
+    public function syncAccounts(PlaidItem $plaidItem, $businessId = null, ?array $selectedAccountIds = null)
     {
         $this->setEnvironmentForToken($plaidItem->access_token);
 
@@ -277,6 +352,13 @@ class PlaidService
 
         foreach ($accounts as $accountData) {
             $accountId = $accountData['account_id'];
+            
+            // If explicit account IDs were selected, skip any account not in the selection
+            if (is_array($selectedAccountIds) && !empty($selectedAccountIds)) {
+                if (!in_array($accountId, $selectedAccountIds)) {
+                    continue;
+                }
+            }
             
             // Find matching numbers if available
             $accountNumber = null;
