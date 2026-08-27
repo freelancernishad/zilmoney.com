@@ -416,6 +416,43 @@ class PlaidService
                     'routing_number' => $routingNumber,
                 ])->first();
             }
+            if (!$existingAccount && $businessId && !empty($mask)) {
+                // Fallback for Tokenized Virtual Account Numbers (TAN):
+                // Match existing account under the same business by mask, institution, type, and name
+                $accountType = $accountData['subtype'] ?? $accountData['type'] ?? null;
+                $accountName = $accountData['name'] ?? null;
+                $instName = $plaidItem->institution_name;
+
+                // 1st Priority: Match mask + institution + type + account nickname/official name
+                $existingAccount = Account::where('company_id', $businessId)
+                    ->where('mask', $mask)
+                    ->when($instName, function ($q) use ($instName) {
+                        return $q->where('institution_name', $instName);
+                    })
+                    ->when($accountType, function ($q) use ($accountType) {
+                        return $q->where('type', $accountType);
+                    })
+                    ->when($accountName, function ($q) use ($accountName) {
+                        return $q->where(function($subQ) use ($accountName) {
+                            $subQ->where('account_nick_name', $accountName)
+                                 ->orWhere('official_name', $accountName);
+                        });
+                    })
+                    ->first();
+
+                // 2nd Priority: If strict name doesn't match, match mask + institution + type
+                if (!$existingAccount) {
+                    $existingAccount = Account::where('company_id', $businessId)
+                        ->where('mask', $mask)
+                        ->when($instName, function ($q) use ($instName) {
+                            return $q->where('institution_name', $instName);
+                        })
+                        ->when($accountType, function ($q) use ($accountType) {
+                            return $q->where('type', $accountType);
+                        })
+                        ->first();
+                }
+            }
 
             $ownerIdentity = $identityByAccount[$accountId] ?? [];
             $holderName = $ownerIdentity['account_holder_name'] ?? $accountData['name'];
