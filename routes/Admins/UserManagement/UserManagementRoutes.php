@@ -6,6 +6,8 @@ use App\Http\Controllers\Admin\UserManagement\AdminUserController;
 
 Route::prefix('admin')->middleware(AuthenticateAdmin::class)->group(function () {
     Route::get('users', [AdminUserController::class, 'index']);
+    Route::post('users', [AdminUserController::class, 'store']);
+    Route::get('admins-list', [AdminUserController::class, 'getAdmins']);
     Route::get('user', [AdminUserController::class, 'index']);
     Route::get('user/{id}', [AdminUserController::class, 'show']);
     Route::match(['patch', 'post'], '/user/{id}', [AdminUserController::class, 'update']);

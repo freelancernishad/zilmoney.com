@@ -21,6 +21,33 @@ use App\Http\Requests\Admin\UserManagement\AdminUserImportRequest;
 
 class AdminUserController extends Controller
 {
+    // Create new admin account ONLY in admins table
+    public function store(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:admins,email',
+            'password' => 'required|string|min:6',
+        ]);
+
+        $admin = \App\Models\Admin::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'email_verified_at' => now(),
+        ]);
+
+        return response()->json([
+            'data' => [
+                'id' => $admin->id,
+                'name' => $admin->name,
+                'email' => $admin->email,
+                'created_at' => $admin->created_at,
+            ],
+            'message' => 'Admin account created successfully',
+        ], 201);
+    }
+
     // List users with filters & pagination
 public function index(Request $request)
 {
@@ -249,6 +276,19 @@ public function index(Request $request)
             'message' => 'Impersonation token generated',
             'token' => $token,
             'user' => $user
+        ]);
+    }
+
+    // Get list of admin accounts from admins table
+    public function getAdmins(Request $request)
+    {
+        $admins = \App\Models\Admin::select('id', 'name', 'email', 'created_at', 'updated_at')
+            ->orderBy('id', 'desc')
+            ->get();
+
+        return response()->json([
+            'data' => $admins,
+            'message' => 'Admin list retrieved successfully',
         ]);
     }
 }
