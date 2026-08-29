@@ -13,6 +13,8 @@ class AdminUserResource extends JsonResource
             'name' => $this->name,
             'email' => $this->email,
             'role' => $this->role,
+            'credit_balance' => (float) ($this->credit_balance ?? 0),
+            'used_credits' => (float) ($this->used_credits ?? 0),
             'is_active' => $this->is_active,
             'is_blocked' => $this->is_blocked,
             'email_verified' => !is_null($this->email_verified_at),

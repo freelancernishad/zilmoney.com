@@ -36,19 +36,24 @@ class UserPlanController extends Controller
             $activeData = $active->toArray();
         }
 
-        $paymentsSum = (float) $user->payments()->whereIn('status', ['paid', 'Success', 'completed', 'succeeded'])->sum('amount');
-        $subsSum = (float) $user->planSubscriptions()->where('status', 'active')->sum('final_amount');
-        
-        $totalRecharged = max($paymentsSum, $subsSum);
-        $usedCredits = (float) ($user->used_credits ?? 0);
-        $netCredit = max(0, $totalRecharged - $usedCredits);
+        // Initialize credit_balance if it has never been set (is null)
+        if (is_null($user->credit_balance)) {
+            $paymentsSum = (float) $user->payments()->whereIn('status', ['paid', 'Success', 'completed', 'succeeded'])->sum('amount');
+            $subsSum = (float) $user->planSubscriptions()->where('status', 'active')->sum('final_amount');
+            
+            $totalRecharged = max($paymentsSum, $subsSum);
+            $usedCredits = (float) ($user->used_credits ?? 0);
+            $netCredit = max(0, $totalRecharged - $usedCredits);
 
-        if ((float)$user->credit_balance !== $netCredit) {
-            $user->update(['credit_balance' => $netCredit]);
+            $user->credit_balance = $netCredit;
+            $user->save();
         }
 
-        $activeData['total_recharge_credit'] = $netCredit;
-        $activeData['recharge_credit'] = $netCredit;
+        $currentCredit = (float) ($user->credit_balance ?? 0);
+
+        $activeData['total_recharge_credit'] = $currentCredit;
+        $activeData['recharge_credit'] = $currentCredit;
+        $activeData['credit_balance'] = $currentCredit;
 
         return response()->json($activeData);
     }

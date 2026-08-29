@@ -21,7 +21,9 @@ class AdminUserUpdateRequest extends FormRequest
             'is_blocked' => 'sometimes|boolean',
             'role' => 'sometimes|string|in:user,moderator,admin',
             'notes' => 'nullable|string|max:1000',
-            'phone' => 'nullable|string|max:20'
+            'phone' => 'nullable|string|max:20',
+            'credit_balance' => 'sometimes|numeric|min:0',
+            'used_credits' => 'sometimes|numeric|min:0',
         ];
     }
 }

@@ -5,9 +5,11 @@ use App\Http\Middleware\AuthenticateAdmin;
 use App\Http\Controllers\Admin\UserManagement\AdminUserController;
 
 Route::prefix('admin')->middleware(AuthenticateAdmin::class)->group(function () {
-    Route::get('users/', [AdminUserController::class, 'index']);
+    Route::get('users', [AdminUserController::class, 'index']);
+    Route::get('user', [AdminUserController::class, 'index']);
     Route::get('user/{id}', [AdminUserController::class, 'show']);
-    Route::patch('/user/{id}', [AdminUserController::class, 'update']);
+    Route::match(['patch', 'post'], '/user/{id}', [AdminUserController::class, 'update']);
+    Route::post('users/{id}/add-credit', [AdminUserController::class, 'addCredit']);
     Route::patch('users/{id}/toggle-active', [AdminUserController::class, 'toggleActive']);
     Route::patch('users/{id}/toggle-block', [AdminUserController::class, 'toggleBlock']);
     Route::patch('users/{id}/reset-password', [AdminUserController::class, 'resetPassword']);

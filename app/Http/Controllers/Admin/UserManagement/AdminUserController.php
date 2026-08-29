@@ -49,6 +49,10 @@ public function index(Request $request)
         $query->where('phone', 'like', '%' . $request->phone . '%');
     }
 
+    if ($request->filled('role') && $request->role !== 'undefined') {
+        $query->where('role', $request->role);
+    }
+
     if ($request->has('is_active')) {
         $query->where('is_active', $request->boolean('is_active'));
     }
@@ -82,11 +86,11 @@ public function index(Request $request)
 
     public function update(AdminUserUpdateRequest $request, $id)
     {
-        $user = User::find($id);
+        $user = User::findOrFail($id);
 
         // Update fields
         $user->fill($request->only([
-            'name', 'email', 'role', 'is_active', 'is_blocked', 'notes', 'phone'
+            'name', 'email', 'role', 'is_active', 'is_blocked', 'notes', 'phone', 'credit_balance', 'used_credits'
         ]));
 
         $user->save();
@@ -96,6 +100,33 @@ public function index(Request $request)
             'Message' => 'User updated successfully',
             'isError' => false,
             'status_code' => 200
+        ]);
+    }
+
+    // Add / Set credit balance directly
+    public function addCredit(Request $request, $id)
+    {
+        $request->validate([
+            'amount' => 'required|numeric',
+            'type' => 'nullable|string|in:add,set'
+        ]);
+
+        $user = User::findOrFail($id);
+        $amount = (float) $request->input('amount');
+        $type = $request->input('type', 'add');
+
+        if ($type === 'set') {
+            $user->credit_balance = $amount;
+        } else {
+            $user->credit_balance = ($user->credit_balance ?? 0) + $amount;
+        }
+
+        $user->save();
+
+        return response()->json([
+            'data' => new AdminUserResource($user),
+            'message' => 'Credit balance updated successfully',
+            'credit_balance' => $user->credit_balance
         ]);
     }
 
