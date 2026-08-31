@@ -46,6 +46,29 @@ class GoogleAuthService
             // Authenticate the user
             Auth::login($user);
 
+            // Check 2FA
+            if ($user->hasTwoFactorEnabled()) {
+                $preAuthToken = JWTAuth::claims([
+                    '2fa_pending' => true,
+                    'sub' => $user->id,
+                    'email' => $user->email,
+                ])->fromUser($user);
+
+                logUserActivity(
+                    activity: 'Google Login 2FA Challenge Triggered',
+                    category: 'Authentication',
+                    userId: $user->id,
+                    request: $request,
+                    isSuccess: true
+                );
+
+                return response()->json([
+                    'message' => 'Two-factor authentication required.',
+                    '2fa_required' => true,
+                    'pre_auth_token' => $preAuthToken,
+                ], 200);
+            }
+
             // Payload for JWT (can be used for additional claims if needed)
             $userPayload = [
                 'email' => $user->email,
