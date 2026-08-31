@@ -37,6 +37,9 @@ class User extends Authenticatable implements JWTSubject, MustVerifyEmail
         'notes',
         'last_login_at',
         'two_factor_verification',
+        'google2fa_secret',
+        'two_factor_recovery_codes',
+        'two_factor_confirmed_at',
         'first_name',
         'last_name',
         'display_name',
@@ -60,6 +63,8 @@ class User extends Authenticatable implements JWTSubject, MustVerifyEmail
         'remember_token',
         'otp',
         'otp_expires_at',
+        'google2fa_secret',
+        'two_factor_recovery_codes',
     ];
 
     /**
@@ -76,8 +81,19 @@ class User extends Authenticatable implements JWTSubject, MustVerifyEmail
             'is_blocked' => 'boolean',
             'last_login_at' => 'datetime',
             'two_factor_verification' => 'boolean',
+            'two_factor_confirmed_at' => 'datetime',
+            'google2fa_secret' => 'encrypted',
+            'two_factor_recovery_codes' => 'encrypted:array',
             'date_of_birth' => 'date',
         ];
+    }
+
+    /**
+     * Check if user has active Two-Factor Authentication enabled.
+     */
+    public function hasTwoFactorEnabled(): bool
+    {
+        return !empty($this->google2fa_secret) && !is_null($this->two_factor_confirmed_at);
     }
 
 

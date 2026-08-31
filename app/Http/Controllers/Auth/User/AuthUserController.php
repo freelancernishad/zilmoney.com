@@ -170,6 +170,28 @@ class AuthUserController extends Controller
         // Attempt authentication
         if (Auth::attempt($credentials)) {
             $user = Auth::user();
+
+            // 🔒 Check if Two-Factor Authentication is enabled
+            if ($user->hasTwoFactorEnabled()) {
+                try {
+                    $preAuthToken = JWTAuth::customClaims([
+                        '2fa_pending' => true,
+                        'sub' => $user->id,
+                        'exp' => now()->addMinutes(5)->timestamp
+                    ])->fromUser($user);
+
+                    logUserActivity('2FA Challenge Prompted', 'Authentication', $user->id, $request, true);
+
+                    return response()->json([
+                        '2fa_required' => true,
+                        'pre_auth_token' => $preAuthToken,
+                        'message' => 'Two-Factor Authentication code required.'
+                    ], 200);
+                } catch (JWTException $e) {
+                    return response()->json(['error' => 'Could not generate authentication challenge session'], 500);
+                }
+            }
+
             $user->last_login_at = now();
             $user->save();
 
