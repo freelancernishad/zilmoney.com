@@ -26,7 +26,7 @@ class ContactMessageController extends Controller
 
     $admin = (object) [
         'name' => 'Admin',
-        'email' => config('ADMIN_EMAIL') || "office@goldenmark.money",
+        'email' => env('ADMIN_EMAIL', 'office@goldenmark.money'),
     ];
 
     // Send to Admin
