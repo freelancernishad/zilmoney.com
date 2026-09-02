@@ -129,16 +129,16 @@ class AuthUserController extends Controller
      */
     public function login(LoginRequest $request)
     {
+        // Handle Apple login
+        if ($request->identity_token || $request->provider === 'apple') {
+            $appleAuthService = new AppleAuthService();
+            return $appleAuthService->login($request);
+        }
+
         // Handle Google login
         if ($request->access_token) {
             $googleAuthService = new GoogleAuthService();
             return $googleAuthService->login($request);
-        }
-
-        // Handle Apple login
-        if ($request->identity_token) {
-            $appleAuthService = new AppleAuthService();
-            return $appleAuthService->login($request);
         }
 
         $credentials = $request->only('email', 'password');

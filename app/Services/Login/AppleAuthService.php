@@ -17,7 +17,7 @@ class AppleAuthService
     public function login(Request $request)
     {
         try {
-            $identityToken = $request->identity_token;
+            $identityToken = $request->identity_token ?? $request->access_token ?? $request->id_token;
             $name = $request->name;
 
             // Decode the Apple Identity Token
@@ -81,10 +81,16 @@ class AppleAuthService
 
             return response()->json([
                 'success' => true,
+                'statusCode' => 200,
+                'status_code' => 200,
                 'access_token' => $token,
                 'token_type' => 'Bearer',
+                'data' => [
+                    'access_token' => $token,
+                    'user' => $user,
+                ],
                 'user' => $user,
-                'profile_completion' => $user->profile_completion,
+                'profile_completion' => $user->profile_completion ?? 10,
                 'message' => 'Login successful via Apple',
             ], 200);
 
