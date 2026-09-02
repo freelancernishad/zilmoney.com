@@ -36,7 +36,7 @@ class ContactMessageController extends Controller
         'New Contact Message',                     // subject
         'ContactMessage',                          // related model
         $message->id,                              // related model id
-        'emails.supportAndConnect.admin_received', // Blade view
+        'emails.SupportAndConnect.admin_received', // Blade view
         [
             'name' => $user->name,                // string
             'email' => $user->email,              // string
@@ -52,7 +52,7 @@ class ContactMessageController extends Controller
         'Contact Form Received',
         'ContactMessage',
         $message->id,
-        'emails.supportAndConnect.user_received',
+        'emails.SupportAndConnect.user_received',
         [
             'name' => $user->name,
             'email' => $user->email,
