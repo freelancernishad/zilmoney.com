@@ -3,8 +3,14 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="color-scheme" content="light dark">
+    <meta name="supported-color-schemes" content="light dark">
     <title>E-check Payment Received - GoldenMark Money</title>
     <style>
+        :root {
+            color-scheme: light dark;
+            supported-color-schemes: light dark;
+        }
         body {
             margin: 0;
             padding: 0;
@@ -75,7 +81,8 @@
             text-align: left;
         }
         .amount-card {
-            background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+            background-color: #fffbeb;
+            background-image: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
             border: 1px solid #fde68a;
             border-radius: 16px;
             padding: 24px;
@@ -150,6 +157,7 @@
             text-align: center;
             margin: 12px 0 0 0;
             font-size: 13px;
+            color: #64748b;
         }
         .secondary-link a {
             color: #d97706;
@@ -174,6 +182,83 @@
         .footer-links a:hover {
             text-decoration: underline;
         }
+
+        /* Dark Mode Override Styles */
+        @media (prefers-color-scheme: dark) {
+            body, table {
+                background-color: #0b0f19 !important;
+            }
+            .email-container {
+                background-color: #1e293b !important;
+                border-color: #334155 !important;
+            }
+            .brand-header {
+                background-color: #1e293b !important;
+            }
+            .brand-dark-text {
+                color: #f8fafc !important;
+            }
+            .brand-badge {
+                background-color: #78350f !important;
+                color: #fef3c7 !important;
+                border-color: #92400e !important;
+            }
+            .hero-title {
+                color: #f8fafc !important;
+            }
+            .hero-subtitle, .hero-subtitle strong {
+                color: #cbd5e1 !important;
+            }
+            .amount-card {
+                background: #2b1f0d !important;
+                background-color: #2b1f0d !important;
+                background-image: none !important;
+                border-color: #78350f !important;
+            }
+            .amount-label {
+                color: #f59e0b !important;
+            }
+            .amount-value {
+                color: #fbbf24 !important;
+            }
+            .details-card {
+                background-color: #0f172a !important;
+                border-color: #334155 !important;
+            }
+            .details-header {
+                color: #94a3b8 !important;
+                border-bottom-color: #334155 !important;
+            }
+            .details-table td {
+                color: #cbd5e1 !important;
+            }
+            .details-table .label {
+                color: #94a3b8 !important;
+            }
+            .details-table .value {
+                color: #f8fafc !important;
+            }
+            .secondary-link {
+                color: #94a3b8 !important;
+            }
+            .secondary-link a {
+                color: #f59e0b !important;
+            }
+            .footer {
+                background-color: #0f172a !important;
+                border-top-color: #334155 !important;
+                color: #94a3b8 !important;
+            }
+            .footer-title {
+                color: #f8fafc !important;
+            }
+            .footer p {
+                color: #94a3b8 !important;
+            }
+            .footer-links a {
+                color: #f59e0b !important;
+            }
+        }
     </style>
 </head>
 <body>
@@ -187,7 +272,7 @@
                     <!-- Brand Header -->
                     <div class="brand-header">
                         <div class="brand-logo-text">
-                            <span style="color: #0f172a;">GoldenMark</span>
+                            <span class="brand-dark-text" style="color: #0f172a;">GoldenMark</span>
                             <span style="color: #f59e0b;">Money</span>
                         </div>
                         <div>
@@ -257,7 +342,7 @@
 
                     <!-- Footer -->
                     <div class="footer">
-                        <p style="margin: 0 0 10px 0; font-weight: 700; color: #0f172a;">GoldenMark Money®</p>
+                        <p class="footer-title" style="margin: 0 0 10px 0; font-weight: 700; color: #0f172a;">GoldenMark Money®</p>
                         <p style="margin: 0 0 10px 0; color: #64748b;">
                             74-09 37th Avenue Suite 203B, Jackson Heights, NY 11372<br>
                             Tel: 833 711 4030 &bull; Email: support@goldenmark.money
