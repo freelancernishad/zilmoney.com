@@ -27,6 +27,7 @@ class Log extends Model
 
     public function initiator()
     {
-        return $this->belongsTo(User::class, 'initiated_by');
+        return $this->belongsTo(User::class, 'initiated_by')
+            ->select(['id', 'name', 'first_name', 'last_name', 'display_name', 'email', 'role']);
     }
 }

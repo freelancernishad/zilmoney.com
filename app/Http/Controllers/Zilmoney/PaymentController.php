@@ -94,6 +94,10 @@ class PaymentController extends Controller
         $perPage = $request->input('per_page', 20);
         $payments = $query->paginate($perPage);
 
+        $payments->getCollection()->transform(function ($payment) {
+            return $this->sanitizePaymentUserRelations($payment);
+        });
+
         return response()->json($payments);
     }
 
@@ -151,6 +155,7 @@ class PaymentController extends Controller
         if (!$business) return response()->json(['message' => 'Business profile required'], 400);
 
         $payment = $business->payments()->with(['payee', 'account.activeSignature', 'account.activeCheckDesign', 'logs.initiator', 'comments.user', 'attachments', 'business'])->findOrFail($id);
+        $this->sanitizePaymentUserRelations($payment);
 
         // Auto-sync & backfill missing snapshot fields for legacy checks using raw DB columns
         $dirty = false;
@@ -955,6 +960,36 @@ class PaymentController extends Controller
             $user->decrement('credit_balance', $servicePrice);
             $user->increment('used_credits', $servicePrice);
         }
+    }
+
+    /**
+     * Strip heavy appends and relations from nested user objects (logs.initiator and comments.user)
+     */
+    private function sanitizePaymentUserRelations($payment)
+    {
+        if ($payment->relationLoaded('logs')) {
+            foreach ($payment->logs as $log) {
+                if ($log->relationLoaded('initiator') && $log->initiator) {
+                    $log->initiator->setAppends([]);
+                    $log->initiator->unsetRelation('businessDetails');
+                    $log->initiator->unsetRelation('personalInfo');
+                    $log->initiator->unsetRelation('deviceLogs');
+                    $log->initiator->makeHidden(['businessDetails', 'personalInfo', 'deviceLogs', 'business_details', 'personal_info', 'device_logs', 'documents', 'accounts', 'payees', 'cards']);
+                }
+            }
+        }
+        if ($payment->relationLoaded('comments')) {
+            foreach ($payment->comments as $comment) {
+                if ($comment->relationLoaded('user') && $comment->user) {
+                    $comment->user->setAppends([]);
+                    $comment->user->unsetRelation('businessDetails');
+                    $comment->user->unsetRelation('personalInfo');
+                    $comment->user->unsetRelation('deviceLogs');
+                    $comment->user->makeHidden(['businessDetails', 'personalInfo', 'deviceLogs', 'business_details', 'personal_info', 'device_logs', 'documents', 'accounts', 'payees', 'cards']);
+                }
+            }
+        }
+        return $payment;
     }
 }
 
