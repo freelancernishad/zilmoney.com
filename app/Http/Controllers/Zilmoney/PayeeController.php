@@ -14,7 +14,36 @@ class PayeeController extends Controller
         $business = auth()->user()->businessDetails;
         if (!$business) return response()->json([]);
 
-        return response()->json($business->payees);
+        $payees = $business->payees()
+            ->select([
+                'id',
+                'company_id',
+                'type',
+                'payee_name',
+                'nick_name',
+                'email',
+                'phone_number',
+                'payee_id_account_number',
+                'entity_type',
+                'company_name',
+                'request_bank_account',
+                'created_at',
+                'updated_at'
+            ])
+            ->latest('id')
+            ->get();
+
+        return response()->json($payees);
+    }
+
+    public function show($id)
+    {
+        $business = auth()->user()->businessDetails;
+        if (!$business) return response()->json(['message' => 'Business profile required'], 400);
+
+        $payee = $business->payees()->findOrFail($id);
+
+        return response()->json($payee);
     }
 
     public function store(Request $request)
