@@ -136,3 +136,9 @@ if (file_exists($ZilmoneyRoutes = __DIR__ . '/zilmoney.php')) {
         require $ZilmoneyRoutes;
     });
 }
+
+// Load ShopRoutes
+if (file_exists($ShopRoutes = __DIR__ . '/Shop/ShopRoutes.php')) {
+    require $ShopRoutes;
+}
+
