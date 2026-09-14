@@ -649,6 +649,7 @@ class PaymentController extends Controller
         $tokenCode = $payment->email_token ?: $payment->unique_check_id;
 
         $frontendUrl = env('FRONTEND_URL', 'http://localhost:3000');
+        $logoUrl = "{$frontendUrl}/logo.png";
         $printUrl = "{$frontendUrl}/outside/emailchecks/disclaimer/{$tokenCode}";
         $trackUrl = "{$frontendUrl}/dashboard/payments";
         $loginUrl = "{$frontendUrl}/login";
@@ -669,6 +670,8 @@ class PaymentController extends Controller
                 'printUrl' => $printUrl,
                 'trackUrl' => $trackUrl,
                 'loginUrl' => $loginUrl,
+                'frontendUrl' => $frontendUrl,
+                'logoUrl' => $logoUrl,
             ], function ($message) use ($recipientPayeeEmail, $subjectPayee) {
                 $message->to($recipientPayeeEmail)
                         ->subject($subjectPayee);
@@ -687,6 +690,8 @@ class PaymentController extends Controller
                         'memo' => $memo,
                         'dateProcessed' => $dateProcessed,
                         'trackUrl' => $trackUrl,
+                        'frontendUrl' => $frontendUrl,
+                        'logoUrl' => $logoUrl,
                     ], function ($message) use ($ownerEmail, $subjectOwner) {
                         $message->to($ownerEmail)
                                 ->subject($subjectOwner);

@@ -270,11 +270,14 @@
                     <div class="header-top-bar"></div>
 
                     <!-- Brand Header -->
-                    <div class="brand-header">
-                        <div class="brand-logo-text">
-                            <span class="brand-dark-text" style="color: #0f172a;">GoldenMark</span>
-                            <span style="color: #f59e0b;">Money</span>
-                        </div>
+                    <div class="brand-header" style="padding: 24px 36px 16px 36px; text-align: center;">
+                        <a href="{{ $frontendUrl ?? env('FRONTEND_URL', 'http://localhost:3000') }}" target="_blank" style="text-decoration: none; display: inline-block;">
+                            @if(isset($message) && file_exists(public_path('images/logo.png')))
+                                <img src="{{ $message->embed(public_path('images/logo.png')) }}" alt="GoldenMark Money Logo" style="max-height: 48px; width: auto; max-width: 220px; display: block; margin: 0 auto; border: 0;" />
+                            @else
+                                <img src="{{ $logoUrl ?? (env('FRONTEND_URL', 'http://localhost:3000') . '/logo.png') }}" alt="GoldenMark Money Logo" style="max-height: 48px; width: auto; max-width: 220px; display: block; margin: 0 auto; border: 0;" />
+                            @endif
+                        </a>
                         <div>
                             <span class="brand-badge">E-Check Payment</span>
                         </div>
