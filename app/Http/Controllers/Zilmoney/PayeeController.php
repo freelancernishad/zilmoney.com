@@ -19,6 +19,8 @@ class PayeeController extends Controller
                 'id',
                 'company_id',
                 'type',
+                'first_name',
+                'last_name',
                 'payee_name',
                 'nick_name',
                 'email',
@@ -53,6 +55,8 @@ class PayeeController extends Controller
 
         $validated = $request->validate([
             'type' => 'required|in:customer,vendor,employee',
+            'first_name' => 'nullable|string',
+            'last_name' => 'nullable|string',
             'payee_name' => 'required|string',
             'nick_name' => 'nullable|string',
             'email' => 'nullable|email',
@@ -131,6 +135,8 @@ class PayeeController extends Controller
 
         $validated = $request->validate([
             'type' => 'nullable|in:customer,vendor,employee',
+            'first_name' => 'nullable|string',
+            'last_name' => 'nullable|string',
             'payee_name' => 'nullable|string',
             'nick_name' => 'nullable|string',
             'email' => 'nullable|email',

@@ -12,6 +12,8 @@ class Payee extends Model
     protected $fillable = [
         'company_id',
         'type',
+        'first_name',
+        'last_name',
         'payee_name',
         'nick_name',
         'email',
