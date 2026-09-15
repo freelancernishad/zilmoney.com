@@ -739,18 +739,20 @@ class PaymentController extends Controller
 
         $payment = Payment::with(['payee', 'account', 'businessDetail'])
             ->where(function($q) use ($searchId, $numericId) {
-                $q->where('id', $searchId)
-                  ->orWhere('check_number', $searchId)
-                  ->orWhere('email_token', $searchId);
-
-                if (!empty($numericId)) {
-                    $q->orWhere('id', (int)$numericId)
-                      ->orWhere('check_number', $numericId);
-                }
+                $q->where('email_token', $searchId);
 
                 if (\Illuminate\Support\Facades\Schema::hasColumn('company_payments', 'unique_check_id')) {
                     $q->orWhere('unique_check_id', $searchId);
-                    if (!empty($numericId)) {
+                }
+
+                if (is_numeric($searchId)) {
+                    $q->orWhere('id', (int)$searchId)
+                      ->orWhere('check_number', $searchId);
+                }
+
+                if (!empty($numericId)) {
+                    $q->orWhere('check_number', $numericId);
+                    if (\Illuminate\Support\Facades\Schema::hasColumn('company_payments', 'unique_check_id')) {
                         $q->orWhere('unique_check_id', 'CHK-' . str_pad($numericId, 8, '0', STR_PAD_LEFT));
                     }
                 }
@@ -810,9 +812,14 @@ class PaymentController extends Controller
     public function getPublicPaymentByCode($code)
     {
         $payment = Payment::with(['payee', 'account', 'business'])
-            ->where('email_token', $code)
-            ->orWhere('unique_check_id', $code)
-            ->orWhere('id', $code)
+            ->where(function ($q) use ($code) {
+                $q->where('email_token', $code)
+                  ->orWhere('unique_check_id', $code);
+
+                if (is_numeric($code)) {
+                    $q->orWhere('id', (int)$code);
+                }
+            })
             ->first();
 
         if (!$payment) {
