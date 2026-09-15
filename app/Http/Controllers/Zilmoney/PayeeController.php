@@ -9,9 +9,28 @@ use Illuminate\Support\Facades\Log;
 
 class PayeeController extends Controller
 {
+    private function getBusinessProfile()
+    {
+        $user = auth()->user();
+        if (!$user) return null;
+
+        $business = $user->businessDetails;
+        if (!$business) {
+            $business = \App\Models\Zilmoney\BusinessDetail::firstOrCreate(
+                ['user_id' => $user->id],
+                [
+                    'legal_business_name' => ($user->name ?? 'User') . "'s Business",
+                    'country' => 'United States',
+                    'entity_type' => 'LLC',
+                ]
+            );
+        }
+        return $business;
+    }
+
     public function index()
     {
-        $business = auth()->user()->businessDetails;
+        $business = $this->getBusinessProfile();
         if (!$business) return response()->json([]);
 
         $payees = $business->payees()
@@ -40,7 +59,7 @@ class PayeeController extends Controller
 
     public function show($id)
     {
-        $business = auth()->user()->businessDetails;
+        $business = $this->getBusinessProfile();
         if (!$business) return response()->json(['message' => 'Business profile required'], 400);
 
         $payee = $business->payees()->findOrFail($id);
@@ -50,14 +69,14 @@ class PayeeController extends Controller
 
     public function store(Request $request)
     {
-        $business = auth()->user()->businessDetails;
+        $business = $this->getBusinessProfile();
         if (!$business) return response()->json(['message' => 'Business profile required'], 400);
 
         $validated = $request->validate([
-            'type' => 'required|in:customer,vendor,employee',
+            'type' => 'nullable|in:customer,vendor,employee',
             'first_name' => 'nullable|string',
             'last_name' => 'nullable|string',
-            'payee_name' => 'required|string',
+            'payee_name' => 'nullable|string',
             'nick_name' => 'nullable|string',
             'email' => 'nullable|email',
             'phone_number' => 'nullable|string',
@@ -128,7 +147,7 @@ class PayeeController extends Controller
 
     public function update(Request $request, $id)
     {
-        $business = auth()->user()->businessDetails;
+        $business = $this->getBusinessProfile();
         if (!$business) return response()->json(['message' => 'Business profile required'], 400);
 
         $payee = $business->payees()->findOrFail($id);
@@ -207,7 +226,7 @@ class PayeeController extends Controller
 
     public function destroy($id)
     {
-        $business = auth()->user()->businessDetails;
+        $business = $this->getBusinessProfile();
         if (!$business) return response()->json(['message' => 'Business profile required'], 400);
 
         $payee = $business->payees()->findOrFail($id);
