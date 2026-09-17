@@ -235,7 +235,7 @@
                             @endif
                         </a>
                         <div>
-                            <span class="brand-badge">Payment Receipt</span>
+                            <span class="brand-badge">Payment Send</span>
                         </div>
                     </div>
 
@@ -292,7 +292,7 @@
 
                     <!-- Footer -->
                     <div class="footer">
-                        <p class="footer-title" style="margin: 0 0 10px 0; font-weight: 700; color: #0f172a;">GoldenMark Money®</p>
+                        <p class="footer-title" style="margin: 0 0 10px 0; font-weight: 700; color: #0f172a;">GoldenMark Money™</p>
                         <p style="margin: 0 0 10px 0; color: #64748b;">
                             74-09 37th Avenue Suite 203B, Jackson Heights, NY 11372<br>
                             Tel: 833 711 4030 &bull; Email: support@goldenmark.money
@@ -303,7 +303,7 @@
                             <a href="{{ config('app.frontend_url') }}/contact">Support</a>
                         </div>
                         <p style="margin: 0; font-size: 11px; color: #94a3b8;">
-                            &copy; {{ date('Y') }} GoldenMark Money®. All rights reserved. Powered by ZSI.ai.
+                            &copy; {{ date('Y') }} GoldenMark Money™. All rights reserved. Powered by ZSI.ai.
                         </p>
                     </div>
                 </div>

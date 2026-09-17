@@ -210,7 +210,7 @@
                     <div class="footer">
                         <p style="margin: 0 0 6px 0; font-weight: 700; color: #0f172a;">GoldenMark Money System Alert</p>
                         <p style="margin: 0; font-size: 11px; color: #94a3b8;">
-                            &copy; {{ date('Y') }} GoldenMark Money®. All rights reserved.
+                            &copy; {{ date('Y') }} GoldenMark Money™. All rights reserved.
                         </p>
                     </div>
                 </div>

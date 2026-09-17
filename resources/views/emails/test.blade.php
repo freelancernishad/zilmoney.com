@@ -99,7 +99,7 @@
                     </div>
                     <div class="footer">
                         <p style="margin: 0; font-size: 11px; color: #94a3b8;">
-                            &copy; {{ date('Y') }} GoldenMark Money®. All rights reserved. Powered by ZSI.ai.
+                            &copy; {{ date('Y') }} GoldenMark Money™. All rights reserved. Powered by ZSI.ai.
                         </p>
                     </div>
                 </div>
