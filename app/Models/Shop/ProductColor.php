@@ -16,6 +16,7 @@ class ProductColor extends Model
         'color_name',
         'hex_code',
         'bg_class',
+        'image_url',
     ];
 
     public function product()

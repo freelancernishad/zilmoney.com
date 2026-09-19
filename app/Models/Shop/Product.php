@@ -17,6 +17,8 @@ class Product extends Model
         'title',
         'slug',
         'subtitle',
+        'image_url',
+        'images',
         'description',
         'starting_quantity',
         'starting_price',
@@ -27,6 +29,7 @@ class Product extends Model
     protected $casts = [
         'starting_price' => 'float',
         'in_stock' => 'boolean',
+        'images' => 'array',
     ];
 
     public function category()

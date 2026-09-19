@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Zilmoney\Shop;
 use App\Http\Controllers\Controller;
 use App\Models\Shop\Product;
 use App\Models\Shop\Category;
+use App\Services\FileSystem\FileUploadService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -85,6 +86,9 @@ class ProductController extends Controller
             'item_code' => 'required|string|unique:shop_products,item_code',
             'category_id' => 'nullable|exists:shop_categories,id',
             'subtitle' => 'nullable|string',
+            'image_url' => 'nullable|string',
+            'images' => 'nullable|array',
+            'images.*' => 'string',
             'description' => 'nullable|string',
             'filter_value_ids' => 'nullable|array',
             'filter_value_ids.*' => 'exists:shop_filter_values,id',
@@ -97,6 +101,9 @@ class ProductController extends Controller
             ['quantity' => 250, 'price' => 95.99, 'is_popular' => true]
         ]);
 
+        $images = $request->get('images', []);
+        $primaryImageUrl = $request->image_url ?? ($images[0] ?? '/images/check-papers-preview.png');
+
         // Starting price & quantity from the first tier
         $startingQty = $quantityTiers[0]['quantity'] ?? 250;
         $startingPrice = $quantityTiers[0]['price'] ?? 95.99;
@@ -106,6 +113,8 @@ class ProductController extends Controller
             'slug' => Str::slug($request->title) . '-' . Str::random(4),
             'item_code' => $request->item_code,
             'subtitle' => $request->subtitle,
+            'image_url' => $primaryImageUrl,
+            'images' => $images,
             'description' => $request->description,
             'category_id' => $request->category_id,
             'starting_quantity' => $startingQty,
@@ -118,13 +127,6 @@ class ProductController extends Controller
         if ($request->has('filter_value_ids')) {
             $product->filterValues()->sync($request->filter_value_ids);
         }
-
-        // Add Default Colors
-        $product->colors()->create([
-            'color_name' => 'Classic Blue',
-            'hex_code' => '#2563eb',
-            'bg_class' => 'bg-blue-600',
-        ]);
 
         // Sync Quantity Tiers
         foreach ($quantityTiers as $tier) {
@@ -159,6 +161,9 @@ class ProductController extends Controller
             'item_code' => 'sometimes|required|string|unique:shop_products,item_code,' . $id,
             'category_id' => 'nullable|exists:shop_categories,id',
             'subtitle' => 'nullable|string',
+            'image_url' => 'nullable|string',
+            'images' => 'nullable|array',
+            'images.*' => 'string',
             'description' => 'nullable|string',
             'filter_value_ids' => 'nullable|array',
             'filter_value_ids.*' => 'exists:shop_filter_values,id',
@@ -177,8 +182,20 @@ class ProductController extends Controller
         if ($request->has('subtitle')) {
             $product->subtitle = $request->subtitle;
         }
+        if ($request->has('images')) {
+            $product->images = $request->images;
+            if (is_array($request->images) && count($request->images) > 0) {
+                $product->image_url = $request->images[0];
+            }
+        }
+        if ($request->has('image_url')) {
+            $product->image_url = $request->image_url;
+        }
         if ($request->has('category_id')) {
             $product->category_id = $request->category_id;
+        }
+        if ($request->has('description')) {
+            $product->description = $request->description;
         }
 
         // Sync Quantity Tiers if provided
@@ -230,5 +247,33 @@ class ProductController extends Controller
             'success' => true,
             'message' => 'Product deleted successfully',
         ]);
+    }
+
+    /**
+     * Upload product image to AWS S3 using FileUploadService.
+     */
+    public function uploadImage(Request $request, FileUploadService $fileUploadService)
+    {
+        $request->validate([
+            'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg,webp|max:10240',
+        ]);
+
+        try {
+            $url = $fileUploadService->uploadFileToS3($request->file('image'), 'products');
+            return response()->json([
+                'success' => true,
+                'url' => $url,
+                'message' => 'Image uploaded to S3 successfully',
+            ]);
+        } catch (\Exception $e) {
+            // Fallback to local public disk storage if S3 credentials are not set in environment
+            $path = $request->file('image')->store('uploads/products', 'public');
+            $url = asset('storage/' . $path);
+            return response()->json([
+                'success' => true,
+                'url' => $url,
+                'message' => 'Image uploaded (Local fallback): ' . $e->getMessage(),
+            ]);
+        }
     }
 }

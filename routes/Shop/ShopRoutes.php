@@ -32,10 +32,11 @@ Route::prefix('v1/shop')->group(function () {
     Route::delete('filter-groups/{id}', [FilterController::class, 'destroyGroup']);
     Route::delete('filter-values/{id}', [FilterController::class, 'destroyValue']);
 
-    // Products CRUD
+    // Products CRUD & S3 Image Upload
     Route::get('products', [ProductController::class, 'index']);
     Route::get('products/{idOrSlug}', [ProductController::class, 'show']);
     Route::post('products', [ProductController::class, 'store']);
+    Route::post('upload-image', [ProductController::class, 'uploadImage']);
     Route::put('products/{id}', [ProductController::class, 'update']);
     Route::delete('products/{id}', [ProductController::class, 'destroy']);
 
