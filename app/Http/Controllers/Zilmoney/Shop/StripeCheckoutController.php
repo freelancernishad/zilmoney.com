@@ -33,6 +33,9 @@ class StripeCheckoutController extends Controller
             'customer_phone' => 'nullable|string|max:50',
             'shipping_address' => 'required|array',
             'delivery_price' => 'nullable|numeric',
+            'tax_amount' => 'nullable|numeric',
+            'tax_rate' => 'nullable|numeric',
+            'tax_state' => 'nullable|string',
             'items' => 'required|array|min:1',
             'items.*.productId' => 'nullable',
             'items.*.title' => 'required|string',
@@ -80,6 +83,24 @@ class StripeCheckoutController extends Controller
                 ];
             }
 
+            // Add estimated sales tax line item if present
+            $taxAmount = (float) ($validated['tax_amount'] ?? 0);
+            $taxRate = (float) ($validated['tax_rate'] ?? 0);
+            $taxState = $validated['tax_state'] ?? null;
+            if ($taxAmount > 0) {
+                $lineItems[] = [
+                    'price_data' => [
+                        'currency' => 'usd',
+                        'product_data' => [
+                            'name' => 'Estimated Sales Tax' . ($taxRate > 0 ? " ({$taxRate}%)" : ''),
+                            'description' => $taxState ? "Sales tax calculated for {$taxState}" : 'State Sales Tax',
+                        ],
+                        'unit_amount' => (int) round($taxAmount * 100),
+                    ],
+                    'quantity' => 1,
+                ];
+            }
+
             $session = StripeSession::create([
                 'payment_method_types' => ['card'],
                 'line_items' => $lineItems,
@@ -90,12 +111,14 @@ class StripeCheckoutController extends Controller
                 'metadata' => [
                     'customer_name' => $validated['customer_name'],
                     'customer_email' => $validated['customer_email'],
+                    'tax_amount' => $taxAmount,
+                    'tax_rate' => $taxRate,
                 ],
             ]);
 
             // Save order in database (allows guest order creation)
             $orderNumber = 'ORD-' . rand(10000, 99999);
-            $totalAmount = array_reduce($validated['items'], fn($sum, $i) => $sum + $i['totalPrice'], 0) + $deliveryPrice;
+            $totalAmount = array_reduce($validated['items'], fn($sum, $i) => $sum + $i['totalPrice'], 0) + $deliveryPrice + $taxAmount;
 
             $order = Order::create([
                 'order_number' => $orderNumber,
@@ -111,6 +134,9 @@ class StripeCheckoutController extends Controller
                 'order_status' => 'processing',
                 'custom_check_details' => [
                     'stripe_session_id' => $session->id,
+                    'tax_amount' => $taxAmount,
+                    'tax_rate' => $taxRate,
+                    'tax_state' => $taxState,
                     'items_raw' => $validated['items'],
                 ],
             ]);
