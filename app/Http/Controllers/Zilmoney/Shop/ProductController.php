@@ -54,8 +54,20 @@ class ProductController extends Controller
             });
         }
 
+        // 4. Sorting
+        $sortBy = $request->input('sort_by') ?? $request->input('sort') ?? $request->input('sortBy') ?? 'featured';
+        if ($sortBy === 'price-asc') {
+            $query->orderBy('starting_price', 'asc');
+        } elseif ($sortBy === 'price-desc') {
+            $query->orderBy('starting_price', 'desc');
+        } elseif ($sortBy === 'code') {
+            $query->orderBy('item_code', 'asc');
+        } else {
+            $query->orderBy('id', 'desc');
+        }
+
         $perPage = (int) ($request->input('per_page') ?? $request->input('perPage') ?? 10);
-        $products = $query->orderBy('id', 'desc')->paginate($perPage);
+        $products = $query->paginate($perPage);
 
         return response()->json($products);
     }
