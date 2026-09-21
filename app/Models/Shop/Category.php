@@ -15,11 +15,16 @@ class Category extends Model
         'name',
         'slug',
         'description',
+        'image_url',
+        'badge_text',
+        'feature_items',
+        'cta_button_text',
         'is_active',
     ];
 
     protected $casts = [
         'is_active' => 'boolean',
+        'feature_items' => 'array',
     ];
 
     public function products()

@@ -17,12 +17,60 @@ class ShopSeeder extends Seeder
     {
         // 1. Categories
         $categories = [
-            ['name' => 'Laser & Inkjet Business Checks', 'slug' => 'laser', 'description' => 'Laser checks compatible with QuickBooks, Sage, & all accounting software.'],
-            ['name' => 'Manual Business Checks', 'slug' => 'manual', 'description' => 'Compact and deskbook manual checks with stub registers.'],
-            ['name' => 'High Security Checks', 'slug' => 'high-security', 'description' => '30+ anti-fraud security features, microprint, and hologram foil.'],
-            ['name' => 'Blank Check Stock', 'slug' => 'blank-check-paper', 'description' => 'Unprinted MICR blank check paper for custom check printing software.'],
-            ['name' => 'Personal & Pocket Checks', 'slug' => 'personal-checks', 'description' => 'Personal wallet size checks and side-tear duplicate checkbooks.'],
-            ['name' => 'Check Accessories & Binders', 'slug' => 'accessories', 'description' => '7-Ring binders, deposit slips, endorsement stamps, and journals.'],
+            [
+                'name' => 'Laser & Inkjet Business Checks',
+                'slug' => 'laser',
+                'description' => 'Laser checks compatible with QuickBooks, Sage, & all accounting software.',
+                'image_url' => '/images/check-papers-preview.png',
+                'badge_text' => 'QuickBooks & Software',
+                'feature_items' => ['3-On-A-Page Laser Checks', '1-Up Voucher Payroll Checks', 'QuickBooks & Quicken Formats', 'Multi-Purpose Accounting Checks'],
+                'cta_button_text' => 'Explore Laser & Inkjet Business Checks',
+            ],
+            [
+                'name' => 'Manual Business Checks',
+                'slug' => 'manual',
+                'description' => 'Compact and deskbook manual checks with stub registers.',
+                'image_url' => '/images/white-paper-checks-preview.png',
+                'badge_text' => 'Portable & Deskbook',
+                'feature_items' => ['3-On-A-Page Desk Checks', '1-Up Portable Checkbooks', 'Side-Tear Perforated Stubs', '7-Ring Binder Deskbooks'],
+                'cta_button_text' => 'Explore Manual Business Checks',
+            ],
+            [
+                'name' => 'High Security Checks',
+                'slug' => 'high-security',
+                'description' => '30+ anti-fraud security features, microprint, and hologram foil.',
+                'image_url' => '/images/blank-check.jpg',
+                'badge_text' => '30+ Security Features',
+                'feature_items' => ['High Security Laser Checks', 'High Security Manual Checks', 'Hologram Foil & Void Pantograph', 'Anti-Copy Tamper Protection'],
+                'cta_button_text' => 'Explore High Security Checks',
+            ],
+            [
+                'name' => 'Blank Check Stock',
+                'slug' => 'blank-check-paper',
+                'description' => 'Unprinted MICR blank check paper for custom check printing software.',
+                'image_url' => '/images/check-papers-preview.png',
+                'badge_text' => 'MICR Paper Stock',
+                'feature_items' => ['Top Check Stock', 'Middle Check Stock', 'Bottom Check Stock', 'Blank 3-Up Paper'],
+                'cta_button_text' => 'Explore Blank Check Stock',
+            ],
+            [
+                'name' => 'Personal & Pocket Checks',
+                'slug' => 'personal-checks',
+                'description' => 'Personal wallet size checks and side-tear duplicate checkbooks.',
+                'image_url' => '/images/white-paper-checks-preview.png',
+                'badge_text' => 'Personal Wallet Size',
+                'feature_items' => ['Single Wallet Checks', 'Duplicate Pocket Checks', 'Personal Deskbooks', 'Decorative Designs'],
+                'cta_button_text' => 'Explore Personal Checks',
+            ],
+            [
+                'name' => 'Check Accessories & Binders',
+                'slug' => 'accessories',
+                'description' => '7-Ring binders, deposit slips, endorsement stamps, and journals.',
+                'image_url' => '/images/blank-check.jpg',
+                'badge_text' => 'Binders & Supplies',
+                'feature_items' => ['7-Ring Check Binders', 'Deposit Slips & Books', 'Endorsement Stamps', 'Tax Forms & Envelopes'],
+                'cta_button_text' => 'Explore Check Accessories',
+            ],
         ];
 
         $categoryModels = [];
