@@ -8,9 +8,15 @@ use App\Http\Controllers\Zilmoney\Shop\OrderController;
 use App\Http\Controllers\Zilmoney\Shop\StripeCheckoutController;
 use App\Http\Controllers\Zilmoney\Shop\AdminStripeTaxRegistrationController;
 use App\Http\Controllers\Zilmoney\Shop\AdminTaxReportController;
+use App\Http\Controllers\Zilmoney\Shop\DeliveryMethodController;
 
 // Public & Admin Shop API Endpoints
 Route::prefix('v1/shop')->group(function () {
+    // Delivery Methods CRUD
+    Route::get('delivery-methods', [DeliveryMethodController::class, 'index']);
+    Route::post('delivery-methods', [DeliveryMethodController::class, 'store']);
+    Route::put('delivery-methods/{id}', [DeliveryMethodController::class, 'update']);
+    Route::delete('delivery-methods/{id}', [DeliveryMethodController::class, 'destroy']);
     // Admin Stripe Tax Registration Routes
     Route::get('admin/stripe-tax-registrations', [AdminStripeTaxRegistrationController::class, 'index']);
     Route::post('admin/stripe-tax-registrations', [AdminStripeTaxRegistrationController::class, 'store']);
