@@ -235,7 +235,7 @@
                             @endif
                         </a>
                         <div>
-                            <span class="brand-badge">Payment Send</span>
+                            <span class="brand-badge">Payment Sent</span>
                         </div>
                     </div>
 
