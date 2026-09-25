@@ -120,6 +120,10 @@ class ProductController extends Controller
         $startingQty = $quantityTiers[0]['quantity'] ?? 250;
         $startingPrice = $quantityTiers[0]['price'] ?? 95.99;
 
+        $templateType = $request->get('template_type', 'business_deskbook_3up');
+        $presets = Product::getDefaultPreviewPresets();
+        $previewConfig = $request->get('preview_config') ?: ($presets[$templateType] ?? $presets['business_deskbook_3up']);
+
         $product = Product::create([
             'title' => $request->title,
             'slug' => Str::slug($request->title) . '-' . Str::random(4),
@@ -133,6 +137,8 @@ class ProductController extends Controller
             'starting_price' => $startingPrice,
             'in_stock' => $request->get('in_stock', true),
             'badge' => $request->badge,
+            'template_type' => $templateType,
+            'preview_config' => $previewConfig,
         ]);
 
         // Sync Checked Relational Filter Values
@@ -177,6 +183,8 @@ class ProductController extends Controller
             'images' => 'nullable|array',
             'images.*' => 'string',
             'description' => 'nullable|string',
+            'template_type' => 'nullable|string',
+            'preview_config' => 'nullable|array',
             'filter_value_ids' => 'nullable|array',
             'filter_value_ids.*' => 'exists:shop_filter_values,id',
             'quantity_tiers' => 'nullable|array|min:1',
@@ -208,6 +216,16 @@ class ProductController extends Controller
         }
         if ($request->has('description')) {
             $product->description = $request->description;
+        }
+        if ($request->has('template_type')) {
+            $product->template_type = $request->template_type;
+            if (!$request->has('preview_config') || empty($request->preview_config)) {
+                $presets = Product::getDefaultPreviewPresets();
+                $product->preview_config = $presets[$request->template_type] ?? $presets['business_deskbook_3up'];
+            }
+        }
+        if ($request->has('preview_config') && !empty($request->preview_config)) {
+            $product->preview_config = $request->preview_config;
         }
 
         // Sync Quantity Tiers if provided
