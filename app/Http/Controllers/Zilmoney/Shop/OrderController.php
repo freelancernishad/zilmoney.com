@@ -69,7 +69,15 @@ class OrderController extends Controller
             'items.*.total_price' => 'required|numeric',
         ]);
 
-        $orderNumber = 'ORD-' . rand(10000, 99999);
+        $primaryCustomDetails = !empty($validated['items'][0]['customCheckDetails']) && is_array($validated['items'][0]['customCheckDetails'])
+            ? $validated['items'][0]['customCheckDetails']
+            : [];
+
+        $customCheckDetails = array_merge(
+            $primaryCustomDetails,
+            $validated['custom_check_details'] ?? [],
+            ['items_raw' => $validated['items']]
+        );
 
         $order = Order::create([
             'order_number' => $orderNumber,
@@ -83,11 +91,21 @@ class OrderController extends Controller
             'payment_status' => $validated['payment_status'] ?? 'paid',
             'payment_method' => $validated['payment_method'] ?? 'Stripe Credit Card',
             'order_status' => 'processing',
-            'custom_check_details' => $validated['custom_check_details'] ?? null,
+            'custom_check_details' => $customCheckDetails,
         ]);
 
         foreach ($validated['items'] as $item) {
-            $order->items()->create($item);
+            $itemCustomDetails = $item['customCheckDetails'] ?? $item['custom_check_details'] ?? null;
+            $order->items()->create([
+                'product_id' => $item['product_id'] ?? null,
+                'product_title' => $item['product_title'],
+                'item_code' => $item['item_code'] ?? null,
+                'selected_color' => $item['selected_color'] ?? null,
+                'quantity' => $item['quantity'],
+                'unit_price' => $item['unit_price'],
+                'total_price' => $item['total_price'],
+                'custom_check_details' => $itemCustomDetails,
+            ]);
         }
 
         return response()->json([
@@ -116,6 +134,43 @@ class OrderController extends Controller
 
         return response()->json([
             'message' => 'Order status updated successfully',
+            'order' => $order->load('items')
+        ]);
+    }
+
+    /**
+     * Update order custom check design details and layout configuration.
+     */
+    public function updateCheckDetails(Request $request, $id)
+    {
+        $order = Order::findOrFail($id);
+
+        $validated = $request->validate([
+            'custom_check_details' => 'required|array',
+        ]);
+
+        $existingDetails = is_array($order->custom_check_details) ? $order->custom_check_details : [];
+        $mergedDetails = array_merge($existingDetails, $validated['custom_check_details']);
+
+        $order->custom_check_details = $mergedDetails;
+        $order->save();
+
+        // Also update individual shop_order_items if items_raw is updated
+        if (isset($mergedDetails['items_raw']) && is_array($mergedDetails['items_raw'])) {
+            $orderItems = $order->items()->orderBy('id', 'asc')->get();
+            foreach ($mergedDetails['items_raw'] as $idx => $rawItem) {
+                if (isset($orderItems[$idx])) {
+                    $itemCustom = $rawItem['customCheckDetails'] ?? $rawItem['custom_check_details'] ?? null;
+                    if ($itemCustom) {
+                        $orderItems[$idx]->custom_check_details = $itemCustom;
+                        $orderItems[$idx]->save();
+                    }
+                }
+            }
+        }
+
+        return response()->json([
+            'message' => 'Order check design configuration updated successfully',
             'order' => $order->load('items')
         ]);
     }

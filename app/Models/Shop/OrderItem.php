@@ -20,11 +20,13 @@ class OrderItem extends Model
         'quantity',
         'unit_price',
         'total_price',
+        'custom_check_details',
     ];
 
     protected $casts = [
         'unit_price' => 'float',
         'total_price' => 'float',
+        'custom_check_details' => 'array',
     ];
 
     public function order()

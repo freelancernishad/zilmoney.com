@@ -51,6 +51,7 @@ Route::prefix('v1/shop')->group(function () {
     Route::get('orders/{id}', [OrderController::class, 'show']);
     Route::post('orders', [OrderController::class, 'store']);
     Route::put('orders/{id}/status', [OrderController::class, 'updateStatus']);
+    Route::put('orders/{id}/check-details', [OrderController::class, 'updateCheckDetails']);
     Route::delete('orders/{id}', [OrderController::class, 'destroy']);
 
     // Stripe Session Payment & Guest Checkout
