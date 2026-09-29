@@ -63,6 +63,7 @@ class PlanController extends Controller
 
         // Transform to array to ensure DB properties and user status are included in JSON
         $plansData = $plans->map(function ($plan) use ($activePlanId, $user) {
+            $plan->makeVisible('features');
             $data = $plan->toArray();
             $data['is_active'] = (bool) $plan->is_active;
             $data['serial'] = (int) $plan->serial;
@@ -141,7 +142,6 @@ class PlanController extends Controller
             'plan' => $plan->makeVisible('features'),
         ]);
     }
-
 
     // Delete a plan
     public function destroy($id)
