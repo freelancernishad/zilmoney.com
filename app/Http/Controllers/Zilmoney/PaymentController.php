@@ -917,12 +917,19 @@ class PaymentController extends Controller
                ?? \App\Models\Plan\Plan::first());
 
         // Determine price for service based on user plan
-        $servicePrice = 0.75; // Default for Pay As You Go
+        $servicePrice = 0.75; // Default fallback for Pay As You Go
         if ($activePlan && is_array($activePlan->features)) {
+            $searchLower = strtolower(trim($serviceName));
             foreach ($activePlan->features as $feature) {
-                if (($feature['label'] ?? '') === $serviceName && isset($feature['price'])) {
-                    $servicePrice = (float) str_replace(['$', ' '], '', $feature['price']);
-                    break;
+                if (isset($feature['price'])) {
+                    $featureLabelLower = strtolower(trim($feature['label'] ?? ''));
+                    if ($featureLabelLower === $searchLower || str_contains($featureLabelLower, $searchLower) || str_contains($searchLower, $featureLabelLower)) {
+                        $parsedPrice = (float) str_replace(['$', ' '], '', $feature['price']);
+                        if ($parsedPrice >= 0) {
+                            $servicePrice = $parsedPrice;
+                            break;
+                        }
+                    }
                 }
             }
         }
