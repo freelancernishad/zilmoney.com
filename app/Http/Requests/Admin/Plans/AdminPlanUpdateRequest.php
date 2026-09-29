@@ -4,7 +4,7 @@ namespace App\Http\Requests\Admin\Plans;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class AdminPlanStoreRequest extends FormRequest
+class AdminPlanUpdateRequest extends FormRequest
 {
     public function authorize(): bool
     {
@@ -14,12 +14,12 @@ class AdminPlanStoreRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required|string',
-            'duration' => 'required|string',
-            'original_price' => 'required|numeric',
+            'name' => 'sometimes|required|string',
+            'duration' => 'sometimes|required|string',
+            'original_price' => 'sometimes|required|numeric',
             'monthly_price' => 'nullable|numeric',
-            'discount_percentage' => 'required|numeric|min:0|max:100',
-            'features' => 'required|array',
+            'discount_percentage' => 'sometimes|required|numeric|min:0|max:100',
+            'features' => 'sometimes|required|array',
             'features.*.label' => 'sometimes|required|string',
             'is_active' => 'nullable|boolean',
             'serial' => 'nullable|integer|min:0',
