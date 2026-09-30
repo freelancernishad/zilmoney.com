@@ -10,8 +10,8 @@ use App\Http\Controllers\Auth\User\TwoFactorController;
 
 
 Route::prefix('auth/user')->group(function () {
-    Route::post('login', [AuthUserController::class, 'login'])->name('login');
-    Route::post('register', [AuthUserController::class, 'register']);
+    Route::post('login', [AuthUserController::class, 'login'])->middleware('throttle:10,1')->name('login');
+    Route::post('register', [AuthUserController::class, 'register'])->middleware('throttle:5,1');
 
     // 2FA Verification during login (Throttled to 5 attempts per minute)
     Route::middleware('throttle:5,1')->group(function () {

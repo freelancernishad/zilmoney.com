@@ -16,7 +16,7 @@ $app = Application::configure(basePath: dirname(__DIR__))
         $middleware->append(\App\Http\Middleware\AttachJwtFromCookie::class);
         $middleware->append(\App\Http\Middleware\ApiResponse::class);
         $middleware->append(\App\Http\Middleware\CompressionMiddleware::class);
-        // $middleware->append(\App\Http\Middleware\Cors::class);
+        $middleware->append(\App\Http\Middleware\Cors::class);
         $middleware->append(\App\Http\Middleware\WhitelistOriginMiddleware::class);
         $middleware->validateCsrfTokens(except: [
             '/api/stripe/webhook',
