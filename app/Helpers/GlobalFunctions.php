@@ -1,19 +1,11 @@
 <?php
 
 use App\Helpers\NotificationHelper;
+use Illuminate\Support\Facades\Storage;
 
 if (!function_exists('send_notification')) {
     /**
      * Send a notification to a user via database and email.
-     *
-     * @param object $user The user object (must have 'email' and 'id' properties).
-     * @param string $message The notification message for the database.
-     * @param string $subject The email subject.
-     * @param string $bladeView The blade view for the email.
-     * @param array $viewData The data to pass to the email view.
-     * @param string|null $relatedModel The related model name (e.g., 'Ticket', 'Subscription').
-     * @param int|string|null $relatedModelId The ID of the related model.
-     * @return void
      */
     function send_notification($user, $message, $subject, $bladeView, $viewData = [], $relatedModel = null, $relatedModelId = null)
     {
@@ -35,7 +27,7 @@ if (!function_exists('send_notification')) {
 
 if (!function_exists('get_file_url')) {
     /**
-     * Get full public URL for a file/image using System Settings AWS_FILE_LOAD_BASE or S3 config.
+     * Get full public URL for a file/image using System Settings AWS_FILE_LOAD_BASE, presigned S3 URLs, or local fallback.
      *
      * @param string|null $path
      * @return string|null
@@ -46,8 +38,25 @@ if (!function_exists('get_file_url')) {
             return null;
         }
 
+        // Handle AWS S3 URLs with temporary presigned URLs to bypass AWS S3 403 Forbidden blocks
         if (filter_var($path, FILTER_VALIDATE_URL)) {
+            if (str_contains($path, 'amazonaws.com')) {
+                $s3Path = ltrim(parse_url($path, PHP_URL_PATH), '/');
+                try {
+                    return Storage::disk('s3')->temporaryUrl($s3Path, now()->addDays(7));
+                } catch (\Exception $e) {
+                    return asset('storage/' . $s3Path);
+                }
+            }
             return $path;
+        }
+
+        if (str_starts_with($path, 'shop/')) {
+            try {
+                return Storage::disk('s3')->temporaryUrl($path, now()->addDays(7));
+            } catch (\Exception $e) {
+                return asset('storage/' . $path);
+            }
         }
 
         $baseLoadUrl = config('AWS_FILE_LOAD_BASE') 
