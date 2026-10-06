@@ -14,6 +14,7 @@ class Plan extends Model
 
     protected $fillable = [
         'name',
+        'type',
         'duration',
         'original_price',
         'discounted_price',
@@ -21,12 +22,14 @@ class Plan extends Model
         'discount_percentage',
         'features',  // stored as JSON
         'is_active',
+        'is_popular',
         'serial',
     ];
 
     protected $casts = [
         'features' => 'array',
         'is_active' => 'boolean',
+        'is_popular' => 'boolean',
         'serial' => 'integer',
     ];
 

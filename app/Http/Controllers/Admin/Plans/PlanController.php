@@ -69,6 +69,22 @@ class PlanController extends Controller
             $data['is_active'] = (bool) $plan->is_active;
             $data['serial'] = (int) $plan->serial;
             $data['is_current_plan'] = (bool) ($activePlanId && $activePlanId == $plan->id);
+
+            // Categorize into 'plan' (On-demand/Pay-as-you-go) vs 'package' (Pre-paid volume package)
+            $isPayAsYouGo = str_contains(strtolower($plan->name), 'pay as you go') || floatval($plan->monthly_price) == 0;
+            $data['type'] = $plan->type ?: ($isPayAsYouGo ? 'plan' : 'package');
+
+            // Extract check quota count
+            preg_match('/(\d+)/', $plan->name, $matches);
+            $checksCount = isset($matches[1]) ? (int)$matches[1] : 0;
+            $data['checks_count'] = $checksCount;
+
+            // Calculate per check rate
+            $price = floatval($plan->discounted_price > 0 ? $plan->discounted_price : $plan->monthly_price);
+            $data['per_check_rate'] = ($checksCount > 0 && $price > 0) ? ('$' . number_format($price / $checksCount, 2) . ' / check') : '$0.50 / check';
+
+            // Highlight popular package
+            $data['is_popular'] = (bool) ($plan->is_popular ?? str_contains(strtolower($plan->name), '250'));
             
             // Pay-As-You-Go credit recharge mode
             $data['proration_credit'] = 0;
@@ -100,12 +116,14 @@ class PlanController extends Controller
     {
         $plan = Plan::create([
             'name' => $request->name,
+            'type' => $request->input('type', 'package'),
             'duration' => $request->duration,
             'original_price' => $request->original_price,
             'monthly_price' => $request->monthly_price,
             'discount_percentage' => $request->discount_percentage,
             'features' => $request->features, // stored as JSON array
             'is_active' => $request->has('is_active') ? $request->boolean('is_active') : true,
+            'is_popular' => $request->has('is_popular') ? $request->boolean('is_popular') : false,
             'serial' => $request->input('serial', 0),
         ]);
 
@@ -121,6 +139,7 @@ class PlanController extends Controller
 
         $updateData = array_filter([
             'name' => $request->input('name'),
+            'type' => $request->input('type'),
             'duration' => $request->input('duration'),
             'original_price' => $request->input('original_price'),
             'monthly_price' => $request->input('monthly_price'),
@@ -132,6 +151,10 @@ class PlanController extends Controller
 
         if ($request->has('is_active')) {
             $updateData['is_active'] = $request->boolean('is_active');
+        }
+
+        if ($request->has('is_popular')) {
+            $updateData['is_popular'] = $request->boolean('is_popular');
         }
 
         if ($request->has('serial')) {

@@ -15,6 +15,7 @@ class AdminPlanUpdateRequest extends FormRequest
     {
         return [
             'name' => 'sometimes|required|string',
+            'type' => 'nullable|string|in:top_box,plan,package',
             'duration' => 'sometimes|required|string',
             'original_price' => 'sometimes|required|numeric',
             'monthly_price' => 'nullable|numeric',
@@ -22,6 +23,7 @@ class AdminPlanUpdateRequest extends FormRequest
             'features' => 'sometimes|required|array',
             'features.*.label' => 'sometimes|required|string',
             'is_active' => 'nullable|boolean',
+            'is_popular' => 'nullable|boolean',
             'serial' => 'nullable|integer|min:0',
         ];
     }

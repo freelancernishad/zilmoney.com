@@ -15,6 +15,7 @@ class AdminPlanStoreRequest extends FormRequest
     {
         return [
             'name' => 'required|string',
+            'type' => 'nullable|string|in:top_box,plan,package',
             'duration' => 'required|string',
             'original_price' => 'required|numeric',
             'monthly_price' => 'nullable|numeric',
@@ -22,6 +23,7 @@ class AdminPlanStoreRequest extends FormRequest
             'features' => 'required|array',
             'features.*.label' => 'sometimes|required|string',
             'is_active' => 'nullable|boolean',
+            'is_popular' => 'nullable|boolean',
             'serial' => 'nullable|integer|min:0',
         ];
     }
