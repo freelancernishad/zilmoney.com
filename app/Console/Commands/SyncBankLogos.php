@@ -3,10 +3,10 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-use App\Models\Zilmoney\Account;
-use App\Models\Zilmoney\PlaidItem;
-use App\Services\Zilmoney\PlaidService;
-use App\Services\Zilmoney\BankingService;
+use App\Models\Goldenmarkmoney\Account;
+use App\Models\Goldenmarkmoney\PlaidItem;
+use App\Services\Goldenmarkmoney\PlaidService;
+use App\Services\Goldenmarkmoney\BankingService;
 use Illuminate\Support\Facades\Log;
 
 class SyncBankLogos extends Command
@@ -16,7 +16,7 @@ class SyncBankLogos extends Command
      *
      * @var string
      */
-    protected $signature = 'zilmoney:sync-bank-logos {--force : Force update logo even if already present}';
+    protected $signature = 'goldenmarkmoney:sync-bank-logos {--force : Force update logo even if already present}';
 
     /**
      * The console command description.
@@ -31,7 +31,7 @@ class SyncBankLogos extends Command
     public function handle(PlaidService $plaidService, BankingService $bankingService)
     {
         $this->info("Starting Bank Logos Sync & Backfill...");
-        Log::info("Artisan Command `zilmoney:sync-bank-logos` initiated.");
+        Log::info("Artisan Command `goldenmarkmoney:sync-bank-logos` initiated.");
 
         $force = $this->option('force');
         

@@ -1,0 +1,403 @@
+<?php
+
+namespace App\Http\Controllers\Goldenmarkmoney;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+
+class AccountController extends Controller
+{
+    protected $bankingService;
+
+    public function __construct(\App\Services\Goldenmarkmoney\BankingService $bankingService)
+    {
+        $this->bankingService = $bankingService;
+    }
+
+    public function index()
+    {
+        $business = Auth::user()->businessDetails;
+        if (!$business) return response()->json([]);
+
+        return response()->json($business->accounts);
+    }
+
+    public function show($id)
+    {
+        $business = Auth::user()->businessDetails;
+        if (!$business) return response()->json(['message' => 'Business profile required'], 400);
+
+        $account = $business->accounts()->findOrFail($id);
+
+        return response()->json($account);
+    }
+
+    public function validateRouting(Request $request)
+    {
+        $request->validate([
+            'routing_number' => 'required|string|size:9',
+        ]);
+
+        try {
+            $result = $this->bankingService->validateRoutingNumber($request->routing_number);
+            return response()->json($result);
+        } catch (\Exception $e) {
+            return response()->json(['valid' => false, 'message' => $e->getMessage()], 400);
+        }
+    }
+
+    public function store(Request $request)
+    {
+        $business = Auth::user()->businessDetails;
+        if (!$business) return response()->json(['message' => 'Business profile required'], 400);
+
+        // Check Bank Account Creation Limit from User Active Plan
+        $user = Auth::user();
+        $activeSub = $user->planSubscriptions()->where('status', 'active')->latest('start_date')->first();
+        $activePlan = $activeSub ? $activeSub->plan : \App\Models\Plan\Plan::find(1);
+
+        $maxAllowed = 1;
+        if ($activePlan && is_array($activePlan->features)) {
+            foreach ($activePlan->features as $feature) {
+                if (($feature['label'] ?? '') === 'Bank Accounts Allowed') {
+                    $maxAllowed = (int) ($feature['value'] ?? 1);
+                    break;
+                }
+            }
+        }
+
+        $currentAccountsCount = $business->accounts()->count();
+        if ($currentAccountsCount >= $maxAllowed) {
+            $planName = $activePlan->name ?? 'Current Plan';
+            return response()->json([
+                'message' => "Bank account creation limit reached ({$maxAllowed} allowed on your {$planName}). Please upgrade your plan to add more bank accounts."
+            ], 403);
+        }
+
+        $validated = $request->validate([
+            'account_holder_name' => 'required|string',
+            'account_nick_name' => 'nullable|string',
+            'account_number' => 'required|string',
+            'routing_number' => 'required|string',
+            'type' => 'required|string', // checking/savings
+            'email' => 'nullable|email',
+            'phone_number' => 'nullable|string',
+            'address_line1' => 'nullable|string',
+            'address_line2' => 'nullable|string',
+            'city' => 'nullable|string',
+            'state' => 'nullable|string',
+            'postal_code' => 'nullable|string',
+            'country' => 'nullable|string',
+            'next_check_starting_number' => 'nullable|integer',
+            'ach_auth_form' => 'nullable|array',
+        ]);
+
+        $validationService = new \App\Services\Goldenmarkmoney\AccountValidationService();
+        $validationResult = $validationService->validate($validated['routing_number'], $validated['account_number']);
+        if (!$validationResult['success']) {
+            return response()->json([
+                'message' => 'Bank Account Validation Failed: ' . $validationResult['message']
+            ], 422);
+        }
+
+        $account = $business->accounts()->create($validated);
+
+        return response()->json($account, 201);
+    }
+
+    public function update(Request $request, $id)
+    {
+        $business = Auth::user()->businessDetails;
+        if (!$business) return response()->json(['message' => 'Business profile required'], 400);
+
+        $account = $business->accounts()->findOrFail($id);
+
+        $validated = $request->validate([
+            'account_holder_name' => 'nullable|string',
+            'account_nick_name' => 'nullable|string',
+            'account_number' => 'nullable|string',
+            'routing_number' => 'nullable|string',
+            'type' => 'nullable|string',
+            'email' => 'nullable|email',
+            'phone_number' => 'nullable|string',
+            'address_line1' => 'nullable|string',
+            'address_line2' => 'nullable|string',
+            'city' => 'nullable|string',
+            'state' => 'nullable|string',
+            'postal_code' => 'nullable|string',
+            'country' => 'nullable|string',
+            'next_check_starting_number' => 'nullable|integer',
+            'ach_auth_form' => 'nullable|array',
+            'company_logo_url' => 'nullable|string',
+            'website' => 'nullable|string',
+            'institution_name' => 'nullable|string',
+            'bank_address_line1' => 'nullable|string',
+            'bank_city' => 'nullable|string',
+            'bank_state' => 'nullable|string',
+            'bank_postal_code' => 'nullable|string',
+        ]);
+
+        if (isset($validated['routing_number']) || isset($validated['account_number'])) {
+            $routing = $validated['routing_number'] ?? $account->routing_number;
+            $accountNo = $validated['account_number'] ?? $account->account_number;
+            
+            $validationService = new \App\Services\Goldenmarkmoney\AccountValidationService();
+            $validationResult = $validationService->validate($routing, $accountNo);
+            if (!$validationResult['success']) {
+                return response()->json([
+                    'message' => 'Bank Account Validation Failed: ' . $validationResult['message']
+                ], 422);
+            }
+        }
+
+        if (array_key_exists('company_logo_url', $validated) && !empty($validated['company_logo_url'])) {
+            $logoInput = $validated['company_logo_url'];
+            if (preg_match('/^data:(.*?);base64,(.*)$/', $logoInput, $matches)) {
+                $base64Data = base64_decode($matches[2]);
+                $filename = "logos/account_" . $account->id . "_" . time() . ".png";
+                try {
+                    $fileService = app(\App\Services\FileSystem\FileUploadService::class);
+                    $logoInput = $fileService->uploadContentToS3($base64Data, $filename);
+                } catch (\Exception $e) {
+                    \Illuminate\Support\Facades\Storage::disk('public')->put($filename, $base64Data);
+                    $logoInput = asset("storage/{$filename}");
+                }
+            }
+            $validated['company_logo_url'] = $logoInput;
+        }
+
+        $account->update($validated);
+
+        return response()->json($account);
+    }
+
+    public function destroy($id)
+    {
+        $business = Auth::user()->businessDetails;
+        if (!$business) return response()->json(['message' => 'Business profile required'], 400);
+
+        $account = $business->accounts()->findOrFail($id);
+        $account->delete();
+
+        return response()->json(['message' => 'Account deleted successfully']);
+    }
+
+    public function syncBalance($id)
+    {
+        $business = Auth::user()->businessDetails;
+        if (!$business) return response()->json(['message' => 'Business profile required'], 400);
+
+        $account = $business->accounts()->findOrFail($id);
+
+        \Log::info("Manual Sync Bank Data & Logo initiated for Account ID {$account->id}", [
+            'account_id' => $account->id,
+            'routing' => $account->routing_number,
+            'current_bank_name' => $account->institution_name,
+            'current_logo' => $account->institution_logo,
+        ]);
+
+        if ($account->plaid_item_id) {
+            $plaidItem = \App\Models\Goldenmarkmoney\PlaidItem::find($account->plaid_item_id);
+            if ($plaidItem) {
+                $plaidService = new \App\Services\Goldenmarkmoney\PlaidService();
+                $plaidService->syncAccounts($plaidItem, $business->id);
+                $account = $account->fresh();
+            }
+        }
+
+        // Also perform routing lookup & logo resync
+        if (!empty($account->routing_number)) {
+            try {
+                $plaidDetails = $this->bankingService->lookupPlaidInstitution($account->routing_number);
+                if ($plaidDetails && !empty($plaidDetails['bank_name'])) {
+                    $account->update([
+                        'institution_name' => $plaidDetails['bank_name'],
+                        'institution_logo' => $plaidDetails['logo'] ?? $account->institution_logo,
+                    ]);
+                    $account = $account->fresh();
+                }
+            } catch (\Exception $e) {
+                \Log::error("Manual Sync Bank Data error for Account {$account->id}: " . $e->getMessage());
+            }
+        }
+
+        \Log::info("Manual Sync Bank Data & Logo COMPLETED for Account ID {$account->id}", [
+            'updated_bank_name' => $account->institution_name,
+            'updated_logo' => $account->institution_logo,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => "Bank details and logo synced successfully for {$account->institution_name}.",
+            'account' => $account
+        ]);
+    }
+
+    public function apiValidateAccount(Request $request)
+    {
+        $validated = $request->validate([
+            'routing_number' => 'required|string',
+            'account_number' => 'required|string',
+        ]);
+
+        $validationService = new \App\Services\Goldenmarkmoney\AccountValidationService();
+        $result = $validationService->validate($validated['routing_number'], $validated['account_number']);
+
+        return response()->json($result);
+    }
+
+    public function manualVerifyOverride(Request $request, $id)
+    {
+        $business = Auth::user()->businessDetails;
+        if (!$business) return response()->json(['message' => 'Business profile required'], 400);
+
+        $account = $business->accounts()->findOrFail($id);
+
+        if (!$account->is_tokenized && $account->verification_status === 'verified') {
+            return response()->json(['message' => 'This account is already verified.'], 400);
+        }
+
+        $validated = $request->validate([
+            'routing_number' => 'required|string|size:9',
+            'prefix' => 'required|string',
+            'confirm_prefix' => 'required|string|same:prefix',
+            'account_holder_name' => 'nullable|string',
+            'account_nick_name' => 'nullable|string',
+            'address_line1' => 'nullable|string',
+            'address_line2' => 'nullable|string',
+            'city' => 'nullable|string',
+            'state' => 'nullable|string',
+            'postal_code' => 'nullable|string',
+            'country' => 'nullable|string',
+            'institution_name' => 'nullable|string',
+            'bank_address_line1' => 'nullable|string',
+            'bank_city' => 'nullable|string',
+            'bank_state' => 'nullable|string',
+            'bank_postal_code' => 'nullable|string',
+            'company_logo_url' => 'nullable|string',
+            'website' => 'nullable|string',
+        ]);
+
+        $validationService = new \App\Services\Goldenmarkmoney\AccountValidationService();
+        if (!$validationService->validateRoutingChecksum($validated['routing_number'])) {
+            return response()->json(['message' => 'Invalid routing number format.'], 422);
+        }
+
+        $plaidMask = $account->mask ?? substr($account->account_number ?? '0000', -4);
+        if (!$plaidMask) {
+            return response()->json(['message' => 'Connected bank account is missing mask information.'], 400);
+        }
+
+        $fullAccountNumber = $validated['prefix'] . $plaidMask;
+
+        $updateData = [
+            'routing_number' => $validated['routing_number'],
+            'account_number' => $fullAccountNumber,
+            'is_tokenized' => false,
+            'verification_status' => 'verified',
+        ];
+
+        if (array_key_exists('account_holder_name', $validated) && !empty($validated['account_holder_name'])) {
+            $updateData['account_holder_name'] = $validated['account_holder_name'];
+        }
+        if (array_key_exists('account_nick_name', $validated) && !empty($validated['account_nick_name'])) {
+            $updateData['account_nick_name'] = $validated['account_nick_name'];
+        }
+        if (array_key_exists('address_line1', $validated)) {
+            $updateData['address_line1'] = $validated['address_line1'];
+        }
+        if (array_key_exists('address_line2', $validated)) {
+            $updateData['address_line2'] = $validated['address_line2'];
+        }
+        if (array_key_exists('city', $validated)) {
+            $updateData['city'] = $validated['city'];
+        }
+        if (array_key_exists('state', $validated)) {
+            $updateData['state'] = $validated['state'];
+        }
+        if (array_key_exists('postal_code', $validated)) {
+            $updateData['postal_code'] = $validated['postal_code'];
+        }
+        if (array_key_exists('country', $validated)) {
+            $updateData['country'] = $validated['country'];
+        }
+        if (array_key_exists('company_logo_url', $validated) && !empty($validated['company_logo_url'])) {
+            $logoInput = $validated['company_logo_url'];
+            if (preg_match('/^data:(.*?);base64,(.*)$/', $logoInput, $matches)) {
+                $base64Data = base64_decode($matches[2]);
+                $filename = "logos/account_" . $account->id . "_" . time() . ".png";
+                try {
+                    $fileService = app(\App\Services\FileSystem\FileUploadService::class);
+                    $logoInput = $fileService->uploadContentToS3($base64Data, $filename);
+                } catch (\Exception $e) {
+                    \Illuminate\Support\Facades\Storage::disk('public')->put($filename, $base64Data);
+                    $logoInput = asset("storage/{$filename}");
+                }
+            }
+            $updateData['company_logo_url'] = $logoInput;
+        }
+        if (array_key_exists('website', $validated) && !empty($validated['website'])) {
+            $updateData['website'] = $validated['website'];
+        }
+        if (array_key_exists('institution_name', $validated) && !empty($validated['institution_name'])) {
+            $updateData['institution_name'] = $validated['institution_name'];
+        }
+        if (array_key_exists('bank_address_line1', $validated)) {
+            $updateData['bank_address_line1'] = $validated['bank_address_line1'];
+        }
+        if (array_key_exists('bank_city', $validated)) {
+            $updateData['bank_city'] = $validated['bank_city'];
+        }
+        if (array_key_exists('bank_state', $validated)) {
+            $updateData['bank_state'] = $validated['bank_state'];
+        }
+        if (array_key_exists('bank_postal_code', $validated)) {
+            $updateData['bank_postal_code'] = $validated['bank_postal_code'];
+        }
+
+        $account->update($updateData);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Bank account successfully verified and updated.',
+            'account' => $account
+        ]);
+    }
+
+    /**
+     * Resync logos and bank names for all accounts belonging to the current user's business
+     */
+    public function resyncLogos(Request $request)
+    {
+        $user = Auth::user();
+        $business = $user->businessDetails;
+        if (!$business) return response()->json(['message' => 'Business profile required'], 400);
+
+        $accounts = $business->accounts;
+        $updated = 0;
+
+        foreach ($accounts as $account) {
+            if (!empty($account->routing_number)) {
+                try {
+                    $plaidDetails = $this->bankingService->lookupPlaidInstitution($account->routing_number);
+                    if ($plaidDetails && !empty($plaidDetails['bank_name'])) {
+                        $account->update([
+                            'institution_name' => $account->institution_name ?: $plaidDetails['bank_name'],
+                            'institution_logo' => $plaidDetails['logo'] ?? $account->institution_logo,
+                        ]);
+                        $updated++;
+                    }
+                } catch (\Exception $e) {
+                    \Log::error("AccountController resyncLogos error for Account {$account->id}: " . $e->getMessage());
+                }
+            }
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => "Successfully resynced logos for {$updated} account(s).",
+            'updated_count' => $updated
+        ]);
+    }
+}

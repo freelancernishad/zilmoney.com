@@ -1,8 +1,8 @@
 $kind: http-request
 description: |-
-  Action: App\Http\Controllers\Zilmoney\BusinessController@store
+  Action: App\Http\Controllers\Goldenmarkmoney\BusinessController@store
   Middleware: api
-url: "{{baseUrl}}/api/zilmoney/business"
+url: "{{baseUrl}}/api/goldenmarkmoney/business"
 method: POST
 headers:
   Accept: application/json

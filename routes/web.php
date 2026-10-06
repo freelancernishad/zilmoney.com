@@ -10,7 +10,7 @@ use App\Http\Controllers\Admin\Auth\AdminAuthController as AdminViewAuthControll
 use App\Http\Controllers\Admin\AdminDashboardController;
 
 
-use App\Http\Controllers\Zilmoney\PlaidController;
+use App\Http\Controllers\Goldenmarkmoney\PlaidController;
 
 Route::get('/', function () {
     $dbConnected = false;
@@ -34,7 +34,7 @@ Route::get('/', function () {
     // AI Info
     $aiInfo = [
         'name' => 'zsi.ai',
-        'tagline' => 'Advanced Agentic Intelligence for ZilMoney',
+        'tagline' => 'Advanced Agentic Intelligence for GoldenMarkMoney',
         'capabilities' => ['Autonomous Task Execution', 'Smart Code Refactoring', 'API Optimization'],
     ];
 
@@ -197,8 +197,8 @@ Route::prefix('user')->middleware([AttachJwtFromCookie::class, AuthenticateUser:
     })->name('user.docs');
 
     Route::get('/plaid-test', function() {
-        $plaidItems = \App\Models\Zilmoney\PlaidItem::where('user_id', auth()->id())->get();
-        $accounts = \App\Models\Zilmoney\Account::whereIn('plaid_item_id', $plaidItems->pluck('id'))->get();
+        $plaidItems = \App\Models\Goldenmarkmoney\PlaidItem::where('user_id', auth()->id())->get();
+        $accounts = \App\Models\Goldenmarkmoney\Account::whereIn('plaid_item_id', $plaidItems->pluck('id'))->get();
         return view('user.plaid-test', compact('plaidItems', 'accounts'));
     })->name('user.plaid-test');
 

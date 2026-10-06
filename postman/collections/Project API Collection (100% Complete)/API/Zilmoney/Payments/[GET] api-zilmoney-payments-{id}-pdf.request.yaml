@@ -1,9 +1,9 @@
 $kind: http-request
-name: "[GET] api/zilmoney/payments/{id}/pdf"
+name: "[GET] api/goldenmarkmoney/payments/{id}/pdf"
 description: |-
-  Action: App\Http\Controllers\Zilmoney\PaymentController@downloadPdf
+  Action: App\Http\Controllers\Goldenmarkmoney\PaymentController@downloadPdf
   Middleware: api
-url: "{{baseUrl}}/api/zilmoney/payments/{id}/pdf"
+url: "{{baseUrl}}/api/goldenmarkmoney/payments/{id}/pdf"
 method: GET
 headers:
   Accept: application/json

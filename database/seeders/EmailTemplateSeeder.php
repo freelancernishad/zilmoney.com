@@ -70,7 +70,7 @@ class EmailTemplateSeeder extends Seeder
                 $rows[] = $this->rowSidebarText([$this->text('LEFT', 'IMPORTANT', $mainColor, '10px')], [$this->heading($cat . " Update", $headingColor)], 'white');
                 break;
             default: // Centered Minimal
-                $rows[] = $this->row1([$this->heading('ZILMONEY - ' . $cat, $mainColor, 'center')], 'white', '40px');
+                $rows[] = $this->row1([$this->heading('GOLDENMARKMONEY - ' . $cat, $mainColor, 'center')], 'white', '40px');
         }
 
         // 3. Category Logic (Unique formats for each category)

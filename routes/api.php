@@ -130,10 +130,10 @@ if (file_exists($EmailTemplateApiRoutes = __DIR__ . '/Admins/EmailTemplates/Emai
 
 
 
-// Load zilmoney
-if (file_exists($ZilmoneyRoutes = __DIR__ . '/zilmoney.php')) {
-    Route::prefix('zilmoney')->group(function () use ($ZilmoneyRoutes) {
-        require $ZilmoneyRoutes;
+// Load goldenmarkmoney
+if (file_exists($GoldenmarkmoneyRoutes = __DIR__ . '/goldenmarkmoney.php')) {
+    Route::prefix('goldenmarkmoney')->group(function () use ($GoldenmarkmoneyRoutes) {
+        require $GoldenmarkmoneyRoutes;
     });
 }
 

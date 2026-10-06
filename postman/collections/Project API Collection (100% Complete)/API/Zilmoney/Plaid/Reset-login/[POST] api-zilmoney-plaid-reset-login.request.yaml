@@ -1,9 +1,9 @@
 $kind: http-request
-name: "[POST] api/zilmoney/plaid/reset-login"
+name: "[POST] api/goldenmarkmoney/plaid/reset-login"
 description: |-
-  Action: App\Http\Controllers\Zilmoney\PlaidController@resetLogin
+  Action: App\Http\Controllers\Goldenmarkmoney\PlaidController@resetLogin
   Middleware: api, auth:api
-url: "{{baseUrl}}/api/zilmoney/plaid/reset-login"
+url: "{{baseUrl}}/api/goldenmarkmoney/plaid/reset-login"
 method: POST
 headers:
   Accept: application/json

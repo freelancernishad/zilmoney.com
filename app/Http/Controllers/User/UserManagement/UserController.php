@@ -15,8 +15,8 @@ use App\Http\Requests\User\UserUpdatePhotosRequest;
 use App\Http\Requests\User\UserSetPrimaryPhotoRequest;
 use App\Http\Requests\User\UserUpdatePersonalInfoRequest;
 use App\Http\Requests\User\UserUpdateBusinessDetailRequest;
-use App\Models\Zilmoney\PersonalInfo;
-use App\Models\Zilmoney\BusinessDetail;
+use App\Models\Goldenmarkmoney\PersonalInfo;
+use App\Models\Goldenmarkmoney\BusinessDetail;
 
 class UserController extends Controller
 {

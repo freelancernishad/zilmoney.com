@@ -1,9 +1,9 @@
 $kind: http-request
-name: "[POST] api/zilmoney/plaid/webhook"
+name: "[POST] api/goldenmarkmoney/plaid/webhook"
 description: |-
-  Action: App\Http\Controllers\Zilmoney\PlaidWebhookController@handleWebhook
+  Action: App\Http\Controllers\Goldenmarkmoney\PlaidWebhookController@handleWebhook
   Middleware: api
-url: "{{baseUrl}}/api/zilmoney/plaid/webhook"
+url: "{{baseUrl}}/api/goldenmarkmoney/plaid/webhook"
 method: POST
 headers:
   Accept: application/json

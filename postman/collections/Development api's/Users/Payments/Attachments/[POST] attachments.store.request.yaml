@@ -1,5 +1,5 @@
 $kind: http-request
-url: "{{baseUrl}}/api/zilmoney/payments/{payment}/attachments"
+url: "{{baseUrl}}/api/goldenmarkmoney/payments/{payment}/attachments"
 method: POST
 headers:
   Accept: application/json

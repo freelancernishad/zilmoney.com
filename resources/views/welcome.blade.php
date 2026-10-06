@@ -257,7 +257,7 @@
                 <div class="w-6 h-6 bg-slate-500 rounded flex items-center justify-center">
                     <span class="text-black font-bold text-xs uppercase">Z</span>
                 </div>
-                <span class="text-sm font-semibold tracking-wide uppercase">© 2026 ZilMoney AI Operations</span>
+                <span class="text-sm font-semibold tracking-wide uppercase">© 2026 GoldenMarkMoney AI Operations</span>
             </div>
             
             <div class="flex gap-8 text-slate-500 text-sm font-medium uppercase tracking-widest leading-none">

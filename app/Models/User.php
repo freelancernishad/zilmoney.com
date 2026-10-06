@@ -146,17 +146,17 @@ class User extends Authenticatable implements JWTSubject, MustVerifyEmail
 
     public function personalInfo()
     {
-        return $this->hasOne(\App\Models\Zilmoney\PersonalInfo::class);
+        return $this->hasOne(\App\Models\Goldenmarkmoney\PersonalInfo::class);
     }
 
     public function businessDetails()
     {
-        return $this->hasOne(\App\Models\Zilmoney\BusinessDetail::class); // Assuming single business for the TS interface
+        return $this->hasOne(\App\Models\Goldenmarkmoney\BusinessDetail::class); // Assuming single business for the TS interface
     }
 
     public function deviceLogs()
     {
-        return $this->hasMany(\App\Models\Zilmoney\DeviceLog::class)->orderBy('created_at', 'desc')->take(10);
+        return $this->hasMany(\App\Models\Goldenmarkmoney\DeviceLog::class)->orderBy('created_at', 'desc')->take(10);
     }
 
     public function planSubscriptions()

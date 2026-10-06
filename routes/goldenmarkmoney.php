@@ -1,0 +1,127 @@
+<?php
+
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Goldenmarkmoney\DashboardController;
+use App\Http\Controllers\Goldenmarkmoney\AccountController;
+use App\Http\Controllers\Goldenmarkmoney\AccountSignatureController;
+use App\Http\Controllers\Goldenmarkmoney\CheckDesignController;
+use App\Http\Controllers\Goldenmarkmoney\PayeeController;
+use App\Http\Controllers\Goldenmarkmoney\PaymentController;
+use App\Http\Controllers\Goldenmarkmoney\PlaidController;
+use App\Http\Controllers\Goldenmarkmoney\CardController;
+use App\Http\Controllers\Goldenmarkmoney\BillController;
+use App\Http\Controllers\Goldenmarkmoney\PlaidWebhookController;
+
+use App\Http\Controllers\Goldenmarkmoney\SignatureSessionController;
+
+// Webhook & Public Signature Sessions
+Route::post('plaid/webhook', [PlaidWebhookController::class, 'handleWebhook']);
+Route::get('signature-sessions/{token}', [SignatureSessionController::class, 'show']);
+Route::post('signature-sessions/{token}/submit', [SignatureSessionController::class, 'submit']);
+Route::get('everify/{id}', [PaymentController::class, 'everifyCheck']);
+Route::get('outside/payments/{code}', [PaymentController::class, 'getPublicPaymentByCode']);
+
+
+// Authenticated Routes
+Route::middleware([\App\Http\Middleware\AuthenticateUser::class])->group(function () {
+    // Signature Sessions (Create Session & Send Email)
+    Route::post('signature-sessions', [SignatureSessionController::class, 'store']);
+    Route::post('signature-sessions/send-email', [SignatureSessionController::class, 'sendEmail']);
+    // Dashboard
+    Route::get('dashboard', [DashboardController::class, 'index']);
+
+    // Cards
+    Route::apiResource('cards', CardController::class);
+
+    // Bills
+    Route::apiResource('bills', BillController::class);
+
+    // Banking
+    Route::post('accounts/validate-routing', [AccountController::class, 'validateRouting']);
+    Route::post('accounts/resync-logos', [AccountController::class, 'resyncLogos']);
+    Route::post('accounts/validate-account', [AccountController::class, 'apiValidateAccount']);
+    Route::post('accounts/{account}/manual-verify', [AccountController::class, 'manualVerifyOverride']);
+    Route::post('accounts/{account}/sync-balance', [AccountController::class, 'syncBalance']);
+    Route::apiResource('accounts', AccountController::class);
+
+    // Account Signatures
+    Route::get('accounts/{account}/signatures', [AccountSignatureController::class, 'index']);
+    Route::post('accounts/signatures', [AccountSignatureController::class, 'store']);
+    Route::put('accounts/signatures/{signature}/primary', [AccountSignatureController::class, 'setPrimary']);
+    Route::delete('accounts/signatures/{signature}', [AccountSignatureController::class, 'destroy']);
+
+    // Check Designs
+    Route::get('accounts/{account}/check-designs', [CheckDesignController::class, 'index']);
+    Route::post('accounts/{account}/check-designs', [CheckDesignController::class, 'store']);
+    Route::put('accounts/{account}/check-designs/{checkDesign}/active', [CheckDesignController::class, 'setActive']);
+    Route::put('accounts/{account}/check-designs/{checkDesign}', [CheckDesignController::class, 'update']);
+    Route::delete('accounts/{account}/check-designs/{checkDesign}', [CheckDesignController::class, 'destroy']);
+
+    // Payees
+    Route::post('payees/upload-file', [PayeeController::class, 'uploadFile']);
+    Route::get('payees/view-file/{filename}', [PayeeController::class, 'viewFile']);
+    Route::apiResource('payees', PayeeController::class);
+
+    // Payments
+    Route::get('payments/next-check-number', [PaymentController::class, 'getNextCheckNumberInfo']);
+    Route::post('payments/bulk-action', [PaymentController::class, 'bulkAction']);
+    Route::post('payments/bulk-store', [PaymentController::class, 'bulkStore']);
+    Route::post('payments/blank-checks', [PaymentController::class, 'storeBlankChecks']);
+    Route::apiResource('payments', PaymentController::class);
+    Route::get('payments/{id}/pdf', [PaymentController::class, 'downloadPdf']);
+    Route::post('payments/{id}/email', [PaymentController::class, 'sendEmail']);
+
+    // Deposit Slips
+    Route::apiResource('deposit-slips', \App\Http\Controllers\Goldenmarkmoney\DepositSlipController::class);
+    Route::get('deposit-slips/{id}/pdf', [\App\Http\Controllers\Goldenmarkmoney\DepositSlipController::class, 'downloadPdf']);
+
+    // Payment Categories
+    Route::apiResource('payment-categories', \App\Http\Controllers\Goldenmarkmoney\PaymentCategoryController::class)->only(['index', 'store', 'destroy']);
+
+    // Payment Sub-Resources
+    Route::get('payments/{payment}/logs', [\App\Http\Controllers\Goldenmarkmoney\PaymentLogController::class, 'index']);
+
+    // Comments
+    Route::get('payments/{payment}/comments', [\App\Http\Controllers\Goldenmarkmoney\PaymentCommentController::class, 'index']);
+    Route::post('payments/{payment}/comments', [\App\Http\Controllers\Goldenmarkmoney\PaymentCommentController::class, 'store']);
+    Route::delete('payments/{payment}/comments/{comment}', [\App\Http\Controllers\Goldenmarkmoney\PaymentCommentController::class, 'destroy']);
+
+    // Attachments
+    Route::get('payments/{payment}/attachments', [\App\Http\Controllers\Goldenmarkmoney\PaymentAttachmentController::class, 'index']);
+    Route::post('payments/{payment}/attachments', [\App\Http\Controllers\Goldenmarkmoney\PaymentAttachmentController::class, 'store']);
+    Route::delete('payments/{payment}/attachments/{attachment}', [\App\Http\Controllers\Goldenmarkmoney\PaymentAttachmentController::class, 'destroy']);
+
+    // Receipts
+    Route::get('payments/{payment}/receipts', [\App\Http\Controllers\Goldenmarkmoney\PaymentReceiptController::class, 'index']);
+    Route::post('payments/{payment}/receipts', [\App\Http\Controllers\Goldenmarkmoney\PaymentReceiptController::class, 'store']);
+    Route::delete('payments/{payment}/receipts/{receipt}', [\App\Http\Controllers\Goldenmarkmoney\PaymentReceiptController::class, 'destroy']);
+
+    // Delivery Proofs
+    Route::get('payments/{payment}/delivery-proofs', [\App\Http\Controllers\Goldenmarkmoney\PaymentDeliveryProofController::class, 'index']);
+    Route::post('payments/{payment}/delivery-proofs', [\App\Http\Controllers\Goldenmarkmoney\PaymentDeliveryProofController::class, 'store']);
+    Route::delete('payments/{payment}/delivery-proofs/{deliveryProof}', [\App\Http\Controllers\Goldenmarkmoney\PaymentDeliveryProofController::class, 'destroy']);
+
+    // Remittances
+    Route::get('payments/{payment}/remittances', [\App\Http\Controllers\Goldenmarkmoney\PaymentRemittanceController::class, 'index']);
+    Route::post('payments/{payment}/remittances', [\App\Http\Controllers\Goldenmarkmoney\PaymentRemittanceController::class, 'store']);
+    Route::delete('payments/{payment}/remittances/{remittance}', [\App\Http\Controllers\Goldenmarkmoney\PaymentRemittanceController::class, 'destroy']);
+
+    // Payments
+    Route::post('payments/{id}/void', [PaymentController::class, 'voidPayment']);
+
+    // Plaid Integration & Compliance
+    Route::post('plaid/create-link-token', [PlaidController::class, 'createLinkToken']);
+    Route::post('plaid/exchange-public-token', [PlaidController::class, 'exchangePublicToken']);
+    Route::post('plaid/fetch-available-accounts', [PlaidController::class, 'fetchAvailableAccounts']);
+    Route::post('plaid/confirm-selected-accounts', [PlaidController::class, 'confirmSelectedAccounts']);
+    Route::post('plaid/reset-login', [PlaidController::class, 'resetLogin']);
+    Route::post('plaid/disconnect', [PlaidController::class, 'disconnectItem']);
+    Route::post('plaid/delete-banking-data', [PlaidController::class, 'deleteBankingData']);
+    Route::post('plaid/sandbox/create-transaction', [PlaidController::class, 'createSandboxTransaction']);
+    Route::post('plaid/sandbox/fire-webhook', [PlaidController::class, 'fireSandboxWebhook']);
+    Route::post('plaid/sandbox/transactions', [PlaidController::class, 'getTransactions']);
+    Route::get('plaid/sandbox/logs', [PlaidController::class, 'getSandboxLogs']);
+
+    // Hosted UI
+    Route::get('connect-bank', [PlaidController::class, 'showLinkPage']);
+});

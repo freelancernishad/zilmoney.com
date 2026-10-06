@@ -1,8 +1,8 @@
 $kind: http-request
 description: |-
-  Action: App\Http\Controllers\Zilmoney\PayeeController@index
+  Action: App\Http\Controllers\Goldenmarkmoney\PayeeController@index
   Middleware: api
-url: "{{baseUrl}}/api/zilmoney/payees"
+url: "{{baseUrl}}/api/goldenmarkmoney/payees"
 method: GET
 headers:
   Accept: application/json

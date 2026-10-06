@@ -1,8 +1,8 @@
 $kind: http-request
 description: |-
-  Action: App\Http\Controllers\Zilmoney\AccountSignatureController@index
+  Action: App\Http\Controllers\Goldenmarkmoney\AccountSignatureController@index
   Middleware: api
-url: "{{baseUrl}}/api/zilmoney/accounts/{account}/signatures"
+url: "{{baseUrl}}/api/goldenmarkmoney/accounts/{account}/signatures"
 method: GET
 headers:
   Accept: application/json

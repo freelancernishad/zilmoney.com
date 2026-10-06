@@ -277,7 +277,7 @@
         logToTerminal(`Payload: { amount: $${amount}, description: "${description}" }`);
 
         try {
-            const response = await fetch('/api/zilmoney/plaid/sandbox/create-transaction', {
+            const response = await fetch('/api/goldenmarkmoney/plaid/sandbox/create-transaction', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -327,7 +327,7 @@
         logToTerminal(`Triggering webhook ${webhookCode} for Plaid Item ID: ${plaidItemId}...`);
 
         try {
-            const response = await fetch('/api/zilmoney/plaid/sandbox/fire-webhook', {
+            const response = await fetch('/api/goldenmarkmoney/plaid/sandbox/fire-webhook', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -373,7 +373,7 @@
         logToTerminal(`Fetching transactions list from Plaid API for Item ID: ${plaidItemId}...`);
 
         try {
-            const response = await fetch('/api/zilmoney/plaid/sandbox/transactions', {
+            const response = await fetch('/api/goldenmarkmoney/plaid/sandbox/transactions', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -417,7 +417,7 @@
         logToTerminal(`Fetching latest server logs from backend...`, "system");
 
         try {
-            const response = await fetch('/api/zilmoney/plaid/sandbox/logs', {
+            const response = await fetch('/api/goldenmarkmoney/plaid/sandbox/logs', {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${token}`,

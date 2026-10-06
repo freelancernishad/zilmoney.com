@@ -1,8 +1,8 @@
 $kind: http-request
 description: |-
-  Action: App\Http\Controllers\Zilmoney\BusinessController@update
+  Action: App\Http\Controllers\Goldenmarkmoney\BusinessController@update
   Middleware: api
-url: "{{baseUrl}}/api/zilmoney/business/{business}"
+url: "{{baseUrl}}/api/goldenmarkmoney/business/{business}"
 method: PUT
 headers:
   Accept: application/json
@@ -14,5 +14,5 @@ pathVariables:
     description: "Path parameter: business"
 body:
   type: json
-  content: "{\n  \"business_name\": \"Zilmoney Inc\",\n  \"ein\": \"12-3456789\",\n  \"address_line1\": \"123 Tech Ave\",\n  \"city\": \"San Jose\",\n  \"state\": \"CA\",\n  \"postal_code\": \"95110\"\n}"
+  content: "{\n  \"business_name\": \"Goldenmarkmoney Inc\",\n  \"ein\": \"12-3456789\",\n  \"address_line1\": \"123 Tech Ave\",\n  \"city\": \"San Jose\",\n  \"state\": \"CA\",\n  \"postal_code\": \"95110\"\n}"
 order: 4000

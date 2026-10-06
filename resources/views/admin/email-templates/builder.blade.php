@@ -145,7 +145,7 @@
                                     {
                                         type: 'heading',
                                         values: {
-                                            text: 'Welcome to ZilMoney',
+                                            text: 'Welcome to GoldenMarkMoney',
                                             color: '#ffffff',
                                             backgroundColor: '#6366f1',
                                             textAlign: 'center',
@@ -243,7 +243,7 @@
                                     {
                                         type: 'text',
                                         values: {
-                                            text: '<div style="background:#f8fafc; padding:20px; border-radius:10px; font-style:italic; text-align:center;">"ZilMoney has transformed our team\'s productivity. Highly recommended!"<br><br><strong>- Jane Doe</strong></div>'
+                                            text: '<div style="background:#f8fafc; padding:20px; border-radius:10px; font-style:italic; text-align:center;">"GoldenMarkMoney has transformed our team\'s productivity. Highly recommended!"<br><br><strong>- Jane Doe</strong></div>'
                                         }
                                     }
                                 ]
@@ -382,7 +382,7 @@
                         cells: [1],
                         columns: [{
                             contents: [
-                                { type: 'heading', values: { text: 'Meet the New ZilMoney! ✨', textAlign: 'center' } },
+                                { type: 'heading', values: { text: 'Meet the New GoldenMarkMoney! ✨', textAlign: 'center' } },
                                 { type: 'text', values: { text: '<p style="text-align:center;">Our biggest update yet is finally here. Designed to help you scale faster.</p>', textAlign: 'center' } }
                             ]
                         }]
@@ -465,7 +465,7 @@
                 welcome: "Welcome to @{{company}}!", 
                 newsletter: "Your Monthly Update from @{{company}}", 
                 promotion: "Flash Sale: Grab 50% OFF!",
-                product_launch: "Big News: Meeting the New ZilMoney! 🚀",
+                product_launch: "Big News: Meeting the New GoldenMarkMoney! 🚀",
                 event: "You're Invited: Annual FinTech Summit",
                 feedback: "Got 2 minutes? We'd love your feedback",
                 holiday: "Happy Holidays from @{{company}}! 🎁"
@@ -497,7 +497,7 @@
                             {
                                 "type": "text",
                                 "values": {
-                                    "text": "Welcome to ZilMoney! Start designing your professional email by dragging elements from the right panel.",
+                                    "text": "Welcome to GoldenMarkMoney! Start designing your professional email by dragging elements from the right panel.",
                                     "textAlign": "center"
                                 }
                             }

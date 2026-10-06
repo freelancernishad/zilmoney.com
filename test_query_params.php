@@ -17,14 +17,14 @@ DB::listen(function($query) {
     echo "Bindings: " . json_encode($query->bindings) . "\n";
 });
 
-$request = Request::create('/zilmoney/payments', 'GET', [
+$request = Request::create('/goldenmarkmoney/payments', 'GET', [
     'page' => 1,
     'per_page' => 50,
     'sort_by' => 'created_at',
     'sort_order' => 'desc',
 ]);
 
-$controller = app(\App\Http\Controllers\Zilmoney\PaymentController::class);
+$controller = app(\App\Http\Controllers\Goldenmarkmoney\PaymentController::class);
 $response = $controller->index($request);
 
 echo "Total records in response: " . count(json_decode($response->getContent(), true)['data']) . "\n";

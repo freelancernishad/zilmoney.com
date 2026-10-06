@@ -3,11 +3,11 @@
 namespace Tests\Feature;
 
 use App\Models\User;
-use App\Models\Zilmoney\BusinessDetail;
-use App\Models\Zilmoney\Account;
-use App\Models\Zilmoney\Payee;
-use App\Models\Zilmoney\Payment;
-use App\Models\Zilmoney\PersonalInfo;
+use App\Models\Goldenmarkmoney\BusinessDetail;
+use App\Models\Goldenmarkmoney\Account;
+use App\Models\Goldenmarkmoney\Payee;
+use App\Models\Goldenmarkmoney\Payment;
+use App\Models\Goldenmarkmoney\PersonalInfo;
 use Tests\TestCase;
 
 class CompanyStructureTest extends TestCase

@@ -1,8 +1,8 @@
 $kind: http-request
 description: |-
-  Action: App\Http\Controllers\Zilmoney\AccountController@destroy
+  Action: App\Http\Controllers\Goldenmarkmoney\AccountController@destroy
   Middleware: api
-url: "{{baseUrl}}/api/zilmoney/accounts/{account}"
+url: "{{baseUrl}}/api/goldenmarkmoney/accounts/{account}"
 method: DELETE
 headers:
   Accept: application/json

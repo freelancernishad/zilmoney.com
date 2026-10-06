@@ -1,0 +1,66 @@
+<?php
+
+namespace App\Models\Goldenmarkmoney;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class Payee extends Model
+{
+    use HasFactory;
+
+    protected $fillable = [
+        'company_id',
+        'type',
+        'first_name',
+        'last_name',
+        'payee_name',
+        'nick_name',
+        'email',
+        'phone_number',
+        'payee_id_account_number',
+        'entity_type',
+        'company_name',
+        'address_line1',
+        'address_line2',
+        'city',
+        'state',
+        'postal_code',
+        'country',
+        'request_bank_account',
+        'bank_name',
+        'bank_account_holder_name',
+        'bank_routing_number',
+        'bank_account_number',
+        'bank_account_type',
+        'swift_code',
+        'iban',
+        'intl_bank_country',
+        'intl_bank_address',
+        'tax_id',
+        'notes',
+        'contacts',
+        'todos',
+        'comments',
+        'attachments',
+        'audit_trials',
+    ];
+
+    protected $casts = [
+        'contacts' => 'array',
+        'todos' => 'array',
+        'comments' => 'array',
+        'attachments' => 'array',
+        'audit_trials' => 'array',
+    ];
+
+    public function company()
+    {
+        return $this->belongsTo(BusinessDetail::class, 'company_id');
+    }
+
+    public function payments()
+    {
+        return $this->hasMany(Payment::class);
+    }
+}

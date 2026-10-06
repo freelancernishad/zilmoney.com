@@ -3952,7 +3952,7 @@
                     ],
                     "body": {
                       "mode": "raw",
-                      "raw": "[\n    {\n        \"key\": \"site_name\",\n        \"value\": \"Zilmoney App\"\n    }\n]",
+                      "raw": "[\n    {\n        \"key\": \"site_name\",\n        \"value\": \"Goldenmarkmoney App\"\n    }\n]",
                       "options": {
                         "raw": {
                           "language": "json"
@@ -7472,7 +7472,7 @@
           "id": "ada97d85-121e-4166-a15e-1a5f1d893505"
         },
         {
-          "name": "Zilmoney",
+          "name": "Goldenmarkmoney",
           "item": [
             {
               "name": "Accounts",
@@ -7481,7 +7481,7 @@
                   "name": "Validate-routing",
                   "item": [
                     {
-                      "name": "[POST] api/zilmoney/accounts/validate-routing",
+                      "name": "[POST] api/goldenmarkmoney/accounts/validate-routing",
                       "id": "281582ba-e3e4-407f-bf90-3ba82979ec91",
                       "request": {
                         "method": "POST",
@@ -7512,18 +7512,18 @@
                           }
                         },
                         "url": {
-                          "raw": "{{baseUrl}}/api/zilmoney/accounts/validate-routing",
+                          "raw": "{{baseUrl}}/api/goldenmarkmoney/accounts/validate-routing",
                           "host": [
                             "{{baseUrl}}"
                           ],
                           "path": [
                             "api",
-                            "zilmoney",
+                            "goldenmarkmoney",
                             "accounts",
                             "validate-routing"
                           ]
                         },
-                        "description": "Action: App\\Http\\Controllers\\Zilmoney\\AccountController@validateRouting\nMiddleware: api"
+                        "description": "Action: App\\Http\\Controllers\\Goldenmarkmoney\\AccountController@validateRouting\nMiddleware: api"
                       },
                       "response": []
                     }
@@ -7553,17 +7553,17 @@
                       }
                     ],
                     "url": {
-                      "raw": "{{baseUrl}}/api/zilmoney/accounts",
+                      "raw": "{{baseUrl}}/api/goldenmarkmoney/accounts",
                       "host": [
                         "{{baseUrl}}"
                       ],
                       "path": [
                         "api",
-                        "zilmoney",
+                        "goldenmarkmoney",
                         "accounts"
                       ]
                     },
-                    "description": "Action: App\\Http\\Controllers\\Zilmoney\\AccountController@index\nMiddleware: api"
+                    "description": "Action: App\\Http\\Controllers\\Goldenmarkmoney\\AccountController@index\nMiddleware: api"
                   },
                   "response": []
                 },
@@ -7590,13 +7590,13 @@
                       }
                     ],
                     "url": {
-                      "raw": "{{baseUrl}}/api/zilmoney/accounts/{account}",
+                      "raw": "{{baseUrl}}/api/goldenmarkmoney/accounts/{account}",
                       "host": [
                         "{{baseUrl}}"
                       ],
                       "path": [
                         "api",
-                        "zilmoney",
+                        "goldenmarkmoney",
                         "accounts",
                         "{account}"
                       ],
@@ -7608,7 +7608,7 @@
                         }
                       ]
                     },
-                    "description": "Action: App\\Http\\Controllers\\Zilmoney\\AccountController@show\nMiddleware: api"
+                    "description": "Action: App\\Http\\Controllers\\Goldenmarkmoney\\AccountController@show\nMiddleware: api"
                   },
                   "response": []
                 },
@@ -7644,13 +7644,13 @@
                       }
                     },
                     "url": {
-                      "raw": "{{baseUrl}}/api/zilmoney/accounts/{account}",
+                      "raw": "{{baseUrl}}/api/goldenmarkmoney/accounts/{account}",
                       "host": [
                         "{{baseUrl}}"
                       ],
                       "path": [
                         "api",
-                        "zilmoney",
+                        "goldenmarkmoney",
                         "accounts",
                         "{account}"
                       ],
@@ -7662,7 +7662,7 @@
                         }
                       ]
                     },
-                    "description": "Action: App\\Http\\Controllers\\Zilmoney\\AccountController@update\nMiddleware: api"
+                    "description": "Action: App\\Http\\Controllers\\Goldenmarkmoney\\AccountController@update\nMiddleware: api"
                   },
                   "response": []
                 },
@@ -7689,13 +7689,13 @@
                       }
                     ],
                     "url": {
-                      "raw": "{{baseUrl}}/api/zilmoney/accounts/{account}",
+                      "raw": "{{baseUrl}}/api/goldenmarkmoney/accounts/{account}",
                       "host": [
                         "{{baseUrl}}"
                       ],
                       "path": [
                         "api",
-                        "zilmoney",
+                        "goldenmarkmoney",
                         "accounts",
                         "{account}"
                       ],
@@ -7707,7 +7707,7 @@
                         }
                       ]
                     },
-                    "description": "Action: App\\Http\\Controllers\\Zilmoney\\AccountController@destroy\nMiddleware: api"
+                    "description": "Action: App\\Http\\Controllers\\Goldenmarkmoney\\AccountController@destroy\nMiddleware: api"
                   },
                   "response": []
                 }
@@ -7740,17 +7740,17 @@
                       }
                     ],
                     "url": {
-                      "raw": "{{baseUrl}}/api/zilmoney/business",
+                      "raw": "{{baseUrl}}/api/goldenmarkmoney/business",
                       "host": [
                         "{{baseUrl}}"
                       ],
                       "path": [
                         "api",
-                        "zilmoney",
+                        "goldenmarkmoney",
                         "business"
                       ]
                     },
-                    "description": "Action: App\\Http\\Controllers\\Zilmoney\\BusinessController@index\nMiddleware: api"
+                    "description": "Action: App\\Http\\Controllers\\Goldenmarkmoney\\BusinessController@index\nMiddleware: api"
                   },
                   "response": []
                 },
@@ -7786,17 +7786,17 @@
                       }
                     },
                     "url": {
-                      "raw": "{{baseUrl}}/api/zilmoney/business",
+                      "raw": "{{baseUrl}}/api/goldenmarkmoney/business",
                       "host": [
                         "{{baseUrl}}"
                       ],
                       "path": [
                         "api",
-                        "zilmoney",
+                        "goldenmarkmoney",
                         "business"
                       ]
                     },
-                    "description": "Action: App\\Http\\Controllers\\Zilmoney\\BusinessController@store\nMiddleware: api"
+                    "description": "Action: App\\Http\\Controllers\\Goldenmarkmoney\\BusinessController@store\nMiddleware: api"
                   },
                   "response": []
                 },
@@ -7823,13 +7823,13 @@
                       }
                     ],
                     "url": {
-                      "raw": "{{baseUrl}}/api/zilmoney/business/{business}",
+                      "raw": "{{baseUrl}}/api/goldenmarkmoney/business/{business}",
                       "host": [
                         "{{baseUrl}}"
                       ],
                       "path": [
                         "api",
-                        "zilmoney",
+                        "goldenmarkmoney",
                         "business",
                         "{business}"
                       ],
@@ -7841,7 +7841,7 @@
                         }
                       ]
                     },
-                    "description": "Action: App\\Http\\Controllers\\Zilmoney\\BusinessController@show\nMiddleware: api"
+                    "description": "Action: App\\Http\\Controllers\\Goldenmarkmoney\\BusinessController@show\nMiddleware: api"
                   },
                   "response": []
                 },
@@ -7877,13 +7877,13 @@
                       }
                     },
                     "url": {
-                      "raw": "{{baseUrl}}/api/zilmoney/business/{business}",
+                      "raw": "{{baseUrl}}/api/goldenmarkmoney/business/{business}",
                       "host": [
                         "{{baseUrl}}"
                       ],
                       "path": [
                         "api",
-                        "zilmoney",
+                        "goldenmarkmoney",
                         "business",
                         "{business}"
                       ],
@@ -7895,7 +7895,7 @@
                         }
                       ]
                     },
-                    "description": "Action: App\\Http\\Controllers\\Zilmoney\\BusinessController@update\nMiddleware: api"
+                    "description": "Action: App\\Http\\Controllers\\Goldenmarkmoney\\BusinessController@update\nMiddleware: api"
                   },
                   "response": []
                 },
@@ -7922,13 +7922,13 @@
                       }
                     ],
                     "url": {
-                      "raw": "{{baseUrl}}/api/zilmoney/business/{business}",
+                      "raw": "{{baseUrl}}/api/goldenmarkmoney/business/{business}",
                       "host": [
                         "{{baseUrl}}"
                       ],
                       "path": [
                         "api",
-                        "zilmoney",
+                        "goldenmarkmoney",
                         "business",
                         "{business}"
                       ],
@@ -7940,7 +7940,7 @@
                         }
                       ]
                     },
-                    "description": "Action: App\\Http\\Controllers\\Zilmoney\\BusinessController@destroy\nMiddleware: api"
+                    "description": "Action: App\\Http\\Controllers\\Goldenmarkmoney\\BusinessController@destroy\nMiddleware: api"
                   },
                   "response": []
                 }
@@ -7951,7 +7951,7 @@
               "name": "Connect-bank",
               "item": [
                 {
-                  "name": "[GET] api/zilmoney/connect-bank",
+                  "name": "[GET] api/goldenmarkmoney/connect-bank",
                   "id": "641cd080-c73d-4583-a459-3809213cff27",
                   "request": {
                     "method": "GET",
@@ -7973,17 +7973,17 @@
                       }
                     ],
                     "url": {
-                      "raw": "{{baseUrl}}/api/zilmoney/connect-bank",
+                      "raw": "{{baseUrl}}/api/goldenmarkmoney/connect-bank",
                       "host": [
                         "{{baseUrl}}"
                       ],
                       "path": [
                         "api",
-                        "zilmoney",
+                        "goldenmarkmoney",
                         "connect-bank"
                       ]
                     },
-                    "description": "Action: App\\Http\\Controllers\\Zilmoney\\PlaidController@showLinkPage\nMiddleware: api"
+                    "description": "Action: App\\Http\\Controllers\\Goldenmarkmoney\\PlaidController@showLinkPage\nMiddleware: api"
                   },
                   "response": []
                 }
@@ -7994,7 +7994,7 @@
               "name": "Dashboard",
               "item": [
                 {
-                  "name": "[GET] api/zilmoney/dashboard",
+                  "name": "[GET] api/goldenmarkmoney/dashboard",
                   "id": "051a19d2-dfbb-47e9-acc3-a046d2d119b1",
                   "request": {
                     "method": "GET",
@@ -8016,17 +8016,17 @@
                       }
                     ],
                     "url": {
-                      "raw": "{{baseUrl}}/api/zilmoney/dashboard",
+                      "raw": "{{baseUrl}}/api/goldenmarkmoney/dashboard",
                       "host": [
                         "{{baseUrl}}"
                       ],
                       "path": [
                         "api",
-                        "zilmoney",
+                        "goldenmarkmoney",
                         "dashboard"
                       ]
                     },
-                    "description": "Action: App\\Http\\Controllers\\Zilmoney\\DashboardController@index\nMiddleware: api"
+                    "description": "Action: App\\Http\\Controllers\\Goldenmarkmoney\\DashboardController@index\nMiddleware: api"
                   },
                   "response": []
                 }
@@ -8059,17 +8059,17 @@
                       }
                     ],
                     "url": {
-                      "raw": "{{baseUrl}}/api/zilmoney/payees",
+                      "raw": "{{baseUrl}}/api/goldenmarkmoney/payees",
                       "host": [
                         "{{baseUrl}}"
                       ],
                       "path": [
                         "api",
-                        "zilmoney",
+                        "goldenmarkmoney",
                         "payees"
                       ]
                     },
-                    "description": "Action: App\\Http\\Controllers\\Zilmoney\\PayeeController@index\nMiddleware: api"
+                    "description": "Action: App\\Http\\Controllers\\Goldenmarkmoney\\PayeeController@index\nMiddleware: api"
                   },
                   "response": []
                 },
@@ -8105,17 +8105,17 @@
                       }
                     },
                     "url": {
-                      "raw": "{{baseUrl}}/api/zilmoney/payees",
+                      "raw": "{{baseUrl}}/api/goldenmarkmoney/payees",
                       "host": [
                         "{{baseUrl}}"
                       ],
                       "path": [
                         "api",
-                        "zilmoney",
+                        "goldenmarkmoney",
                         "payees"
                       ]
                     },
-                    "description": "Action: App\\Http\\Controllers\\Zilmoney\\PayeeController@store\nMiddleware: api"
+                    "description": "Action: App\\Http\\Controllers\\Goldenmarkmoney\\PayeeController@store\nMiddleware: api"
                   },
                   "response": []
                 },
@@ -8142,13 +8142,13 @@
                       }
                     ],
                     "url": {
-                      "raw": "{{baseUrl}}/api/zilmoney/payees/{payee}",
+                      "raw": "{{baseUrl}}/api/goldenmarkmoney/payees/{payee}",
                       "host": [
                         "{{baseUrl}}"
                       ],
                       "path": [
                         "api",
-                        "zilmoney",
+                        "goldenmarkmoney",
                         "payees",
                         "{payee}"
                       ],
@@ -8160,7 +8160,7 @@
                         }
                       ]
                     },
-                    "description": "Action: App\\Http\\Controllers\\Zilmoney\\PayeeController@show\nMiddleware: api"
+                    "description": "Action: App\\Http\\Controllers\\Goldenmarkmoney\\PayeeController@show\nMiddleware: api"
                   },
                   "response": []
                 },
@@ -8196,13 +8196,13 @@
                       }
                     },
                     "url": {
-                      "raw": "{{baseUrl}}/api/zilmoney/payees/{payee}",
+                      "raw": "{{baseUrl}}/api/goldenmarkmoney/payees/{payee}",
                       "host": [
                         "{{baseUrl}}"
                       ],
                       "path": [
                         "api",
-                        "zilmoney",
+                        "goldenmarkmoney",
                         "payees",
                         "{payee}"
                       ],
@@ -8214,7 +8214,7 @@
                         }
                       ]
                     },
-                    "description": "Action: App\\Http\\Controllers\\Zilmoney\\PayeeController@update\nMiddleware: api"
+                    "description": "Action: App\\Http\\Controllers\\Goldenmarkmoney\\PayeeController@update\nMiddleware: api"
                   },
                   "response": []
                 },
@@ -8241,13 +8241,13 @@
                       }
                     ],
                     "url": {
-                      "raw": "{{baseUrl}}/api/zilmoney/payees/{payee}",
+                      "raw": "{{baseUrl}}/api/goldenmarkmoney/payees/{payee}",
                       "host": [
                         "{{baseUrl}}"
                       ],
                       "path": [
                         "api",
-                        "zilmoney",
+                        "goldenmarkmoney",
                         "payees",
                         "{payee}"
                       ],
@@ -8259,7 +8259,7 @@
                         }
                       ]
                     },
-                    "description": "Action: App\\Http\\Controllers\\Zilmoney\\PayeeController@destroy\nMiddleware: api"
+                    "description": "Action: App\\Http\\Controllers\\Goldenmarkmoney\\PayeeController@destroy\nMiddleware: api"
                   },
                   "response": []
                 }
@@ -8292,17 +8292,17 @@
                       }
                     ],
                     "url": {
-                      "raw": "{{baseUrl}}/api/zilmoney/payments",
+                      "raw": "{{baseUrl}}/api/goldenmarkmoney/payments",
                       "host": [
                         "{{baseUrl}}"
                       ],
                       "path": [
                         "api",
-                        "zilmoney",
+                        "goldenmarkmoney",
                         "payments"
                       ]
                     },
-                    "description": "Action: App\\Http\\Controllers\\Zilmoney\\PaymentController@index\nMiddleware: api"
+                    "description": "Action: App\\Http\\Controllers\\Goldenmarkmoney\\PaymentController@index\nMiddleware: api"
                   },
                   "response": []
                 },
@@ -8338,22 +8338,22 @@
                       }
                     },
                     "url": {
-                      "raw": "{{baseUrl}}/api/zilmoney/payments",
+                      "raw": "{{baseUrl}}/api/goldenmarkmoney/payments",
                       "host": [
                         "{{baseUrl}}"
                       ],
                       "path": [
                         "api",
-                        "zilmoney",
+                        "goldenmarkmoney",
                         "payments"
                       ]
                     },
-                    "description": "Action: App\\Http\\Controllers\\Zilmoney\\PaymentController@store\nMiddleware: api"
+                    "description": "Action: App\\Http\\Controllers\\Goldenmarkmoney\\PaymentController@store\nMiddleware: api"
                   },
                   "response": []
                 },
                 {
-                  "name": "[GET] api/zilmoney/payments/{id}/pdf",
+                  "name": "[GET] api/goldenmarkmoney/payments/{id}/pdf",
                   "id": "1ba8ff66-7291-4da3-8b7b-2455c56d5c5c",
                   "request": {
                     "method": "GET",
@@ -8375,13 +8375,13 @@
                       }
                     ],
                     "url": {
-                      "raw": "{{baseUrl}}/api/zilmoney/payments/{id}/pdf",
+                      "raw": "{{baseUrl}}/api/goldenmarkmoney/payments/{id}/pdf",
                       "host": [
                         "{{baseUrl}}"
                       ],
                       "path": [
                         "api",
-                        "zilmoney",
+                        "goldenmarkmoney",
                         "payments",
                         "{id}",
                         "pdf"
@@ -8394,7 +8394,7 @@
                         }
                       ]
                     },
-                    "description": "Action: App\\Http\\Controllers\\Zilmoney\\PaymentController@downloadPdf\nMiddleware: api"
+                    "description": "Action: App\\Http\\Controllers\\Goldenmarkmoney\\PaymentController@downloadPdf\nMiddleware: api"
                   },
                   "response": []
                 },
@@ -8421,13 +8421,13 @@
                       }
                     ],
                     "url": {
-                      "raw": "{{baseUrl}}/api/zilmoney/payments/{payment}",
+                      "raw": "{{baseUrl}}/api/goldenmarkmoney/payments/{payment}",
                       "host": [
                         "{{baseUrl}}"
                       ],
                       "path": [
                         "api",
-                        "zilmoney",
+                        "goldenmarkmoney",
                         "payments",
                         "{payment}"
                       ],
@@ -8439,7 +8439,7 @@
                         }
                       ]
                     },
-                    "description": "Action: App\\Http\\Controllers\\Zilmoney\\PaymentController@show\nMiddleware: api"
+                    "description": "Action: App\\Http\\Controllers\\Goldenmarkmoney\\PaymentController@show\nMiddleware: api"
                   },
                   "response": []
                 },
@@ -8475,13 +8475,13 @@
                       }
                     },
                     "url": {
-                      "raw": "{{baseUrl}}/api/zilmoney/payments/{payment}",
+                      "raw": "{{baseUrl}}/api/goldenmarkmoney/payments/{payment}",
                       "host": [
                         "{{baseUrl}}"
                       ],
                       "path": [
                         "api",
-                        "zilmoney",
+                        "goldenmarkmoney",
                         "payments",
                         "{payment}"
                       ],
@@ -8493,7 +8493,7 @@
                         }
                       ]
                     },
-                    "description": "Action: App\\Http\\Controllers\\Zilmoney\\PaymentController@update\nMiddleware: api"
+                    "description": "Action: App\\Http\\Controllers\\Goldenmarkmoney\\PaymentController@update\nMiddleware: api"
                   },
                   "response": []
                 },
@@ -8520,13 +8520,13 @@
                       }
                     ],
                     "url": {
-                      "raw": "{{baseUrl}}/api/zilmoney/payments/{payment}",
+                      "raw": "{{baseUrl}}/api/goldenmarkmoney/payments/{payment}",
                       "host": [
                         "{{baseUrl}}"
                       ],
                       "path": [
                         "api",
-                        "zilmoney",
+                        "goldenmarkmoney",
                         "payments",
                         "{payment}"
                       ],
@@ -8538,7 +8538,7 @@
                         }
                       ]
                     },
-                    "description": "Action: App\\Http\\Controllers\\Zilmoney\\PaymentController@destroy\nMiddleware: api"
+                    "description": "Action: App\\Http\\Controllers\\Goldenmarkmoney\\PaymentController@destroy\nMiddleware: api"
                   },
                   "response": []
                 }
@@ -8552,7 +8552,7 @@
                   "name": "Create-link-token",
                   "item": [
                     {
-                      "name": "[POST] api/zilmoney/plaid/create-link-token",
+                      "name": "[POST] api/goldenmarkmoney/plaid/create-link-token",
                       "id": "85b1e4dc-a7a8-46b9-b305-8e8d8d6b5a1d",
                       "request": {
                         "method": "POST",
@@ -8583,18 +8583,18 @@
                           }
                         },
                         "url": {
-                          "raw": "{{baseUrl}}/api/zilmoney/plaid/create-link-token",
+                          "raw": "{{baseUrl}}/api/goldenmarkmoney/plaid/create-link-token",
                           "host": [
                             "{{baseUrl}}"
                           ],
                           "path": [
                             "api",
-                            "zilmoney",
+                            "goldenmarkmoney",
                             "plaid",
                             "create-link-token"
                           ]
                         },
-                        "description": "Action: App\\Http\\Controllers\\Zilmoney\\PlaidController@createLinkToken\nMiddleware: api, auth:api"
+                        "description": "Action: App\\Http\\Controllers\\Goldenmarkmoney\\PlaidController@createLinkToken\nMiddleware: api, auth:api"
                       },
                       "response": []
                     }
@@ -8605,7 +8605,7 @@
                   "name": "Exchange-public-token",
                   "item": [
                     {
-                      "name": "[POST] api/zilmoney/plaid/exchange-public-token",
+                      "name": "[POST] api/goldenmarkmoney/plaid/exchange-public-token",
                       "id": "ac87e142-51c2-4d21-9b36-472c9f279698",
                       "request": {
                         "method": "POST",
@@ -8636,18 +8636,18 @@
                           }
                         },
                         "url": {
-                          "raw": "{{baseUrl}}/api/zilmoney/plaid/exchange-public-token",
+                          "raw": "{{baseUrl}}/api/goldenmarkmoney/plaid/exchange-public-token",
                           "host": [
                             "{{baseUrl}}"
                           ],
                           "path": [
                             "api",
-                            "zilmoney",
+                            "goldenmarkmoney",
                             "plaid",
                             "exchange-public-token"
                           ]
                         },
-                        "description": "Action: App\\Http\\Controllers\\Zilmoney\\PlaidController@exchangePublicToken\nMiddleware: api, auth:api"
+                        "description": "Action: App\\Http\\Controllers\\Goldenmarkmoney\\PlaidController@exchangePublicToken\nMiddleware: api, auth:api"
                       },
                       "response": []
                     }
@@ -8658,7 +8658,7 @@
                   "name": "Reset-login",
                   "item": [
                     {
-                      "name": "[POST] api/zilmoney/plaid/reset-login",
+                      "name": "[POST] api/goldenmarkmoney/plaid/reset-login",
                       "id": "dd7bee20-29af-4968-a672-55242124fee6",
                       "request": {
                         "method": "POST",
@@ -8689,18 +8689,18 @@
                           }
                         },
                         "url": {
-                          "raw": "{{baseUrl}}/api/zilmoney/plaid/reset-login",
+                          "raw": "{{baseUrl}}/api/goldenmarkmoney/plaid/reset-login",
                           "host": [
                             "{{baseUrl}}"
                           ],
                           "path": [
                             "api",
-                            "zilmoney",
+                            "goldenmarkmoney",
                             "plaid",
                             "reset-login"
                           ]
                         },
-                        "description": "Action: App\\Http\\Controllers\\Zilmoney\\PlaidController@resetLogin\nMiddleware: api, auth:api"
+                        "description": "Action: App\\Http\\Controllers\\Goldenmarkmoney\\PlaidController@resetLogin\nMiddleware: api, auth:api"
                       },
                       "response": []
                     }
@@ -8711,7 +8711,7 @@
                   "name": "Webhook",
                   "item": [
                     {
-                      "name": "[POST] api/zilmoney/plaid/webhook",
+                      "name": "[POST] api/goldenmarkmoney/plaid/webhook",
                       "id": "062be657-6b9e-4927-b335-f8932a3c0cb7",
                       "request": {
                         "method": "POST",
@@ -8742,18 +8742,18 @@
                           }
                         },
                         "url": {
-                          "raw": "{{baseUrl}}/api/zilmoney/plaid/webhook",
+                          "raw": "{{baseUrl}}/api/goldenmarkmoney/plaid/webhook",
                           "host": [
                             "{{baseUrl}}"
                           ],
                           "path": [
                             "api",
-                            "zilmoney",
+                            "goldenmarkmoney",
                             "plaid",
                             "webhook"
                           ]
                         },
-                        "description": "Action: App\\Http\\Controllers\\Zilmoney\\PlaidWebhookController@handleWebhook\nMiddleware: api"
+                        "description": "Action: App\\Http\\Controllers\\Goldenmarkmoney\\PlaidWebhookController@handleWebhook\nMiddleware: api"
                       },
                       "response": []
                     }
@@ -9194,7 +9194,7 @@
                     "connect-bank"
                   ]
                 },
-                "description": "Action: App\\Http\\Controllers\\Zilmoney\\PlaidController@showLinkPage\nMiddleware: web, App\\Http\\Middleware\\AttachJwtFromCookie, App\\Http\\Middleware\\AuthenticateUser"
+                "description": "Action: App\\Http\\Controllers\\Goldenmarkmoney\\PlaidController@showLinkPage\nMiddleware: web, App\\Http\\Middleware\\AttachJwtFromCookie, App\\Http\\Middleware\\AuthenticateUser"
               },
               "response": []
             }

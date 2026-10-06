@@ -10,11 +10,11 @@ if (!$user) {
 }
 auth()->login($user);
 
-$request = Request::create('/zilmoney/payments', 'GET', [
+$request = Request::create('/goldenmarkmoney/payments', 'GET', [
     'per_page' => 50,
 ]);
 
-$controller = app(\App\Http\Controllers\Zilmoney\PaymentController::class);
+$controller = app(\App\Http\Controllers\Goldenmarkmoney\PaymentController::class);
 $response = $controller->index($request);
 
 echo $response->getContent() . "\n";

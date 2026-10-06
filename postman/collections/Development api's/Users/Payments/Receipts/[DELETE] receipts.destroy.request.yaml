@@ -1,5 +1,5 @@
 $kind: http-request
-url: "{{baseUrl}}/api/zilmoney/payments/{payment}/receipts/{receipt}"
+url: "{{baseUrl}}/api/goldenmarkmoney/payments/{payment}/receipts/{receipt}"
 method: DELETE
 headers:
   Accept: application/json

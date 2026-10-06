@@ -1,6 +1,6 @@
 $kind: http-request
 description: >-
-  Action: App\Http\Controllers\Zilmoney\PlaidController@showLinkPage
+  Action: App\Http\Controllers\Goldenmarkmoney\PlaidController@showLinkPage
 
   Middleware: web, App\Http\Middleware\AttachJwtFromCookie,
   App\Http\Middleware\AuthenticateUser

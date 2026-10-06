@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 use App\Http\Requests\User\UserStoreDocumentRequest;
-use App\Models\Zilmoney\Document;
+use App\Models\Goldenmarkmoney\Document;
 
 class UserDocumentController extends Controller
 {

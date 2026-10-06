@@ -1,9 +1,9 @@
 $kind: http-request
-name: "[POST] api/zilmoney/plaid/create-link-token"
+name: "[POST] api/goldenmarkmoney/plaid/create-link-token"
 description: |-
-  Action: App\Http\Controllers\Zilmoney\PlaidController@createLinkToken
+  Action: App\Http\Controllers\Goldenmarkmoney\PlaidController@createLinkToken
   Middleware: api, auth:api
-url: "{{baseUrl}}/api/zilmoney/plaid/create-link-token"
+url: "{{baseUrl}}/api/goldenmarkmoney/plaid/create-link-token"
 method: POST
 headers:
   Accept: application/json

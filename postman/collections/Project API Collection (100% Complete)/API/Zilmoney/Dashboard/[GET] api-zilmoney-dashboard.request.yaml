@@ -1,9 +1,9 @@
 $kind: http-request
-name: "[GET] api/zilmoney/dashboard"
+name: "[GET] api/goldenmarkmoney/dashboard"
 description: |-
-  Action: App\Http\Controllers\Zilmoney\DashboardController@index
+  Action: App\Http\Controllers\Goldenmarkmoney\DashboardController@index
   Middleware: api
-url: "{{baseUrl}}/api/zilmoney/dashboard"
+url: "{{baseUrl}}/api/goldenmarkmoney/dashboard"
 method: GET
 headers:
   Accept: application/json

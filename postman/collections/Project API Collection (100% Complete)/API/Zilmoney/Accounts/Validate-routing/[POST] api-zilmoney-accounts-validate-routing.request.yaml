@@ -1,9 +1,9 @@
 $kind: http-request
-name: "[POST] api/zilmoney/accounts/validate-routing"
+name: "[POST] api/goldenmarkmoney/accounts/validate-routing"
 description: |-
-  Action: App\Http\Controllers\Zilmoney\AccountController@validateRouting
+  Action: App\Http\Controllers\Goldenmarkmoney\AccountController@validateRouting
   Middleware: api
-url: "{{baseUrl}}/api/zilmoney/accounts/validate-routing"
+url: "{{baseUrl}}/api/goldenmarkmoney/accounts/validate-routing"
 method: POST
 headers:
   Accept: application/json

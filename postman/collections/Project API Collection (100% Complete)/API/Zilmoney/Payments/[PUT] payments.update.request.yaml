@@ -1,8 +1,8 @@
 $kind: http-request
 description: |-
-  Action: App\Http\Controllers\Zilmoney\PaymentController@update
+  Action: App\Http\Controllers\Goldenmarkmoney\PaymentController@update
   Middleware: api
-url: "{{baseUrl}}/api/zilmoney/payments/{payment}"
+url: "{{baseUrl}}/api/goldenmarkmoney/payments/{payment}"
 method: PUT
 headers:
   Accept: application/json

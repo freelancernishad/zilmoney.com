@@ -111,7 +111,7 @@ $bodies = [
     ],
     
     // -----------------------------------------------------------------------------
-    // ZILMONEY CORE
+    // GOLDENMARKMONEY CORE
     // -----------------------------------------------------------------------------
     'BusinessController@store' => [
         'legal_business_name' => 'ACME Corp',
@@ -229,7 +229,7 @@ $bodies = [
         'related_model_id' => 101
     ],
     'SystemSettingController@storeOrUpdate' => [
-        ['key' => 'site_name', 'value' => 'Zilmoney App']
+        ['key' => 'site_name', 'value' => 'Goldenmarkmoney App']
     ],
     'MediaController@upload' => [
         'file_url' => 'https://via.placeholder.com/500.png' 
@@ -344,10 +344,10 @@ foreach ($routes as $route) {
              if (preg_match('/^\{.*\}$/', $seg)) break;
              if ($seg !== '') $folderSegments[] = ucfirst($seg);
         }
-    } elseif (strpos($uri, 'api/zilmoney') === 0) {
+    } elseif (strpos($uri, 'api/goldenmarkmoney') === 0) {
         $folderSegments[] = 'API';
-        $folderSegments[] = 'Zilmoney';
-        $remaining = array_diff($segments, ['api', 'zilmoney']);
+        $folderSegments[] = 'Goldenmarkmoney';
+        $remaining = array_diff($segments, ['api', 'goldenmarkmoney']);
         foreach($remaining as $seg) {
              if (preg_match('/^\{.*\}$/', $seg)) break;
              if ($seg !== '') $folderSegments[] = ucfirst($seg);

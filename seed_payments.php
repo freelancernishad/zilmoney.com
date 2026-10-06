@@ -1,9 +1,9 @@
 <?php
 
 use App\Models\User;
-use App\Models\Zilmoney\Account;
-use App\Models\Zilmoney\Payee;
-use App\Models\Zilmoney\Payment;
+use App\Models\Goldenmarkmoney\Account;
+use App\Models\Goldenmarkmoney\Payee;
+use App\Models\Goldenmarkmoney\Payment;
 use Illuminate\Support\Facades\DB;
 
 // 1. Get the target user (first user or default testing user)
@@ -22,7 +22,7 @@ $business = $user->businessDetails()->first();
 if (!$business) {
     // Create a mock business
     $business = $user->businessDetails()->create([
-        'company_name' => 'Zilmoney Inc',
+        'company_name' => 'Goldenmarkmoney Inc',
         'address_line1' => '123 Business Way',
         'city' => 'Silicon Valley',
         'state' => 'CA',
@@ -38,7 +38,7 @@ if (!$account) {
     $account = Account::create([
         'company_id' => $business->id,
         'bank_name' => 'Chase Bank',
-        'account_holder_name' => 'Zilmoney Inc',
+        'account_holder_name' => 'Goldenmarkmoney Inc',
         'account_nick_name' => 'Chase Business Checking',
         'routing_number' => '121000248',
         'account_number' => '9876543210',

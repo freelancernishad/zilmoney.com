@@ -1,14 +1,14 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Zilmoney\Shop\CategoryController;
-use App\Http\Controllers\Zilmoney\Shop\FilterController;
-use App\Http\Controllers\Zilmoney\Shop\ProductController;
-use App\Http\Controllers\Zilmoney\Shop\OrderController;
-use App\Http\Controllers\Zilmoney\Shop\StripeCheckoutController;
-use App\Http\Controllers\Zilmoney\Shop\AdminStripeTaxRegistrationController;
-use App\Http\Controllers\Zilmoney\Shop\AdminTaxReportController;
-use App\Http\Controllers\Zilmoney\Shop\DeliveryMethodController;
+use App\Http\Controllers\Goldenmarkmoney\Shop\CategoryController;
+use App\Http\Controllers\Goldenmarkmoney\Shop\FilterController;
+use App\Http\Controllers\Goldenmarkmoney\Shop\ProductController;
+use App\Http\Controllers\Goldenmarkmoney\Shop\OrderController;
+use App\Http\Controllers\Goldenmarkmoney\Shop\StripeCheckoutController;
+use App\Http\Controllers\Goldenmarkmoney\Shop\AdminStripeTaxRegistrationController;
+use App\Http\Controllers\Goldenmarkmoney\Shop\AdminTaxReportController;
+use App\Http\Controllers\Goldenmarkmoney\Shop\DeliveryMethodController;
 
 // Public & Admin Shop API Endpoints
 Route::prefix('v1/shop')->group(function () {

@@ -411,7 +411,7 @@
                                 <label class="block text-sm font-medium text-slate-400 mb-2">Plaid Webhook URL</label>
                                 <input type="text" name="plaid_webhook_url" 
                                     class="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 focus:border-indigo-500 outline-none text-white"
-                                    placeholder="https://your-domain.com/api/zilmoney/plaid/webhook">
+                                    placeholder="https://your-domain.com/api/goldenmarkmoney/plaid/webhook">
                                 <p class="text-xs text-slate-500 mt-1">Required for Hosted Link. Use ngrok for local dev.</p>
                             </div>
                             <div>
