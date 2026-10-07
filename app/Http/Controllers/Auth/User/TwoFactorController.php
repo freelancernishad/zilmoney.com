@@ -316,4 +316,69 @@ class TwoFactorController extends Controller
             'recovery_codes' => $recoveryCodes,
         ]);
     }
+
+    /**
+     * Verify 2FA code for printing checks or downloading PDFs.
+     */
+    public function verifyPrint(Request $request)
+    {
+        $request->validate([
+            'code' => 'nullable|string',
+            'recovery_code' => 'nullable|string',
+        ]);
+
+        $user = Auth::user();
+
+        if (!$user || !$user->hasTwoFactorEnabled()) {
+            return response()->json([
+                'message' => 'Two-Factor Authentication (2FA) is required to print checks. Please enable 2FA in your account security settings first.',
+                'requires_2fa' => true,
+            ], 403);
+        }
+
+        if (empty($request->code) && empty($request->recovery_code)) {
+            return response()->json(['message' => 'Please provide a 6-digit verification code or recovery code.'], 422);
+        }
+
+        $google2fa = new Google2FA();
+        $isVerified = false;
+
+        if (!empty($request->code)) {
+            $isVerified = $google2fa->verifyKey($user->google2fa_secret, trim($request->code));
+        } elseif (!empty($request->recovery_code)) {
+            $submittedCode = trim($request->recovery_code);
+            $codes = $user->two_factor_recovery_codes ?? [];
+            if (in_array($submittedCode, $codes)) {
+                $isVerified = true;
+                $user->two_factor_recovery_codes = array_values(array_diff($codes, [$submittedCode]));
+                $user->save();
+            }
+        }
+
+        if (!$isVerified) {
+            logUserActivity(
+                activity: '2FA Verification for Print Failed',
+                category: 'Security',
+                userId: $user->id,
+                request: $request,
+                isSuccess: false,
+                extraDetails: ['reason' => 'Invalid OTP or Recovery code']
+            );
+
+            return response()->json(['message' => 'Invalid 2FA verification code. Please try again.'], 422);
+        }
+
+        logUserActivity(
+            activity: '2FA Verification for Print Successful',
+            category: 'Security',
+            userId: $user->id,
+            request: $request,
+            isSuccess: true
+        );
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Two-Factor Authentication verified successfully for printing.'
+        ]);
+    }
 }
