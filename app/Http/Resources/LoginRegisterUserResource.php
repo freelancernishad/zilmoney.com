@@ -35,6 +35,7 @@ class LoginRegisterUserResource extends JsonResource
                 'is_active' => $this->is_active,
                 'is_blocked' => $this->is_blocked,
                 'role' => $this->role,
+                'has_2fa_enabled' => $this->hasTwoFactorEnabled(),
                 'last_login_at' => optional($this->last_login_at)->toDateTimeString(),
             ],
             'Message' => $this->message,

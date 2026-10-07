@@ -17,6 +17,14 @@ class PlaidController extends Controller
 
     public function createLinkToken(Request $request)
     {
+        $user = auth()->user();
+        if (!$user || !$user->hasTwoFactorEnabled()) {
+            return response()->json([
+                'message' => 'Two-Factor Authentication (2FA) is required to connect a bank account. Please enable 2FA in your account security settings first.',
+                'requires_2fa' => true,
+            ], 403);
+        }
+
         try {
             $redirectUri = $request->input('redirect_uri');
             $itemId = $request->input('item_id'); // Optional: for update mode
@@ -69,6 +77,14 @@ class PlaidController extends Controller
 
     public function exchangePublicToken(Request $request)
     {
+        $user = auth()->user();
+        if (!$user || !$user->hasTwoFactorEnabled()) {
+            return response()->json([
+                'message' => 'Two-Factor Authentication (2FA) is required to connect a bank account. Please enable 2FA in your account security settings first.',
+                'requires_2fa' => true,
+            ], 403);
+        }
+
         $request->validate([
             'public_token' => 'required|string',
             'account_ids' => 'nullable|array',
@@ -111,6 +127,14 @@ class PlaidController extends Controller
 
     public function fetchAvailableAccounts(Request $request)
     {
+        $user = auth()->user();
+        if (!$user || !$user->hasTwoFactorEnabled()) {
+            return response()->json([
+                'message' => 'Two-Factor Authentication (2FA) is required to connect a bank account. Please enable 2FA in your account security settings first.',
+                'requires_2fa' => true,
+            ], 403);
+        }
+
         $request->validate([
             'public_token' => 'required|string',
         ]);
@@ -136,6 +160,14 @@ class PlaidController extends Controller
 
     public function confirmSelectedAccounts(Request $request)
     {
+        $user = auth()->user();
+        if (!$user || !$user->hasTwoFactorEnabled()) {
+            return response()->json([
+                'message' => 'Two-Factor Authentication (2FA) is required to connect a bank account. Please enable 2FA in your account security settings first.',
+                'requires_2fa' => true,
+            ], 403);
+        }
+
         $request->validate([
             'plaid_item_id' => 'required|integer',
             'account_ids' => 'required|array',

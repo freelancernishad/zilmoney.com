@@ -36,13 +36,24 @@ Route::middleware([\App\Http\Middleware\AuthenticateUser::class])->group(functio
     // Bills
     Route::apiResource('bills', BillController::class);
 
-    // Banking
+    // Banking (Protected routes requiring 2FA)
+    Route::middleware([\App\Http\Middleware\EnsureTwoFactorEnabled::class])->group(function () {
+        Route::post('accounts', [AccountController::class, 'store']);
+        Route::post('accounts/{account}/manual-verify', [AccountController::class, 'manualVerifyOverride']);
+        Route::post('plaid/create-link-token', [PlaidController::class, 'createLinkToken']);
+        Route::post('plaid/exchange-public-token', [PlaidController::class, 'exchangePublicToken']);
+        Route::post('plaid/fetch-available-accounts', [PlaidController::class, 'fetchAvailableAccounts']);
+        Route::post('plaid/confirm-selected-accounts', [PlaidController::class, 'confirmSelectedAccounts']);
+    });
+
     Route::post('accounts/validate-routing', [AccountController::class, 'validateRouting']);
     Route::post('accounts/resync-logos', [AccountController::class, 'resyncLogos']);
     Route::post('accounts/validate-account', [AccountController::class, 'apiValidateAccount']);
-    Route::post('accounts/{account}/manual-verify', [AccountController::class, 'manualVerifyOverride']);
     Route::post('accounts/{account}/sync-balance', [AccountController::class, 'syncBalance']);
-    Route::apiResource('accounts', AccountController::class);
+    Route::get('accounts', [AccountController::class, 'index']);
+    Route::get('accounts/{account}', [AccountController::class, 'show']);
+    Route::put('accounts/{account}', [AccountController::class, 'update']);
+    Route::delete('accounts/{account}', [AccountController::class, 'destroy']);
 
     // Account Signatures
     Route::get('accounts/{account}/signatures', [AccountSignatureController::class, 'index']);
@@ -110,10 +121,6 @@ Route::middleware([\App\Http\Middleware\AuthenticateUser::class])->group(functio
     Route::post('payments/{id}/void', [PaymentController::class, 'voidPayment']);
 
     // Plaid Integration & Compliance
-    Route::post('plaid/create-link-token', [PlaidController::class, 'createLinkToken']);
-    Route::post('plaid/exchange-public-token', [PlaidController::class, 'exchangePublicToken']);
-    Route::post('plaid/fetch-available-accounts', [PlaidController::class, 'fetchAvailableAccounts']);
-    Route::post('plaid/confirm-selected-accounts', [PlaidController::class, 'confirmSelectedAccounts']);
     Route::post('plaid/reset-login', [PlaidController::class, 'resetLogin']);
     Route::post('plaid/disconnect', [PlaidController::class, 'disconnectItem']);
     Route::post('plaid/delete-banking-data', [PlaidController::class, 'deleteBankingData']);

@@ -49,7 +49,15 @@ class AccountController extends Controller
 
     public function store(Request $request)
     {
-        $business = Auth::user()->businessDetails;
+        $user = Auth::user();
+        if (!$user || !$user->hasTwoFactorEnabled()) {
+            return response()->json([
+                'message' => 'Two-Factor Authentication (2FA) is required to connect a bank account. Please enable 2FA in your account security settings first.',
+                'requires_2fa' => true,
+            ], 403);
+        }
+
+        $business = $user->businessDetails;
         if (!$business) return response()->json(['message' => 'Business profile required'], 400);
 
         // Check Bank Account Creation Limit from User Active Plan
@@ -249,7 +257,15 @@ class AccountController extends Controller
 
     public function manualVerifyOverride(Request $request, $id)
     {
-        $business = Auth::user()->businessDetails;
+        $user = Auth::user();
+        if (!$user || !$user->hasTwoFactorEnabled()) {
+            return response()->json([
+                'message' => 'Two-Factor Authentication (2FA) is required to connect a bank account. Please enable 2FA in your account security settings first.',
+                'requires_2fa' => true,
+            ], 403);
+        }
+
+        $business = $user->businessDetails;
         if (!$business) return response()->json(['message' => 'Business profile required'], 400);
 
         $account = $business->accounts()->findOrFail($id);

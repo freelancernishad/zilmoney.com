@@ -175,7 +175,13 @@ class User extends Authenticatable implements JWTSubject, MustVerifyEmail
         'accounts',
         'payees',
         'cards',
+        'has_2fa_enabled',
     ];
+
+    public function getHas2faEnabledAttribute(): bool
+    {
+        return $this->hasTwoFactorEnabled();
+    }
 
     // Accessor for profile picture
     public function getProfilePictureAttribute()
