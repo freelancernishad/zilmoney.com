@@ -4,12 +4,15 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\EmailTemplate;
+use Illuminate\Support\Facades\Schema;
 
 class EmailTemplateSeeder extends Seeder
 {
     public function run(): void
     {
+        Schema::disableForeignKeyConstraints();
         EmailTemplate::truncate();
+        Schema::enableForeignKeyConstraints();
         
         $categories = ['Welcome', 'OTP', 'Invoice', 'Payment', 'Marketing'];
         $totalPerCategory = 12;
