@@ -74,13 +74,32 @@ class ProductController extends Controller
 
     /**
      * Display specified product details by ID or Slug.
+     * Prevents MySQL implicit string-to-integer conversion trap (e.g. '7-ring-...' matching id 7).
      */
     public function show($idOrSlug)
     {
-        $product = Product::with(['category', 'filterValues.filter', 'colors', 'quantityTiers'])
-            ->where('id', $idOrSlug)
-            ->orWhere('slug', $idOrSlug)
-            ->firstOrFail();
+        $query = Product::with(['category', 'filterValues.filter', 'colors', 'quantityTiers']);
+
+        if (is_numeric($idOrSlug)) {
+            $product = (clone $query)->where('id', (int) $idOrSlug)->first();
+        } else {
+            // Priority 1: Exact slug match
+            $product = (clone $query)->where('slug', $idOrSlug)->first();
+
+            // Priority 2: Exact item_code match
+            if (!$product) {
+                $product = (clone $query)->where('item_code', $idOrSlug)->first();
+            }
+
+            // Priority 3: Partial slug match (e.g., '7-ring-executive-check-binder' in 'deluxe-7-ring-executive-check-binder-7r100')
+            if (!$product) {
+                $product = (clone $query)->where('slug', 'like', '%' . $idOrSlug . '%')->first();
+            }
+        }
+
+        if (!$product) {
+            abort(404, 'Product not found');
+        }
 
         return response()->json([
             'success' => true,

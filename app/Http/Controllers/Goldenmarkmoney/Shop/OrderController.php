@@ -352,11 +352,15 @@ class OrderController extends Controller
      */
     public function getPayInfo(Request $request, $token)
     {
-        $order = Order::with('items')
+        $orderQuery = Order::with('items')
             ->where('payment_token', $token)
-            ->orWhere('order_number', $token)
-            ->orWhere('id', $token)
-            ->first();
+            ->orWhere('order_number', $token);
+
+        if (is_numeric($token)) {
+            $orderQuery = $orderQuery->orWhere('id', (int) $token);
+        }
+
+        $order = $orderQuery->first();
 
         if (!$order) {
             return response()->json([
@@ -380,11 +384,15 @@ class OrderController extends Controller
      */
     public function initiatePayment(Request $request, $token)
     {
-        $order = Order::with('items')
+        $orderQuery = Order::with('items')
             ->where('payment_token', $token)
-            ->orWhere('order_number', $token)
-            ->orWhere('id', $token)
-            ->first();
+            ->orWhere('order_number', $token);
+
+        if (is_numeric($token)) {
+            $orderQuery = $orderQuery->orWhere('id', (int) $token);
+        }
+
+        $order = $orderQuery->first();
 
         if (!$order) {
             return response()->json([
@@ -465,11 +473,15 @@ class OrderController extends Controller
      */
     public function payRedirect(Request $request, $token)
     {
-        $order = Order::with('items')
+        $orderQuery = Order::with('items')
             ->where('payment_token', $token)
-            ->orWhere('order_number', $token)
-            ->orWhere('id', $token)
-            ->firstOrFail();
+            ->orWhere('order_number', $token);
+
+        if (is_numeric($token)) {
+            $orderQuery = $orderQuery->orWhere('id', (int) $token);
+        }
+
+        $order = $orderQuery->firstOrFail();
 
         $frontendUrl = config('app.frontend_url', env('FRONTEND_URL', 'http://localhost:3000'));
         $payToken = $order->payment_token ?: $order->order_number;
