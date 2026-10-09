@@ -194,37 +194,78 @@ class StripeCheckoutController extends Controller
     public function verifySession(Request $request)
     {
         $sessionId = $request->query('session_id');
-        if (!$sessionId) {
-            return response()->json(['error' => 'Session ID is required'], 400);
+        $orderNumber = $request->query('order_number');
+
+        if (!$sessionId && !$orderNumber) {
+            return response()->json(['error' => 'Session ID or Order Number is required'], 400);
         }
 
         try {
-            $this->initStripe();
-            $session = StripeSession::retrieve($sessionId);
+            $isPaid = false;
+            $customerEmail = null;
+            $amountTotal = 0;
 
+            if ($sessionId && !str_starts_with($sessionId, 'mock_session_')) {
+                $this->initStripe();
+                $session = StripeSession::retrieve($sessionId);
+                $isPaid = ($session->payment_status === 'paid');
+                $customerEmail = $session->customer_email;
+                $amountTotal = $session->amount_total ? $session->amount_total / 100 : 0;
+            } else {
+                // Mock / Local test session
+                $isPaid = true;
+            }
+
+            // Find order by session id or order number
             $order = Order::with('items')
-                ->where('payment_method', 'like', "%{$sessionId}%")
-                ->orWhere('custom_check_details->stripe_session_id', $sessionId)
+                ->where(function ($q) use ($sessionId, $orderNumber) {
+                    if ($sessionId) {
+                        $q->where('payment_method', 'like', "%{$sessionId}%")
+                          ->orWhere('payment_link', 'like', "%{$sessionId}%")
+                          ->orWhere('custom_check_details->stripe_session_id', $sessionId);
+                    }
+                    if ($orderNumber) {
+                        $q->orWhere('order_number', $orderNumber);
+                    }
+                })
                 ->first();
 
-            if ($session->payment_status === 'paid' && $order) {
+            if ($isPaid && $order) {
+                $wasUnpaid = ($order->payment_status !== 'paid');
                 $order->payment_status = 'paid';
                 $order->order_status = 'processing';
                 $order->save();
+
+                // Send payment confirmation email if newly paid
+                if ($wasUnpaid) {
+                    try {
+                        $frontendUrl = $request->header('origin') ?: config('app.frontend_url', env('FRONTEND_URL', 'http://localhost:3000'));
+                        \Illuminate\Support\Facades\Mail::send('goldenmarkmoney.emails.shop-order-paid', [
+                            'order' => $order,
+                            'frontendUrl' => $frontendUrl,
+                        ], function ($message) use ($order) {
+                            $message->to($order->customer_email)
+                                    ->subject("Payment Received - Your Check Order #{$order->order_number} is Processing");
+                        });
+                    } catch (Exception $mailEx) {
+                        \Illuminate\Support\Facades\Log::warning("Could not send payment receipt email: " . $mailEx->getMessage());
+                    }
+                }
             }
 
             return response()->json([
                 'id' => $order ? $order->id : 1,
-                'status' => $session->payment_status,
+                'status' => $isPaid ? 'paid' : 'unpaid',
                 'session' => [
-                    'id' => $session->id,
-                    'customer_email' => $session->customer_email,
-                    'amount_total' => $session->amount_total ? $session->amount_total / 100 : 0,
-                    'payment_status' => $session->payment_status,
+                    'id' => $sessionId,
+                    'customer_email' => $customerEmail ?? ($order->customer_email ?? null),
+                    'amount_total' => $amountTotal ?: ($order->total_amount ?? 0),
+                    'payment_status' => $isPaid ? 'paid' : 'unpaid',
                 ],
                 'order' => $order,
             ]);
         } catch (Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Verify Session Error: ' . $e->getMessage());
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }

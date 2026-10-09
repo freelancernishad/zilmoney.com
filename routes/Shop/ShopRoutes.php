@@ -50,6 +50,15 @@ Route::prefix('v1/shop')->group(function () {
     Route::get('orders', [OrderController::class, 'index']);
     Route::get('orders/{id}', [OrderController::class, 'show']);
     Route::post('orders', [OrderController::class, 'store']);
+    Route::post('orders/{id}/approve', [OrderController::class, 'approveOrder']);
+    Route::post('orders/{id}/resend-payment-link', [OrderController::class, 'resendPaymentLink']);
+    
+    // Public Payment Gateway Endpoints (Unique Token - NO direct database ID)
+    Route::get('pay/{token}', [OrderController::class, 'getPayInfo']);
+    Route::match(['get', 'post'], 'pay/{token}/initiate', [OrderController::class, 'initiatePayment']);
+    Route::get('pay/{token}/redirect', [OrderController::class, 'payRedirect']);
+    Route::match(['get', 'post'], 'orders/{id}/initiate-payment', [OrderController::class, 'initiatePayment']);
+    
     Route::put('orders/{id}/status', [OrderController::class, 'updateStatus']);
     Route::put('orders/{id}/check-details', [OrderController::class, 'updateCheckDetails']);
     Route::delete('orders/{id}', [OrderController::class, 'destroy']);

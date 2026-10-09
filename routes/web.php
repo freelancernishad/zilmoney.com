@@ -56,6 +56,9 @@ Route::get('/run-migrate', function() {
     return "Migrations completed!";
 });
 
+// Shop Order Public Pay Route (Unique Token)
+Route::get('/pay/{token}', [App\Http\Controllers\Goldenmarkmoney\Shop\OrderController::class, 'payRedirect']);
+
 
 
 

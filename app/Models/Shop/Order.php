@@ -14,6 +14,7 @@ class Order extends Model
 
     protected $fillable = [
         'order_number',
+        'payment_token',
         'user_id',
         'customer_name',
         'customer_email',
@@ -23,10 +24,20 @@ class Order extends Model
         'total_amount',
         'payment_status',
         'payment_method',
+        'payment_link',
         'order_status',
         'tracking_number',
         'custom_check_details',
     ];
+
+    protected static function booted()
+    {
+        static::creating(function ($order) {
+            if (empty($order->payment_token)) {
+                $order->payment_token = (string) \Illuminate\Support\Str::uuid();
+            }
+        });
+    }
 
     protected $casts = [
         'shipping_address' => 'array',
