@@ -113,10 +113,12 @@ class StripeCheckoutController extends Controller
                     'payment_method_types' => ['card'],
                     'line_items' => $lineItems,
                     'mode' => 'payment',
+                    'client_reference_id' => (string) $orderNumber,
                     'customer_email' => $validated['customer_email'],
-                    'success_url' => $validated['success_url'] . (str_contains($validated['success_url'], '?') ? '&' : '?') . 'session_id={CHECKOUT_SESSION_ID}',
+                    'success_url' => $validated['success_url'] . (str_contains($validated['success_url'], '?') ? '&' : '?') . 'session_id={CHECKOUT_SESSION_ID}&order_number=' . $orderNumber,
                     'cancel_url' => $validated['cancel_url'],
                     'metadata' => [
+                        'order_number' => (string) $orderNumber,
                         'customer_name' => $validated['customer_name'],
                         'customer_email' => $validated['customer_email'],
                         'tax_amount' => $taxAmount,
@@ -204,36 +206,90 @@ class StripeCheckoutController extends Controller
             $isPaid = false;
             $customerEmail = null;
             $amountTotal = 0;
+            $session = null;
 
             if ($sessionId && !str_starts_with($sessionId, 'mock_session_')) {
-                $this->initStripe();
-                $session = StripeSession::retrieve($sessionId);
-                $isPaid = ($session->payment_status === 'paid');
-                $customerEmail = $session->customer_email;
-                $amountTotal = $session->amount_total ? $session->amount_total / 100 : 0;
+                try {
+                    $this->initStripe();
+                    $session = StripeSession::retrieve($sessionId);
+                    $isPaid = ($session->payment_status === 'paid');
+                    $customerEmail = $session->customer_email;
+                    $amountTotal = $session->amount_total ? $session->amount_total / 100 : 0;
+                } catch (Exception $stripeEx) {
+                    \Illuminate\Support\Facades\Log::warning('Stripe Session Retrieval Failed: ' . $stripeEx->getMessage());
+                }
             } else {
                 // Mock / Local test session
                 $isPaid = true;
             }
 
-            // Find order by session id or order number
-            $order = Order::with('items')
-                ->where(function ($q) use ($sessionId, $orderNumber) {
-                    if ($sessionId) {
+            // Find order by multi-layered strategy to guarantee reliable matching:
+            $order = null;
+
+            // 1. Try order_number, order_id, or payment_token from Stripe Session metadata
+            if ($session && isset($session->metadata)) {
+                $metaOrderId = $session->metadata->order_id ?? null;
+                $metaOrderNumber = $session->metadata->order_number ?? null;
+                $metaPaymentToken = $session->metadata->payment_token ?? null;
+
+                if ($metaOrderId) {
+                    $order = Order::with('items')->find($metaOrderId);
+                }
+                if (!$order && $metaOrderNumber) {
+                    $order = Order::with('items')->where('order_number', $metaOrderNumber)->first();
+                }
+                if (!$order && $metaPaymentToken) {
+                    $order = Order::with('items')->where('payment_token', $metaPaymentToken)->first();
+                }
+            }
+
+            // 2. Try client_reference_id on Stripe Session
+            if (!$order && $session && !empty($session->client_reference_id)) {
+                $order = Order::with('items')->where('order_number', $session->client_reference_id)->first();
+            }
+
+            // 3. Try order_number from request query
+            if (!$order && $orderNumber) {
+                $order = Order::with('items')->where('order_number', $orderNumber)->first();
+            }
+
+            // 4. Try session ID matches across custom_check_details, payment_method, payment_link
+            if (!$order && $sessionId) {
+                $order = Order::with('items')
+                    ->where(function ($q) use ($sessionId) {
                         $q->where('payment_method', 'like', "%{$sessionId}%")
                           ->orWhere('payment_link', 'like', "%{$sessionId}%")
-                          ->orWhere('custom_check_details->stripe_session_id', $sessionId);
-                    }
-                    if ($orderNumber) {
-                        $q->orWhere('order_number', $orderNumber);
-                    }
-                })
-                ->first();
+                          ->orWhere('custom_check_details->stripe_session_id', $sessionId)
+                          ->orWhere('custom_check_details', 'like', "%{$sessionId}%");
+                    })
+                    ->first();
+            }
+
+            // 5. Fallback: match by customer email and approximate total amount for recently awaiting orders
+            if (!$order && $customerEmail && $amountTotal > 0) {
+                $order = Order::with('items')
+                    ->where('customer_email', $customerEmail)
+                    ->where('payment_status', '!=', 'paid')
+                    ->whereBetween('total_amount', [$amountTotal - 1.00, $amountTotal + 1.00])
+                    ->latest()
+                    ->first();
+            }
+
+            if ($order && $order->payment_status === 'paid') {
+                $isPaid = true;
+            }
 
             if ($isPaid && $order) {
                 $wasUnpaid = ($order->payment_status !== 'paid');
                 $order->payment_status = 'paid';
                 $order->order_status = 'processing';
+                $order->payment_method = 'Stripe Credit Card (' . ($sessionId ?: 'Checkout') . ')';
+
+                $customDetails = is_array($order->custom_check_details) ? $order->custom_check_details : [];
+                if ($sessionId) {
+                    $customDetails['stripe_session_id'] = $sessionId;
+                }
+                $order->custom_check_details = $customDetails;
                 $order->save();
 
                 // Send payment confirmation email if newly paid
@@ -253,16 +309,20 @@ class StripeCheckoutController extends Controller
                 }
             }
 
+            $resolvedOrderNumber = $order ? $order->order_number : ($orderNumber ?: ($session->metadata->order_number ?? ($session->client_reference_id ?? null)));
+
             return response()->json([
+                'success' => true,
                 'id' => $order ? $order->id : 1,
-                'status' => $isPaid ? 'paid' : 'unpaid',
+                'status' => $isPaid ? 'paid' : ($order->payment_status ?? 'unpaid'),
+                'order_number' => $resolvedOrderNumber,
                 'session' => [
                     'id' => $sessionId,
                     'customer_email' => $customerEmail ?? ($order->customer_email ?? null),
                     'amount_total' => $amountTotal ?: ($order->total_amount ?? 0),
-                    'payment_status' => $isPaid ? 'paid' : 'unpaid',
+                    'payment_status' => $isPaid ? 'paid' : ($order->payment_status ?? 'unpaid'),
                 ],
-                'order' => $order,
+                'order' => $order ? $order->load('items') : null,
             ]);
         } catch (Exception $e) {
             \Illuminate\Support\Facades\Log::error('Verify Session Error: ' . $e->getMessage());

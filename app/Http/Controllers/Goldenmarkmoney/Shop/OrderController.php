@@ -224,15 +224,16 @@ class OrderController extends Controller
             'payment_method_types' => ['card'],
             'line_items' => $lineItems,
             'mode' => 'payment',
+            'client_reference_id' => (string) $order->order_number,
             'customer_email' => $order->customer_email,
             'success_url' => $successUrl,
             'cancel_url' => $cancelUrl,
             'metadata' => [
-                'order_id' => $order->id,
-                'order_number' => $order->order_number,
-                'payment_token' => $order->payment_token,
-                'customer_name' => $order->customer_name,
-                'customer_email' => $order->customer_email,
+                'order_id' => (string) $order->id,
+                'order_number' => (string) $order->order_number,
+                'payment_token' => (string) ($order->payment_token ?? ''),
+                'customer_name' => (string) ($order->customer_name ?? ''),
+                'customer_email' => (string) ($order->customer_email ?? ''),
             ],
         ]);
     }
@@ -492,6 +493,13 @@ class OrderController extends Controller
 
         try {
             $stripeSession = $this->createStripeCheckoutSessionForOrder($order, $frontendUrl);
+
+            $customDetails = is_array($order->custom_check_details) ? $order->custom_check_details : [];
+            $customDetails['stripe_session_id'] = $stripeSession->id;
+            $order->custom_check_details = $customDetails;
+            $order->payment_method = 'Stripe Credit Card (' . $stripeSession->id . ')';
+            $order->save();
+
             return redirect()->away($stripeSession->url);
         } catch (Exception $e) {
             Log::warning("Stripe payRedirect fallback: " . $e->getMessage());

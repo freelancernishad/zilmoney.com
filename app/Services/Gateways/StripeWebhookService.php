@@ -144,6 +144,65 @@ class StripeWebhookService
             // Still dispatch event, but without user_id
             StripePaymentEvent::dispatch($eventType, $session->toArray(), 'success');
         }
+
+        // --- Handle Shop Order Payment Completion ---
+        try {
+            $shopOrder = null;
+            $metadata = $session->metadata ?? null;
+            $metaOrderNumber = $metadata->order_number ?? ($metadata['order_number'] ?? null);
+            $metaOrderId = $metadata->order_id ?? ($metadata['order_id'] ?? null);
+
+            if ($metaOrderId) {
+                $shopOrder = \App\Models\Shop\Order::with('items')->find($metaOrderId);
+            }
+            if (!$shopOrder && $metaOrderNumber) {
+                $shopOrder = \App\Models\Shop\Order::with('items')->where('order_number', $metaOrderNumber)->first();
+            }
+            if (!$shopOrder && !empty($session->client_reference_id)) {
+                $shopOrder = \App\Models\Shop\Order::with('items')->where('order_number', $session->client_reference_id)->first();
+            }
+            if (!$shopOrder && !empty($session->id)) {
+                $shopOrder = \App\Models\Shop\Order::with('items')
+                    ->where(function ($q) use ($session) {
+                        $q->where('custom_check_details->stripe_session_id', $session->id)
+                          ->orWhere('custom_check_details', 'like', "%{$session->id}%")
+                          ->orWhere('payment_method', 'like', "%{$session->id}%");
+                    })
+                    ->first();
+            }
+
+            if ($shopOrder && $session->payment_status === 'paid') {
+                $wasUnpaid = ($shopOrder->payment_status !== 'paid');
+                $shopOrder->payment_status = 'paid';
+                $shopOrder->order_status = 'processing';
+                $shopOrder->payment_method = 'Stripe Credit Card (' . $session->id . ')';
+
+                $customDetails = is_array($shopOrder->custom_check_details) ? $shopOrder->custom_check_details : [];
+                $customDetails['stripe_session_id'] = $session->id;
+                $shopOrder->custom_check_details = $customDetails;
+                $shopOrder->save();
+
+                Log::info("Shop Order #{$shopOrder->order_number} successfully marked as PAID via webhook session {$session->id}");
+
+                if ($wasUnpaid) {
+                    try {
+                        $frontendUrl = config('app.frontend_url', env('FRONTEND_URL', 'https://goldenmark.money'));
+                        \Illuminate\Support\Facades\Mail::send('goldenmarkmoney.emails.shop-order-paid', [
+                            'order' => $shopOrder,
+                            'frontendUrl' => $frontendUrl,
+                        ], function ($message) use ($shopOrder) {
+                            $message->to($shopOrder->customer_email)
+                                    ->subject("Payment Received - Your Check Order #{$shopOrder->order_number} is Processing");
+                        });
+                    } catch (\Exception $mailEx) {
+                        Log::warning("Could not send payment receipt email via webhook: " . $mailEx->getMessage());
+                    }
+                }
+            }
+        } catch (\Exception $shopEx) {
+            Log::error("Shop Order Webhook processing error: " . $shopEx->getMessage());
+        }
+        // ---------------------------------------------
     }
 
     protected function handleInvoicePaymentSucceeded($invoice, $eventType)

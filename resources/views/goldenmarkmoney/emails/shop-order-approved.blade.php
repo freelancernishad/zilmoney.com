@@ -146,8 +146,8 @@
 </head>
 <body>
     @php
-        $siteUrl = rtrim($frontendUrl ?? config('app.frontend_url', env('FRONTEND_URL', 'http://localhost:3000')), '/');
-        $fallbackLogo = file_exists(public_path('images/logo.png')) ? url('images/logo.png') : ($siteUrl . '/logo.png');
+        $siteUrl = rtrim($frontendUrl ?? config('app.frontend_url', env('FRONTEND_URL', 'https://goldenmark.money')), '/');
+        $logoUrl = 'https://goldenmark.money/logo.png';
     @endphp
     <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #f8fafc; padding: 24px 10px; margin: 0; width: 100%;">
         <tr>
@@ -159,11 +159,7 @@
                     <!-- Brand Header -->
                     <div class="brand-header" style="padding: 28px 36px 18px 36px; text-align: center; background-color: #ffffff;">
                         <a href="{{ $siteUrl }}" target="_blank" class="brand-logo-link" style="text-decoration: none; display: inline-block; border: none; outline: none; color: #f59e0b;">
-                            @if(isset($message) && file_exists(public_path('images/logo.png')))
-                                <img src="{{ $message->embed(public_path('images/logo.png')) }}" alt="GoldenMark Money" width="200" style="max-height: 48px; width: auto; max-width: 200px; display: block; margin: 0 auto; border: 0; outline: none; text-decoration: none;" />
-                            @else
-                                <img src="{{ $fallbackLogo }}" alt="GoldenMark Money" width="200" style="max-height: 48px; width: auto; max-width: 200px; display: block; margin: 0 auto; border: 0; outline: none; text-decoration: none;" onerror="this.onerror=null; this.src='{{ $siteUrl }}/logo.png';" />
-                            @endif
+                            <img src="{{ $logoUrl }}" alt="GoldenMark Money" width="200" height="63" style="display: block; width: 200px; max-width: 200px; height: auto; margin: 0 auto; border: 0; outline: none; text-decoration: none; color: #f59e0b; font-size: 20px; font-weight: 900;" />
                         </a>
                         <div style="margin-top: 14px;">
                             <span class="status-badge" style="display: inline-block; padding: 5px 16px; background-color: #fef3c7; color: #b45309; font-weight: 700; font-size: 11px; text-transform: uppercase; letter-spacing: 0.6px; border-radius: 9999px; border: 1px solid #fde68a;">
