@@ -177,30 +177,64 @@
                             To move your order into production (MICR laser encoding, verification proofing, and expedited printing), please complete your payment using our secure payment gateway below:
                         </p>
 
+                        @php
+                            $customDetails = is_array($order->custom_check_details) ? $order->custom_check_details : [];
+                            $deliveryPrice = (float) ($customDetails['delivery_price'] ?? 0);
+                            $taxAmount = (float) ($customDetails['tax_amount'] ?? 0);
+                        @endphp
+
                         <div class="order-card" style="background-color: #f8fafc; border-radius: 16px; border: 1px solid #e2e8f0; padding: 20px; margin-bottom: 24px;">
                             <div class="order-card-title" style="font-size: 12px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 14px; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px;">Order Summary (#{{ $order->order_number }})</div>
 
-                            @if($order->items && count($order->items) > 0)
-                                @foreach($order->items as $item)
-                                    <div class="item-row" style="display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px dashed #e2e8f0;">
-                                        <div>
-                                            <div class="item-name" style="font-weight: 600; color: #1e293b;">{{ $item->product_title }}</div>
-                                            <div class="item-meta" style="font-size: 11px; color: #64748b;">
-                                                Qty: {{ $item->quantity }} checks
-                                                @if($item->selected_color) • Color: {{ $item->selected_color }} @endif
-                                            </div>
-                                        </div>
-                                        <div class="item-price" style="font-weight: 700; color: #0f172a; text-align: right;">
-                                            ${{ number_format($item->total_price, 2) }}
-                                        </div>
-                                    </div>
-                                @endforeach
-                            @endif
+                            <table width="100%" border="0" cellspacing="0" cellpadding="0" style="width: 100%; border-collapse: collapse;">
+                                @if($order->items && count($order->items) > 0)
+                                    @foreach($order->items as $item)
+                                        <tr>
+                                            <td align="left" valign="top" style="padding: 8px 0; border-bottom: 1px dashed #e2e8f0;">
+                                                <div style="font-weight: 600; color: #1e293b; font-size: 13px; line-height: 1.4;">{{ $item->product_title }}</div>
+                                                <div style="font-size: 11px; color: #64748b; margin-top: 3px;">
+                                                    Qty: {{ $item->quantity }} checks
+                                                    @if($item->selected_color) &bull; Color: {{ $item->selected_color }} @endif
+                                                </div>
+                                            </td>
+                                            <td align="right" valign="top" style="padding: 8px 0 8px 16px; font-weight: 700; color: #0f172a; font-size: 13px; white-space: nowrap; border-bottom: 1px dashed #e2e8f0;">
+                                                ${{ number_format($item->total_price, 2) }}
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                @endif
 
-                            <div class="total-row" style="display: flex; justify-content: space-between; font-size: 16px; font-weight: 800; color: #0f172a; padding-top: 8px;">
-                                <span>Total Due:</span>
-                                <span style="color: #d97706;">${{ number_format($order->total_amount, 2) }} USD</span>
-                            </div>
+                                @if($deliveryPrice > 0)
+                                    <tr>
+                                        <td align="left" valign="middle" style="padding: 8px 0; font-size: 12px; color: #64748b; border-bottom: 1px dashed #e2e8f0;">
+                                            Shipping & Expedited Printing:
+                                        </td>
+                                        <td align="right" valign="middle" style="padding: 8px 0 8px 16px; font-size: 12px; font-weight: 600; color: #1e293b; white-space: nowrap; border-bottom: 1px dashed #e2e8f0;">
+                                            ${{ number_format($deliveryPrice, 2) }}
+                                        </td>
+                                    </tr>
+                                @endif
+
+                                @if($taxAmount > 0)
+                                    <tr>
+                                        <td align="left" valign="middle" style="padding: 8px 0; font-size: 12px; color: #64748b; border-bottom: 1px dashed #e2e8f0;">
+                                            Estimated Sales Tax:
+                                        </td>
+                                        <td align="right" valign="middle" style="padding: 8px 0 8px 16px; font-size: 12px; font-weight: 600; color: #1e293b; white-space: nowrap; border-bottom: 1px dashed #e2e8f0;">
+                                            ${{ number_format($taxAmount, 2) }}
+                                        </td>
+                                    </tr>
+                                @endif
+
+                                <tr>
+                                    <td align="left" valign="middle" style="padding-top: 14px; font-size: 15px; font-weight: 800; color: #0f172a;">
+                                        Total Due:
+                                    </td>
+                                    <td align="right" valign="middle" style="padding-top: 14px; font-size: 16px; font-weight: 800; color: #d97706; white-space: nowrap;">
+                                        ${{ number_format($order->total_amount, 2) }} USD
+                                    </td>
+                                </tr>
+                            </table>
                         </div>
 
                         <div class="cta-container" style="text-align: center; margin: 32px 0;">

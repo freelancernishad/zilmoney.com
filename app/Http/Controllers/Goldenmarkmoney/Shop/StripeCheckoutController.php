@@ -68,7 +68,7 @@ class StripeCheckoutController extends Controller
 
                 $lineItems = [];
                 foreach ($validated['items'] as $item) {
-                    $unitAmount = (int) round(($item['totalPrice'] / $item['quantity']) * 100);
+                    $itemTotal = (float) ($item['totalPrice'] ?? $item['total_price'] ?? 0);
                     $lineItems[] = [
                         'price_data' => [
                             'currency' => 'usd',
@@ -76,9 +76,9 @@ class StripeCheckoutController extends Controller
                                 'name' => $item['title'] . (!empty($item['colorName']) ? ' (' . $item['colorName'] . ')' : ''),
                                 'description' => 'Personalized Check Order (' . $item['quantity'] . ' checks)',
                             ],
-                            'unit_amount' => max(1, $unitAmount),
+                            'unit_amount' => (int) round($itemTotal * 100),
                         ],
-                        'quantity' => (int) $item['quantity'],
+                        'quantity' => 1,
                     ];
                 }
 

@@ -161,7 +161,7 @@ class OrderController extends Controller
 
         $lineItems = [];
         foreach ($order->items as $item) {
-            $unitAmount = (int) round(($item->total_price / max(1, $item->quantity)) * 100);
+            $itemTotal = (float) $item->total_price;
             $lineItems[] = [
                 'price_data' => [
                     'currency' => 'usd',
@@ -169,9 +169,9 @@ class OrderController extends Controller
                         'name' => $item->product_title . (!empty($item->selected_color) ? ' (' . $item->selected_color . ')' : ''),
                         'description' => 'Approved Check Order (' . $item->quantity . ' checks) - #' . $order->order_number,
                     ],
-                    'unit_amount' => max(1, $unitAmount),
+                    'unit_amount' => (int) round($itemTotal * 100),
                 ],
-                'quantity' => (int) $item->quantity,
+                'quantity' => 1,
             ];
         }
 
@@ -194,11 +194,14 @@ class OrderController extends Controller
         // Include tax if stored
         $taxAmount = (float) ($customDetails['tax_amount'] ?? 0);
         if ($taxAmount > 0) {
+            $taxRate = $customDetails['tax_rate'] ?? 0;
+            $taxState = $customDetails['tax_state'] ?? null;
             $lineItems[] = [
                 'price_data' => [
                     'currency' => 'usd',
                     'product_data' => [
-                        'name' => 'State Sales Tax',
+                        'name' => 'State Sales Tax' . ($taxRate > 0 ? " ({$taxRate}%)" : ''),
+                        'description' => $taxState ? "Sales tax calculated for {$taxState}" : 'Sales Tax',
                     ],
                     'unit_amount' => (int) round($taxAmount * 100),
                 ],
@@ -206,17 +209,27 @@ class OrderController extends Controller
             ];
         }
 
-        // Fallback line item if items array empty
-        if (empty($lineItems)) {
-            $lineItems[] = [
-                'price_data' => [
-                    'currency' => 'usd',
-                    'product_data' => [
-                        'name' => 'Custom Check Printing Order #' . $order->order_number,
+        // Calculate expected sum of line items in cents
+        $lineItemsTotalCents = array_reduce($lineItems, function ($carry, $li) {
+            return $carry + ($li['price_data']['unit_amount'] * $li['quantity']);
+        }, 0);
+
+        $orderTotalCents = (int) round(((float) $order->total_amount) * 100);
+
+        // Safeguard: Ensure Stripe checkout total matches order total exactly
+        if (empty($lineItems) || $lineItemsTotalCents !== $orderTotalCents) {
+            $lineItems = [
+                [
+                    'price_data' => [
+                        'currency' => 'usd',
+                        'product_data' => [
+                            'name' => 'Custom Check Order #' . $order->order_number,
+                            'description' => 'Personalized Check Order & Delivery',
+                        ],
+                        'unit_amount' => max(1, $orderTotalCents),
                     ],
-                    'unit_amount' => (int) round(max(1, $order->total_amount) * 100),
-                ],
-                'quantity' => 1,
+                    'quantity' => 1,
+                ]
             ];
         }
 
